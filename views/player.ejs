@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StreamAPI Player</title>
+    <!-- Tailwind CSS via CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            height: 100vh;
+            background-color: #000;
+        }
+        .loading {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 10;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .spinner {
+            border: 4px solid rgba(255, 255, 255, 0.1);
+            border-left-color: #10B981;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+        .iframe-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+        .iframe-container.loaded {
+            opacity: 1;
+        }
+        iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+        .controls {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            z-index: 20;
+            display: flex;
+            gap: 10px;
+        }
+        .control-btn {
+            background-color: rgba(31, 41, 55, 0.8);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+        .control-btn:hover {
+            background-color: rgba(31, 41, 55, 1);
+        }
+    </style>
+</head>
+<body>
+    <!-- Loading Indicator -->
+    <div class="loading" id="loading">
+        <div class="spinner mb-4"></div>
+        <p class="text-white text-lg">Loading Stream...</p>
+    </div>
+    
+    <!-- Player -->
+    <div class="iframe-container" id="player-container">
+        <iframe 
+            id="player-iframe"
+            src="<%= embedUrl %>" 
+            frameborder="0"
+            allowfullscreen
+            referrerpolicy="no-referrer"
+            allow="autoplay; encrypted-media; picture-in-picture"
+        ></iframe>
+    </div>
+    
+    <!-- Controls -->
+    <div class="controls">
+        <button class="control-btn" id="fullscreen-btn" title="Full Screen">
+            <i class="fas fa-expand"></i>
+        </button>
+        <button class="control-btn" id="close-btn" title="Close Player">
+            <i class="fas fa-times"></i>
+        </button>
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const loading = document.getElementById('loading');
+            const playerContainer = document.getElementById('player-container');
+            const playerIframe = document.getElementById('player-iframe');
+            const fullscreenBtn = document.getElementById('fullscreen-btn');
+            const closeBtn = document.getElementById('close-btn');
+            
+            // Hide loading after iframe loads
+            playerIframe.addEventListener('load', function() {
+                setTimeout(() => {
+                    loading.style.display = 'none';
+                    playerContainer.classList.add('loaded');
+                }, 1000); // Add slight delay to ensure content is ready
+            });
+            
+            // Fullscreen functionality
+            fullscreenBtn.addEventListener('click', function() {
+                if (document.fullscreenElement) {
+                    document.exitFullscreen();
+                } else {
+                    playerContainer.requestFullscreen().catch(err => {
+                        console.error(`Error attempting to enable fullscreen: ${err.message}`);
+                    });
+                }
+            });
+            
+            // Close player functionality
+            closeBtn.addEventListener('click', function() {
+                window.close();
+            });
+            
+            // Handle escape key for fullscreen
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape' && document.fullscreenElement) {
+                    document.exitFullscreen();
+                }
+            });
+            
+            // Update fullscreen button icon
+            document.addEventListener('fullscreenchange', function() {
+                if (document.fullscreenElement) {
+                    fullscreenBtn.innerHTML = '<i class="fas fa-compress"></i>';
+                    fullscreenBtn.title = 'Exit Full Screen';
+                } else {
+                    fullscreenBtn.innerHTML = '<i class="fas fa-expand"></i>';
+                    fullscreenBtn.title = 'Full Screen';
+                }
+            });
+        });
+    </script>
+</body>
+</html> 

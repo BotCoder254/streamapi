@@ -1,0 +1,123 @@
+<!-- TV Search Page -->
+<div class="py-8 animate__animated animate__fadeIn">
+    <div class="max-w-3xl mx-auto">
+        <!-- Search Header -->
+        <div class="text-center mb-10">
+            <h1 class="text-4xl font-bold mb-4">Find Your Favorite TV Shows</h1>
+            <p class="text-xl text-gray-400">Search our database of thousands of TV shows</p>
+        </div>
+        
+        <!-- Search Form -->
+        <form action="/results/tv" method="GET" class="mb-12">
+            <div class="relative">
+                <input 
+                    type="text" 
+                    name="q" 
+                    placeholder="Search for a TV show..." 
+                    class="w-full bg-gray-800 border-2 border-gray-700 rounded-full py-4 px-6 text-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition"
+                    autocomplete="off"
+                    required
+                >
+                <button type="submit" class="absolute right-2 top-2 bottom-2 bg-green-600 hover:bg-green-700 rounded-full w-12 flex items-center justify-center transition">
+                    <i class="fas fa-search text-xl"></i>
+                </button>
+            </div>
+        </form>
+        
+        <!-- Categories -->
+        <div class="mb-12">
+            <h2 class="text-2xl font-bold mb-6 text-center">Popular Categories</h2>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <a href="/results/tv?q=drama" class="bg-gradient-to-r from-red-600 to-red-800 rounded-lg p-6 text-center hover:shadow-lg transform hover:-translate-y-1 transition">
+                    <i class="fas fa-theater-masks text-3xl mb-3"></i>
+                    <h3 class="text-lg font-bold">Drama</h3>
+                </a>
+                <a href="/results/tv?q=comedy" class="bg-gradient-to-r from-yellow-500 to-yellow-700 rounded-lg p-6 text-center hover:shadow-lg transform hover:-translate-y-1 transition">
+                    <i class="fas fa-laugh text-3xl mb-3"></i>
+                    <h3 class="text-lg font-bold">Comedy</h3>
+                </a>
+                <a href="/results/tv?q=crime" class="bg-gradient-to-r from-blue-700 to-blue-900 rounded-lg p-6 text-center hover:shadow-lg transform hover:-translate-y-1 transition">
+                    <i class="fas fa-fingerprint text-3xl mb-3"></i>
+                    <h3 class="text-lg font-bold">Crime</h3>
+                </a>
+                <a href="/results/tv?q=fantasy" class="bg-gradient-to-r from-purple-600 to-purple-800 rounded-lg p-6 text-center hover:shadow-lg transform hover:-translate-y-1 transition">
+                    <i class="fas fa-dragon text-3xl mb-3"></i>
+                    <h3 class="text-lg font-bold">Fantasy</h3>
+                </a>
+            </div>
+        </div>
+        
+        <!-- Popular Shows (Placeholders) -->
+        <div class="mb-12">
+            <h2 class="text-2xl font-bold mb-6 text-center">Popular Shows</h2>
+            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                <% for(let i = 0; i < 4; i++) { %>
+                <div class="bg-gray-800 rounded-lg overflow-hidden shadow-lg animate__animated animate__fadeIn">
+                    <div class="relative pb-[150%] bg-gray-700">
+                        <div class="absolute inset-0 w-full h-full flex items-center justify-center">
+                            <div class="animate-pulse">
+                                <i class="fas fa-tv text-3xl text-gray-600"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <% } %>
+            </div>
+        </div>
+        
+        <!-- Quick Links -->
+        <div>
+            <h2 class="text-2xl font-bold mb-6 text-center">Quick Links</h2>
+            <div class="flex flex-wrap justify-center gap-4">
+                <a href="/browse/tv" class="px-6 py-3 bg-gray-800 hover:bg-gray-700 rounded-lg transition flex items-center">
+                    <i class="fas fa-tv mr-2"></i> Popular Shows
+                </a>
+                <a href="/top/tv" class="px-6 py-3 bg-gray-800 hover:bg-gray-700 rounded-lg transition flex items-center">
+                    <i class="fas fa-star mr-2"></i> Top Rated
+                </a>
+                <a href="/latest/tv" class="px-6 py-3 bg-gray-800 hover:bg-gray-700 rounded-lg transition flex items-center">
+                    <i class="fas fa-clock mr-2"></i> Latest Shows
+                </a>
+                <a href="/latest/episodes" class="px-6 py-3 bg-gray-800 hover:bg-gray-700 rounded-lg transition flex items-center">
+                    <i class="fas fa-play-circle mr-2"></i> Latest Episodes
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- JavaScript for Search Animation -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const searchInput = document.querySelector('input[name="q"]');
+        const searchForm = document.querySelector('form');
+        
+        if (searchInput && searchForm) {
+            // Focus the search input when the page loads
+            searchInput.focus();
+            
+            // Add animation to the form submission
+            searchForm.addEventListener('submit', function(e) {
+                // Only if the input has a value
+                if (searchInput.value.trim()) {
+                    e.preventDefault();
+                    
+                    // Add fade out animation
+                    document.querySelector('.py-8').classList.add('animate__fadeOut');
+                    
+                    // Submit after animation completes
+                    setTimeout(() => {
+                        searchForm.submit();
+                    }, 300);
+                }
+            });
+        }
+        
+        // Add animation to the category cards
+        const categories = document.querySelectorAll('.grid a');
+        categories.forEach((category, index) => {
+            category.classList.add('animate__animated', 'animate__fadeInUp');
+            category.style.animationDelay = `${index * 0.1}s`;
+        });
+    });
+</script> 

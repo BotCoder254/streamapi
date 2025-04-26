@@ -1,0 +1,212 @@
+<!-- Movie Details -->
+<div class="animate__animated animate__fadeIn">
+    <% if (movie && movie.tmdbId) { %>
+        <!-- Movie Hero Section with Background -->
+        <div class="relative mb-8">
+            <% if (movie.background) { %>
+                <div class="absolute inset-0 w-full h-full overflow-hidden rounded-xl min-h-[600px]">
+                    <img src="<%= movie.background %>" alt="<%= movie.title %> Background" class="w-full h-full object-cover">
+                    <div class="absolute inset-0 bg-gradient-to-t from-gray-900 via-gray-900/80 to-transparent"></div>
+                </div>
+            <% } else { %>
+                <div class="absolute inset-0 w-full h-full bg-gradient-to-b from-gray-800 to-gray-900 rounded-xl min-h-[600px]"></div>
+            <% } %>
+            
+            <div class="relative z-10 container mx-auto px-4 py-20 flex flex-col md:flex-row items-center md:items-start gap-8">
+                <!-- Movie Poster -->
+                <div class="w-72 h-[28rem] flex-shrink-0 bg-gray-800 rounded-lg overflow-hidden shadow-2xl transform hover:scale-105 transition-transform duration-500 group">
+                    <% if (movie.poster) { %>
+                        <div class="relative w-full h-full overflow-hidden">
+                            <img src="<%= movie.poster %>" alt="<%= movie.title %> Poster" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" onerror="this.onerror=null; this.src='https://via.placeholder.com/400x600?text=No+Poster'; this.classList.add('object-contain');">
+                            <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+                                <span class="bg-green-600/80 text-white px-4 py-2 rounded-full font-bold transform -translate-y-4 group-hover:translate-y-0 transition-transform duration-300">View Details</span>
+                            </div>
+                        </div>
+                    <% } else { %>
+                        <div class="w-full h-full flex items-center justify-center bg-gray-700">
+                            <i class="fas fa-film text-5xl text-gray-600"></i>
+                        </div>
+                    <% } %>
+                </div>
+                
+                <!-- Movie Details -->
+                <div class="flex-1 text-center md:text-left p-4 bg-gray-900/75 rounded-lg backdrop-blur-sm">
+                    <h1 class="text-3xl md:text-4xl font-bold mb-2"><%= movie.title %> <span class="text-gray-400 font-normal"><%= movie.year %></span></h1>
+                    
+                    <% if (movie.tagline) { %>
+                        <p class="text-xl text-green-400 italic mb-4"><%= movie.tagline %></p>
+                    <% } %>
+                    
+                    <div class="flex flex-wrap gap-4 justify-center md:justify-start mb-6">
+                        <div class="flex items-center bg-gray-800/70 px-3 py-1 rounded-full">
+                            <i class="fas fa-star text-yellow-500 mr-2"></i>
+                            <span><%= movie.rating %></span>
+                        </div>
+                        
+                        <div class="flex items-center bg-gray-800/70 px-3 py-1 rounded-full">
+                            <i class="fas fa-clock text-blue-400 mr-2"></i>
+                            <span><%= movie.runtime %></span>
+                        </div>
+                        
+                        <% if (movie.imdbId) { %>
+                            <a href="https://www.imdb.com/title/<%= movie.imdbId %>" target="_blank" class="flex items-center hover:text-yellow-400 transition bg-gray-800/70 px-3 py-1 rounded-full hover:bg-gray-700/70">
+                                <i class="fab fa-imdb text-yellow-400 mr-2 text-xl"></i>
+                                <span>IMDb</span>
+                            </a>
+                        <% } %>
+                    </div>
+                    
+                    <p class="text-gray-200 mb-8 text-lg leading-relaxed"><%= movie.overview %></p>
+                    
+                    <div class="flex flex-wrap gap-3 justify-center md:justify-start">
+                        <a href="<%= movie.embedUrl %>" class="play-btn px-6 py-3 bg-green-600 hover:bg-green-500 rounded-lg transition-all flex items-center shadow-lg animate__animated animate__pulse animate__infinite group">
+                            <i class="fas fa-play mr-2 group-hover:animate-ping"></i> Watch Now
+                        </a>
+                        
+                        <button class="favorite-btn px-6 py-3 bg-gray-700 hover:bg-gray-600 rounded-lg transition flex items-center shadow-lg hover:shadow-xl">
+                            <i class="far fa-heart mr-2"></i> Add to Favorites
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Player Section -->
+        <div id="player-container" class="hidden mb-8">
+            <div class="bg-black rounded-xl overflow-hidden shadow-2xl relative" style="padding-top: 56.25%;">
+                <iframe id="movie-player" src="" frameborder="0" class="absolute inset-0 w-full h-full" allowfullscreen></iframe>
+                <button id="close-player" class="absolute top-4 right-4 bg-gray-800/80 hover:bg-gray-700 text-white rounded-full w-10 h-10 flex items-center justify-center shadow-lg">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        </div>
+        
+        <!-- More Like This Section -->
+        <div class="mb-8">
+            <h2 class="text-2xl font-bold mb-6"><i class="fas fa-film mr-2"></i> More Like This</h2>
+            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+                <% if (movie.similarMovies && movie.similarMovies.length > 0) { %>
+                    <% movie.similarMovies.forEach(similar => { %>
+                        <div class="movie-card bg-gray-800 rounded-lg overflow-hidden shadow-lg animate__animated animate__fadeIn hover:shadow-xl transition-all duration-300 group">
+                            <a href="/view/movie/<%= similar.id %>">
+                                <div class="relative pb-[150%]">
+                                    <% if (similar.poster) { %>
+                                        <img src="<%= similar.poster %>" alt="<%= similar.title %>" class="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" onerror="this.onerror=null; this.src='https://via.placeholder.com/300x450?text=No+Poster'; this.classList.add('object-contain');">
+                                        <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+                                            <span class="text-white px-3 py-1 rounded-full font-bold bg-green-600/80 transform scale-0 group-hover:scale-100 transition-transform duration-300">View</span>
+                                        </div>
+                                    <% } else { %>
+                                        <div class="absolute inset-0 w-full h-full bg-gray-700 flex items-center justify-center">
+                                            <i class="fas fa-film text-3xl text-gray-600"></i>
+                                        </div>
+                                    <% } %>
+                                    <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black to-transparent py-2 px-3">
+                                        <h3 class="text-sm font-bold line-clamp-2"><%= similar.title %></h3>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+                    <% }); %>
+                <% } else { %>
+                    <% for(let i = 0; i < 6; i++) { %>
+                    <div class="movie-card bg-gray-800 rounded-lg overflow-hidden shadow-lg animate__animated animate__fadeIn">
+                        <div class="relative pb-[150%] bg-gray-700">
+                            <div class="absolute inset-0 w-full h-full flex items-center justify-center">
+                                <div class="animate-pulse">
+                                    <i class="fas fa-film text-3xl text-gray-600"></i>
+                                </div>
+                            </div>
+                            <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black to-transparent py-2 px-3">
+                                <h3 class="text-sm font-bold">Similar Movie</h3>
+                            </div>
+                        </div>
+                    </div>
+                    <% } %>
+                <% } %>
+            </div>
+        </div>
+    <% } else { %>
+        <div class="text-center py-16">
+            <i class="fas fa-exclamation-circle text-5xl text-red-500 mb-4"></i>
+            <h2 class="text-2xl font-bold">Movie Not Found</h2>
+            <p class="mt-2 text-gray-400">The movie you're looking for doesn't exist or has been removed.</p>
+            <a href="/browse" class="inline-block mt-6 px-6 py-3 bg-green-600 hover:bg-green-700 rounded-lg transition">
+                Browse Movies
+            </a>
+        </div>
+    <% } %>
+</div>
+
+<!-- JavaScript for Player -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const playBtn = document.querySelector('.play-btn');
+        const playerContainer = document.getElementById('player-container');
+        const moviePlayer = document.getElementById('movie-player');
+        const closePlayer = document.getElementById('close-player');
+        
+        // Add bounce effect on hover for play button
+        if (playBtn) {
+            playBtn.addEventListener('mouseenter', function() {
+                this.classList.remove('animate__pulse');
+                this.classList.add('animate__animated', 'animate__bounceIn');
+            });
+            
+            playBtn.addEventListener('mouseleave', function() {
+                this.classList.remove('animate__bounceIn');
+                this.classList.add('animate__pulse');
+            });
+            
+            playBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                const embedUrl = this.getAttribute('href');
+                moviePlayer.src = embedUrl;
+                playerContainer.classList.remove('hidden');
+                playerContainer.classList.add('animate__animated', 'animate__fadeIn');
+                
+                // Scroll to player
+                playerContainer.scrollIntoView({ behavior: 'smooth' });
+            });
+        }
+        
+        if (closePlayer) {
+            closePlayer.addEventListener('click', function() {
+                playerContainer.classList.add('animate__fadeOut');
+                setTimeout(() => {
+                    playerContainer.classList.add('hidden');
+                    playerContainer.classList.remove('animate__fadeOut');
+                    moviePlayer.src = '';
+                }, 500);
+            });
+        }
+        
+        // Favorite button animation
+        const favoriteBtn = document.querySelector('.favorite-btn');
+        if (favoriteBtn) {
+            favoriteBtn.addEventListener('click', function() {
+                const icon = this.querySelector('i');
+                icon.classList.toggle('far');
+                icon.classList.toggle('fas');
+                icon.classList.toggle('text-red-500');
+                
+                if (icon.classList.contains('fas')) {
+                    this.querySelector('span').textContent = 'Added to Favorites';
+                    icon.classList.add('animate__animated', 'animate__heartBeat');
+                } else {
+                    this.querySelector('span').textContent = 'Add to Favorites';
+                    icon.classList.remove('animate__animated', 'animate__heartBeat');
+                }
+            });
+        }
+        
+        // Fix poster image loading errors
+        const posterImages = document.querySelectorAll('img[alt*="Poster"]');
+        posterImages.forEach(img => {
+            img.addEventListener('error', function() {
+                this.onerror = null;
+                this.src = 'https://via.placeholder.com/400x600?text=No+Poster';
+                this.classList.add('object-contain');
+            });
+        });
+    });
+</script> 

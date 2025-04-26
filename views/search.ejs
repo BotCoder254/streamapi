@@ -1,0 +1,105 @@
+<!-- Search Page -->
+<div class="py-8 animate__animated animate__fadeIn">
+    <div class="max-w-3xl mx-auto">
+        <!-- Search Header -->
+        <div class="text-center mb-10">
+            <h1 class="text-4xl font-bold mb-4">Find Your Favorite Movies</h1>
+            <p class="text-xl text-gray-400">Search our database of thousands of movies</p>
+        </div>
+        
+        <!-- Search Form -->
+        <form action="/results" method="GET" class="mb-12">
+            <div class="relative">
+                <input 
+                    type="text" 
+                    name="q" 
+                    placeholder="Search for a movie..." 
+                    class="w-full bg-gray-800 border-2 border-gray-700 rounded-full py-4 px-6 text-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition"
+                    autocomplete="off"
+                    required
+                >
+                <button type="submit" class="absolute right-2 top-2 bottom-2 bg-green-600 hover:bg-green-700 rounded-full w-12 flex items-center justify-center transition">
+                    <i class="fas fa-search text-xl"></i>
+                </button>
+            </div>
+        </form>
+        
+        <!-- Categories -->
+        <div class="mb-12">
+            <h2 class="text-2xl font-bold mb-6 text-center">Popular Categories</h2>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <a href="/results?q=action" class="bg-gradient-to-r from-blue-600 to-blue-800 rounded-lg p-6 text-center hover:shadow-lg transform hover:-translate-y-1 transition">
+                    <i class="fas fa-bomb text-3xl mb-3"></i>
+                    <h3 class="text-lg font-bold">Action</h3>
+                </a>
+                <a href="/results?q=comedy" class="bg-gradient-to-r from-yellow-500 to-yellow-700 rounded-lg p-6 text-center hover:shadow-lg transform hover:-translate-y-1 transition">
+                    <i class="fas fa-laugh text-3xl mb-3"></i>
+                    <h3 class="text-lg font-bold">Comedy</h3>
+                </a>
+                <a href="/results?q=horror" class="bg-gradient-to-r from-red-800 to-red-900 rounded-lg p-6 text-center hover:shadow-lg transform hover:-translate-y-1 transition">
+                    <i class="fas fa-ghost text-3xl mb-3"></i>
+                    <h3 class="text-lg font-bold">Horror</h3>
+                </a>
+                <a href="/results?q=sci-fi" class="bg-gradient-to-r from-purple-600 to-purple-800 rounded-lg p-6 text-center hover:shadow-lg transform hover:-translate-y-1 transition">
+                    <i class="fas fa-rocket text-3xl mb-3"></i>
+                    <h3 class="text-lg font-bold">Sci-Fi</h3>
+                </a>
+            </div>
+        </div>
+        
+        <!-- Quick Links -->
+        <div>
+            <h2 class="text-2xl font-bold mb-6 text-center">Quick Links</h2>
+            <div class="flex flex-wrap justify-center gap-4">
+                <a href="/browse" class="px-6 py-3 bg-gray-800 hover:bg-gray-700 rounded-lg transition flex items-center">
+                    <i class="fas fa-film mr-2"></i> Popular Movies
+                </a>
+                <a href="/top" class="px-6 py-3 bg-gray-800 hover:bg-gray-700 rounded-lg transition flex items-center">
+                    <i class="fas fa-star mr-2"></i> Top Rated
+                </a>
+                <a href="/latest" class="px-6 py-3 bg-gray-800 hover:bg-gray-700 rounded-lg transition flex items-center">
+                    <i class="fas fa-clock mr-2"></i> Latest Releases
+                </a>
+                <a href="/browse/tv" class="px-6 py-3 bg-gray-800 hover:bg-gray-700 rounded-lg transition flex items-center">
+                    <i class="fas fa-tv mr-2"></i> TV Shows
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- JavaScript for Search Animation -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const searchInput = document.querySelector('input[name="q"]');
+        const searchForm = document.querySelector('form');
+        
+        if (searchInput && searchForm) {
+            // Focus the search input when the page loads
+            searchInput.focus();
+            
+            // Add animation to the form submission
+            searchForm.addEventListener('submit', function(e) {
+                // Only if the input has a value
+                if (searchInput.value.trim()) {
+                    e.preventDefault();
+                    
+                    // Add fade out animation
+                    document.querySelector('.py-8').classList.add('animate__fadeOut');
+                    
+                    // Submit after animation completes
+                    setTimeout(() => {
+                        searchForm.submit();
+                    }, 300);
+                }
+            });
+        }
+        
+        // Add animation to the category cards
+        const categories = document.querySelectorAll('.grid a');
+        categories.forEach((category, index) => {
+            category.classList.add('animate__animated', 'animate__fadeInUp');
+            category.style.animationDelay = `${index * 0.1}s`;
+        });
+    });
+</script> 

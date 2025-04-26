@@ -1,0 +1,98 @@
+<!-- Search Results Page -->
+<div class="animate__animated animate__fadeIn">
+    <!-- Search Results Header -->
+    <div class="flex flex-col md:flex-row justify-between items-center mb-8">
+        <div>
+            <h1 class="text-3xl font-bold">Search Results</h1>
+            <p class="text-gray-400">Showing results for "<span class="text-green-400 font-bold"><%= query %></span>"</p>
+        </div>
+        
+        <div class="mt-4 md:mt-0">
+            <form action="/results" method="GET" class="flex">
+                <input 
+                    type="text" 
+                    name="q" 
+                    value="<%= query %>"
+                    placeholder="Search for a movie..." 
+                    class="bg-gray-800 border border-gray-700 rounded-l-lg py-2 px-4 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                >
+                <button type="submit" class="bg-green-600 hover:bg-green-700 text-white rounded-r-lg px-4 transition">
+                    <i class="fas fa-search"></i>
+                </button>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Search Results Grid -->
+    <% if (movies && movies.length > 0) { %>
+        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
+            <% movies.forEach(movie => { %>
+                <div class="movie-card bg-gray-800 rounded-lg overflow-hidden shadow-lg">
+                    <a href="/view/movie/<%= movie.id %>">
+                        <div class="relative pb-[150%]">
+                            <% if (movie.poster) { %>
+                                <img src="<%= movie.poster %>" alt="<%= movie.title %>" class="absolute inset-0 w-full h-full object-cover">
+                            <% } else { %>
+                                <div class="absolute inset-0 w-full h-full bg-gray-700 flex items-center justify-center">
+                                    <i class="fas fa-film text-4xl text-gray-500"></i>
+                                </div>
+                            <% } %>
+                            <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black to-transparent py-2 px-3">
+                                <h3 class="text-sm md:text-base font-bold line-clamp-2"><%= movie.title %></h3>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+            <% }); %>
+        </div>
+
+        <!-- Pagination -->
+        <div class="mt-8 flex justify-center">
+            <div class="flex space-x-1">
+                <% if (parseInt(page) > 1) { %>
+                    <a href="/results?q=<%= query %>&p=<%= parseInt(page) - 1 %>" class="px-4 py-2 bg-gray-800 rounded-l-lg hover:bg-gray-700 transition">
+                        <i class="fas fa-chevron-left"></i>
+                    </a>
+                <% } else { %>
+                    <span class="px-4 py-2 bg-gray-800 opacity-50 rounded-l-lg">
+                        <i class="fas fa-chevron-left"></i>
+                    </span>
+                <% } %>
+
+                <span class="px-4 py-2 bg-green-600 font-bold"><%= page %></span>
+
+                <a href="/results?q=<%= query %>&p=<%= parseInt(page) + 1 %>" class="px-4 py-2 bg-gray-800 rounded-r-lg hover:bg-gray-700 transition">
+                    <i class="fas fa-chevron-right"></i>
+                </a>
+            </div>
+        </div>
+    <% } else { %>
+        <div class="text-center py-16 animate__animated animate__fadeIn">
+            <i class="fas fa-search text-6xl text-gray-600 mb-6"></i>
+            <h2 class="text-2xl font-bold mb-2">No Results Found</h2>
+            <p class="text-gray-400 mb-8">We couldn't find any movies matching "<span class="text-green-400"><%= query %></span>"</p>
+            
+            <div class="flex flex-col items-center space-y-4">
+                <a href="/search" class="px-6 py-3 bg-gray-800 hover:bg-gray-700 rounded-lg transition flex items-center">
+                    <i class="fas fa-search mr-2"></i> Try Another Search
+                </a>
+                
+                <a href="/browse" class="px-6 py-3 bg-green-600 hover:bg-green-700 rounded-lg transition flex items-center">
+                    <i class="fas fa-film mr-2"></i> Browse Popular Movies
+                </a>
+            </div>
+        </div>
+    <% } %>
+</div>
+
+<!-- Animation Script -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Add animation to movie cards
+        const movieCards = document.querySelectorAll('.movie-card');
+        movieCards.forEach((card, index) => {
+            card.classList.add('animate__animated', 'animate__fadeIn');
+            card.style.animationDelay = `${index * 0.05}s`;
+        });
+    });
+</script> 

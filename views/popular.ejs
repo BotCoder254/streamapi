@@ -1,0 +1,128 @@
+<!-- Popular Movies Listing -->
+<div class="mb-8">
+    <div class="flex justify-between items-center mb-6">
+        <h1 class="text-3xl font-bold"><i class="fas fa-fire mr-2 text-red-400"></i>Popular Movies</h1>
+        <div class="flex items-center">
+            <a href="/browse/tv" class="text-green-400 hover:text-green-300 transition">
+                <i class="fas fa-tv mr-1"></i> Switch to TV Shows
+            </a>
+        </div>
+    </div>
+    
+    <% if (movies && movies.length > 0) { %>
+        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
+            <% movies.forEach(movie => { %>
+                <div class="movie-card bg-gray-800 rounded-lg overflow-hidden shadow-lg">
+                    <a href="/view/movie/<%= movie.id %>">
+                        <div class="relative pb-[150%]">
+                            <% if (movie.poster) { %>
+                                <img src="<%= movie.poster %>" alt="<%= movie.title %>" class="absolute inset-0 w-full h-full object-cover">
+                            <% } else { %>
+                                <div class="absolute inset-0 w-full h-full bg-gray-700 flex items-center justify-center">
+                                    <i class="fas fa-film text-4xl text-gray-500"></i>
+                                </div>
+                            <% } %>
+                            <% if (movie.popularity && movie.popularity > 50) { %>
+                                <div class="absolute top-0 right-0 bg-red-600 px-2 py-1 m-2 rounded text-xs font-bold">
+                                    <i class="fas fa-fire mr-1"></i> HOT
+                                </div>
+                            <% } %>
+                            <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black to-transparent py-2 px-3">
+                                <h3 class="text-sm md:text-base font-bold line-clamp-2"><%= movie.title %></h3>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+            <% }); %>
+        </div>
+
+        <!-- Pagination -->
+        <div class="mt-8 flex justify-center">
+            <div class="flex space-x-1">
+                <% if (parseInt(page) > 1) { %>
+                    <a href="/browse?p=<%= parseInt(page) - 1 %>" class="px-4 py-2 bg-gray-800 rounded-l-lg hover:bg-gray-700 transition">
+                        <i class="fas fa-chevron-left"></i>
+                    </a>
+                <% } else { %>
+                    <span class="px-4 py-2 bg-gray-800 opacity-50 rounded-l-lg">
+                        <i class="fas fa-chevron-left"></i>
+                    </span>
+                <% } %>
+
+                <span class="px-4 py-2 bg-red-600 font-bold"><%= page %></span>
+
+                <a href="/browse?p=<%= parseInt(page) + 1 %>" class="px-4 py-2 bg-gray-800 rounded-r-lg hover:bg-gray-700 transition">
+                    <i class="fas fa-chevron-right"></i>
+                </a>
+            </div>
+        </div>
+    <% } else { %>
+        <div class="text-center py-12">
+            <i class="fas fa-film text-6xl text-gray-700 mb-4"></i>
+            <h2 class="text-2xl font-bold text-gray-400">No movies found</h2>
+            <p class="mt-2 text-gray-500">Try refreshing the page or check your connection.</p>
+        </div>
+    <% } %>
+</div>
+
+<!-- Categories -->
+<div class="mb-10">
+    <h2 class="text-2xl font-bold mb-6"><i class="fas fa-tags mr-2"></i>Browse by Genre</h2>
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+        <% const genres = ["Action", "Drama", "Comedy", "Sci-Fi", "Horror", "Romance", "Adventure", "Animation"]; %>
+        <% genres.forEach(genre => { %>
+            <a href="/browse?genre=<%= genre.toLowerCase() %>" class="category-card bg-gray-800 hover:bg-gray-700 transition p-4 rounded-lg text-center">
+                <h3 class="font-bold"><%= genre %></h3>
+            </a>
+        <% }); %>
+    </div>
+</div>
+
+<!-- Trending This Week -->
+<div class="mb-10">
+    <h2 class="text-2xl font-bold mb-6"><i class="fas fa-chart-line mr-2 text-yellow-400"></i>Trending This Week</h2>
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 animate__animated animate__fadeIn">
+        <% for(let i = 0; i < 3; i++) { %>
+        <div class="bg-gray-800 rounded-lg overflow-hidden shadow-lg">
+            <div class="relative aspect-video bg-gray-700">
+                <div class="absolute inset-0 w-full h-full flex items-center justify-center">
+                    <div class="animate-pulse">
+                        <i class="fas fa-film text-3xl text-gray-600"></i>
+                    </div>
+                </div>
+                <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black to-transparent py-2 px-3">
+                    <h3 class="text-sm md:text-base font-bold">Trending Movie</h3>
+                </div>
+            </div>
+        </div>
+        <% } %>
+    </div>
+</div>
+
+<!-- Quick Links -->
+<div class="flex flex-wrap justify-center gap-4 mb-8">
+    <a href="/search" class="px-5 py-2 bg-gray-800 hover:bg-gray-700 rounded-lg transition flex items-center">
+        <i class="fas fa-search mr-2"></i> Search Movies
+    </a>
+    <a href="/top" class="px-5 py-2 bg-gray-800 hover:bg-gray-700 rounded-lg transition flex items-center">
+        <i class="fas fa-star mr-2"></i> Top Rated
+    </a>
+    <a href="/latest" class="px-5 py-2 bg-gray-800 hover:bg-gray-700 rounded-lg transition flex items-center">
+        <i class="fas fa-clock mr-2"></i> Latest Releases
+    </a>
+    <a href="/browse/tv" class="px-5 py-2 bg-gray-800 hover:bg-gray-700 rounded-lg transition flex items-center">
+        <i class="fas fa-tv mr-2"></i> TV Shows
+    </a>
+</div>
+
+<script>
+    // Add animation to category cards
+    document.addEventListener('DOMContentLoaded', function() {
+        const categoryCards = document.querySelectorAll('.category-card');
+        categoryCards.forEach((card, index) => {
+            setTimeout(() => {
+                card.classList.add('animate__animated', 'animate__fadeIn');
+            }, index * 100);
+        });
+    });
+</script> 

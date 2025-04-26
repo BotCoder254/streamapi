@@ -1,0 +1,80 @@
+<!-- Top Rated TV Shows Listing -->
+<div class="mb-8">
+    <div class="flex justify-between items-center mb-6">
+        <h1 class="text-3xl font-bold"><i class="fas fa-star mr-2 text-yellow-500"></i>Top Rated TV Shows</h1>
+        <div class="flex items-center">
+            <a href="/top" class="text-green-400 hover:text-green-300 transition">
+                <i class="fas fa-film mr-1"></i> Switch to Movies
+            </a>
+        </div>
+    </div>
+    
+    <% if (shows && shows.length > 0) { %>
+        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
+            <% shows.forEach(show => { %>
+                <div class="movie-card bg-gray-800 rounded-lg overflow-hidden shadow-lg">
+                    <a href="/view/tv/<%= show.id %>">
+                        <div class="relative pb-[150%]">
+                            <% if (show.poster) { %>
+                                <img src="<%= show.poster %>" alt="<%= show.title %>" class="absolute inset-0 w-full h-full object-cover">
+                            <% } else { %>
+                                <div class="absolute inset-0 w-full h-full bg-gray-700 flex items-center justify-center">
+                                    <i class="fas fa-tv text-4xl text-gray-500"></i>
+                                </div>
+                            <% } %>
+                            <div class="absolute top-0 right-0 bg-yellow-600 px-2 py-1 m-2 rounded text-xs font-bold">
+                                <i class="fas fa-star mr-1"></i> TOP
+                            </div>
+                            <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black to-transparent py-2 px-3">
+                                <h3 class="text-sm md:text-base font-bold line-clamp-2"><%= show.title %></h3>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+            <% }); %>
+        </div>
+
+        <!-- Pagination -->
+        <div class="mt-8 flex justify-center">
+            <div class="flex space-x-1">
+                <% if (parseInt(page) > 1) { %>
+                    <a href="/top/tv?p=<%= parseInt(page) - 1 %>" class="px-4 py-2 bg-gray-800 rounded-l-lg hover:bg-gray-700 transition">
+                        <i class="fas fa-chevron-left"></i>
+                    </a>
+                <% } else { %>
+                    <span class="px-4 py-2 bg-gray-800 opacity-50 rounded-l-lg">
+                        <i class="fas fa-chevron-left"></i>
+                    </span>
+                <% } %>
+
+                <span class="px-4 py-2 bg-green-600 font-bold"><%= page %></span>
+
+                <a href="/top/tv?p=<%= parseInt(page) + 1 %>" class="px-4 py-2 bg-gray-800 rounded-r-lg hover:bg-gray-700 transition">
+                    <i class="fas fa-chevron-right"></i>
+                </a>
+            </div>
+        </div>
+    <% } else { %>
+        <div class="text-center py-12">
+            <i class="fas fa-tv text-6xl text-gray-700 mb-4"></i>
+            <h2 class="text-2xl font-bold text-gray-400">No TV shows found</h2>
+            <p class="mt-2 text-gray-500">Try refreshing the page or check your connection.</p>
+        </div>
+    <% } %>
+</div>
+
+<!-- Quick Links -->
+<div class="flex flex-wrap justify-center gap-4 mb-8">
+    <a href="/browse/tv" class="px-5 py-2 bg-gray-800 hover:bg-gray-700 rounded-lg transition flex items-center">
+        <i class="fas fa-tv mr-2"></i> Popular Shows
+    </a>
+    <a href="/search/tv" class="px-5 py-2 bg-gray-800 hover:bg-gray-700 rounded-lg transition flex items-center">
+        <i class="fas fa-search mr-2"></i> Search Shows
+    </a>
+    <a href="/latest/tv" class="px-5 py-2 bg-gray-800 hover:bg-gray-700 rounded-lg transition flex items-center">
+        <i class="fas fa-clock mr-2"></i> Latest Shows
+    </a>
+    <a href="/latest/episodes" class="px-5 py-2 bg-gray-800 hover:bg-gray-700 rounded-lg transition flex items-center">
+        <i class="fas fa-play-circle mr-2"></i> Latest Episodes
+    </a>
+</div> 

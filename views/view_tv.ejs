@@ -1,0 +1,211 @@
+<!-- TV Episode View -->
+<div class="animate__animated animate__fadeIn">
+    <% if (episode && episode.id) { %>
+        <!-- Episode Player Section -->
+        <div class="mb-8 bg-black rounded-xl overflow-hidden shadow-2xl relative" style="padding-top: 56.25%;">
+            <iframe 
+                src="<%= episode.embedUrl %>" 
+                frameborder="0" 
+                class="absolute inset-0 w-full h-full" 
+                allowfullscreen
+                referrerpolicy="no-referrer"
+                allow="autoplay; encrypted-media; picture-in-picture"
+            ></iframe>
+        </div>
+
+        <!-- Episode Info Section -->
+        <div class="bg-gray-800/90 backdrop-blur-sm rounded-xl p-6 mb-8 shadow-lg hover:shadow-xl transition-shadow duration-300">
+            <div class="flex flex-col md:flex-row justify-between items-start mb-4">
+                <div>
+                    <div class="flex items-center mb-2">
+                        <h1 class="text-2xl font-bold mr-3"><%= episode.title %></h1>
+                        <span class="bg-green-700 text-white text-xs px-2 py-1 rounded-full shadow-sm">S<%= episode.season %>:E<%= episode.episode %></span>
+                    </div>
+                    
+                    <div class="flex items-center space-x-4 text-sm text-gray-400">
+                        <% if (episode.year) { %>
+                            <span class="bg-gray-700/70 px-3 py-1 rounded-full"><%= episode.year %></span>
+                        <% } %>
+                        
+                        <% if (episode.rating) { %>
+                            <div class="flex items-center bg-gray-700/70 px-3 py-1 rounded-full">
+                                <i class="fas fa-star text-yellow-500 mr-1"></i>
+                                <span><%= episode.rating %>/10</span>
+                            </div>
+                        <% } %>
+                        
+                        <% if (episode.imdbId) { %>
+                            <a href="https://www.imdb.com/title/<%= episode.imdbId %>" target="_blank" class="flex items-center hover:text-yellow-400 transition bg-gray-700/70 px-3 py-1 rounded-full hover:bg-gray-600/70">
+                                <i class="fab fa-imdb text-yellow-400 mr-1"></i>
+                                <span>IMDb</span>
+                            </a>
+                        <% } %>
+                    </div>
+                </div>
+                
+                <div class="mt-4 md:mt-0 flex space-x-2">
+                    <button class="favorite-btn px-3 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg transition flex items-center text-sm shadow-md hover:shadow-lg">
+                        <i class="far fa-heart mr-2"></i> <span>Favorite</span>
+                    </button>
+                    <button class="share-btn px-3 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg transition flex items-center text-sm shadow-md hover:shadow-lg">
+                        <i class="fas fa-share-alt mr-2"></i> <span>Share</span>
+                    </button>
+                </div>
+            </div>
+            
+            <% if (episode.overview) { %>
+                <p class="text-gray-300 mb-4 leading-relaxed"><%= episode.overview %></p>
+            <% } %>
+        </div>
+        
+        <!-- Episode Navigation -->
+        <div class="flex justify-between items-center mb-8">
+            <% if (parseInt(episode.episode) > 1) { %>
+                <a href="/view/tv/<%= episode.id %>/<%= episode.season %>/<%= parseInt(episode.episode) - 1 %>" class="px-4 py-2 bg-gray-800 hover:bg-gray-700 rounded-lg transition flex items-center shadow-md hover:shadow-lg group">
+                    <i class="fas fa-chevron-left mr-2 group-hover:-translate-x-1 transition-transform"></i> Previous Episode
+                </a>
+            <% } else if (parseInt(episode.season) > 1) { %>
+                <a href="/view/tv/<%= episode.id %>/<%= parseInt(episode.season) - 1 %>/<%= epCount - 1 %>" class="px-4 py-2 bg-gray-800 hover:bg-gray-700 rounded-lg transition flex items-center shadow-md hover:shadow-lg group">
+                    <i class="fas fa-chevron-left mr-2 group-hover:-translate-x-1 transition-transform"></i> Previous Season
+                </a>
+            <% } else { %>
+                <div></div>
+            <% } %>
+            
+            <a href="/view/tv/<%= episode.id %>" class="px-4 py-2 bg-gray-800 hover:bg-gray-700 rounded-lg transition flex items-center shadow-md hover:shadow-lg hover:scale-105 transition-transform">
+                <i class="fas fa-th-list mr-2"></i> All Episodes
+            </a>
+            
+            <% if (parseInt(episode.episode) < epCount - 1) { %>
+                <a href="/view/tv/<%= episode.id %>/<%= episode.season %>/<%= parseInt(episode.episode) + 1 %>" class="px-4 py-2 bg-gray-800 hover:bg-gray-700 rounded-lg transition flex items-center shadow-md hover:shadow-lg group">
+                    Next Episode <i class="fas fa-chevron-right ml-2 group-hover:translate-x-1 transition-transform"></i>
+                </a>
+            <% } else if (nextSeason <= seasons.length) { %>
+                <a href="/view/tv/<%= episode.id %>/<%= nextSeason %>/1" class="px-4 py-2 bg-gray-800 hover:bg-gray-700 rounded-lg transition flex items-center shadow-md hover:shadow-lg group">
+                    Next Season <i class="fas fa-chevron-right ml-2 group-hover:translate-x-1 transition-transform"></i>
+                </a>
+            <% } else { %>
+                <div></div>
+            <% } %>
+        </div>
+        
+        <!-- Season Episode Selector -->
+        <div class="mb-8">
+            <h2 class="text-xl font-bold mb-4"><i class="fas fa-list-ol mr-2 text-green-400"></i> Episodes</h2>
+            
+            <div class="mb-4">
+                <label for="season-select" class="block text-sm font-medium text-gray-400 mb-2">Season</label>
+                <select id="season-select" class="bg-gray-800 border border-gray-700 text-white rounded-lg block w-full p-2.5 focus:outline-none focus:ring-2 focus:ring-green-500 shadow-md">
+                    <% seasons.forEach((season, index) => { %>
+                        <% if (season.season_number > 0) { %>
+                            <option value="<%= season.season_number %>" <%= parseInt(episode.season) === season.season_number ? 'selected' : '' %>>
+                                Season <%= season.season_number %> (<%= season.episode_count %> Episodes)
+                            </option>
+                        <% } %>
+                    <% }); %>
+                </select>
+            </div>
+            
+            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4" id="episode-grid">
+                <% for (let i = 1; i < epCount; i++) { %>
+                    <a href="/view/tv/<%= episode.id %>/<%= episode.season %>/<%= i %>" 
+                       class="episode-card bg-gray-800 p-4 rounded-lg text-center hover:bg-gray-700 transition-all duration-300 shadow-md hover:shadow-lg transform hover:-translate-y-1 <%= parseInt(episode.episode) === i ? 'border-2 border-green-500 bg-gray-700' : '' %>">
+                        <div class="w-full aspect-video bg-gray-900 mb-2 flex items-center justify-center rounded overflow-hidden group">
+                            <i class="fas fa-play-circle text-gray-600 text-2xl group-hover:text-green-500 group-hover:scale-125 transition-all duration-300"></i>
+                            <% if (parseInt(episode.episode) === i) { %>
+                                <div class="absolute inset-0 bg-green-500/10"></div>
+                            <% } %>
+                        </div>
+                        <h3 class="text-sm font-bold truncate"><%= parseInt(episode.episode) === i ? 'Now Playing:' : 'Episode' %> <%= i %></h3>
+                    </a>
+                <% } %>
+            </div>
+        </div>
+    <% } else { %>
+        <div class="text-center py-16">
+            <i class="fas fa-exclamation-circle text-5xl text-red-500 mb-4"></i>
+            <h2 class="text-2xl font-bold">Episode Not Found</h2>
+            <p class="mt-2 text-gray-400">The episode you're looking for doesn't exist or has been removed.</p>
+            <a href="/browse/tv" class="inline-block mt-6 px-6 py-3 bg-green-600 hover:bg-green-700 rounded-lg transition">
+                Browse TV Shows
+            </a>
+        </div>
+    <% } %>
+</div>
+
+<!-- JavaScript for Episode View -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Season selector functionality
+        const seasonSelect = document.getElementById('season-select');
+        if (seasonSelect) {
+            seasonSelect.addEventListener('change', function() {
+                const showId = '<%= episode.id %>';
+                const seasonNumber = this.value;
+                window.location.href = `/view/tv/${showId}/${seasonNumber}/1`;
+            });
+        }
+        
+        // Add animation to episode cards
+        const episodeCards = document.querySelectorAll('.episode-card');
+        episodeCards.forEach((card, index) => {
+            card.classList.add('animate__animated', 'animate__fadeIn');
+            card.style.animationDelay = `${index * 0.03}s`;
+        });
+        
+        // Highlight current episode
+        const currentEpisode = document.querySelector('.episode-card.border-green-500');
+        if (currentEpisode) {
+            currentEpisode.classList.add('animate__pulse');
+            setTimeout(() => {
+                currentEpisode.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
+            }, 500);
+        }
+        
+        // Favorite button animation
+        const favoriteBtn = document.querySelector('.favorite-btn');
+        if (favoriteBtn) {
+            favoriteBtn.addEventListener('click', function() {
+                const icon = this.querySelector('i');
+                icon.classList.toggle('far');
+                icon.classList.toggle('fas');
+                icon.classList.toggle('text-red-500');
+                
+                if (icon.classList.contains('fas')) {
+                    this.querySelector('span').textContent = 'Favorited';
+                    icon.classList.add('animate__animated', 'animate__heartBeat');
+                } else {
+                    this.querySelector('span').textContent = 'Favorite';
+                    icon.classList.remove('animate__animated', 'animate__heartBeat');
+                }
+            });
+        }
+        
+        // Share button functionality (placeholder)
+        const shareBtn = document.querySelector('.share-btn');
+        if (shareBtn) {
+            shareBtn.addEventListener('click', function() {
+                // Create a temporary input to copy the URL
+                const tempInput = document.createElement('input');
+                tempInput.value = window.location.href;
+                document.body.appendChild(tempInput);
+                tempInput.select();
+                document.execCommand('copy');
+                document.body.removeChild(tempInput);
+                
+                // Change button text temporarily
+                const originalText = this.querySelector('span').textContent;
+                this.querySelector('span').textContent = 'Copied!';
+                this.classList.add('bg-green-700');
+                this.classList.add('animate__animated', 'animate__headShake');
+                
+                // Reset after 2 seconds
+                setTimeout(() => {
+                    this.querySelector('span').textContent = originalText;
+                    this.classList.remove('bg-green-700');
+                    this.classList.remove('animate__animated', 'animate__headShake');
+                }, 2000);
+            });
+        }
+    });
+</script> 

@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StreamAPI - Your Streaming Service</title>
+    <!-- Tailwind CSS via CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Animation library -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    <style>
+        /* Custom styles */
+        .movie-card {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .movie-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+        .nav-link {
+            position: relative;
+        }
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: -4px;
+            left: 0;
+            background-color: #10B981;
+            transition: width 0.3s ease;
+        }
+        .nav-link:hover::after {
+            width: 100%;
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-white min-h-screen">
+    <!-- Navigation -->
+    <nav class="bg-gray-800 py-4 sticky top-0 z-50">
+        <div class="container mx-auto px-4 flex items-center justify-between">
+            <a href="/" class="text-2xl font-bold text-green-500 flex items-center">
+                <i class="fas fa-play-circle mr-2"></i>
+                StreamAPI
+            </a>
+            
+            <div class="hidden md:flex space-x-6">
+                <a href="/browse" class="nav-link hover:text-green-400"><i class="fas fa-film mr-1"></i> Movies</a>
+                <a href="/browse/tv" class="nav-link hover:text-green-400"><i class="fas fa-tv mr-1"></i> TV Shows</a>
+                <a href="/latest" class="nav-link hover:text-green-400"><i class="fas fa-clock mr-1"></i> Latest</a>
+                <a href="/top" class="nav-link hover:text-green-400"><i class="fas fa-star mr-1"></i> Top Rated</a>
+            </div>
+            
+            <div class="flex items-center">
+                <a href="/search" class="p-2 rounded-lg bg-gray-700 hover:bg-gray-600 transition mr-2">
+                    <i class="fas fa-search"></i>
+                </a>
+                <button class="md:hidden p-2" id="mobile-menu-button">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </div>
+        </div>
+        
+        <!-- Mobile menu (hidden by default) -->
+        <div class="md:hidden hidden" id="mobile-menu">
+            <div class="px-4 py-3 space-y-3 bg-gray-800 animate__animated animate__fadeIn">
+                <a href="/browse" class="block hover:text-green-400"><i class="fas fa-film mr-1"></i> Movies</a>
+                <a href="/browse/tv" class="block hover:text-green-400"><i class="fas fa-tv mr-1"></i> TV Shows</a>
+                <a href="/latest" class="block hover:text-green-400"><i class="fas fa-clock mr-1"></i> Latest</a>
+                <a href="/top" class="block hover:text-green-400"><i class="fas fa-star mr-1"></i> Top Rated</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 py-8">
+        <%- body %>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-gray-400 py-8">
+        <div class="container mx-auto px-4">
+            <div class="flex flex-col md:flex-row justify-between items-center">
+                <div class="mb-4 md:mb-0">
+                    <h2 class="text-xl font-bold text-green-500 flex items-center">
+                        <i class="fas fa-play-circle mr-2"></i>
+                        StreamAPI
+                    </h2>
+                    <p class="mt-2">Your ultimate streaming destination</p>
+                </div>
+                <div class="flex space-x-4">
+                    <a href="#" class="hover:text-white transition"><i class="fab fa-github text-2xl"></i></a>
+                    <a href="#" class="hover:text-white transition"><i class="fab fa-twitter text-2xl"></i></a>
+                    <a href="#" class="hover:text-white transition"><i class="fab fa-discord text-2xl"></i></a>
+                </div>
+            </div>
+            <div class="mt-6 text-center text-sm">
+                <p>Powered by TMDB API. This product uses the TMDB API but is not endorsed or certified by TMDB.</p>
+                <p class="mt-2">&copy; <%= new Date().getFullYear() %> StreamAPI. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- JavaScript -->
+    <script>
+        // Mobile menu toggle
+        const mobileMenuButton = document.getElementById('mobile-menu-button');
+        const mobileMenu = document.getElementById('mobile-menu');
+        
+        mobileMenuButton.addEventListener('click', () => {
+            mobileMenu.classList.toggle('hidden');
+        });
+        
+        // Add animation classes to movie cards
+        document.addEventListener('DOMContentLoaded', function() {
+            const movieCards = document.querySelectorAll('.movie-card');
+            movieCards.forEach((card, index) => {
+                card.classList.add('animate__animated', 'animate__fadeIn');
+                card.style.animationDelay = `${index * 0.05}s`;
+            });
+        });
+    </script>
+</body>
+</html> 

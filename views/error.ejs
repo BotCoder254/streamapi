@@ -1,0 +1,28 @@
+<div class="flex flex-col items-center justify-center py-12 animate__animated animate__fadeIn">
+    <div class="text-center">
+        <div class="mb-6">
+            <% if (code === 404) { %>
+                <i class="fas fa-search text-6xl text-gray-600 mb-4"></i>
+                <h1 class="text-4xl font-bold mb-2">404</h1>
+            <% } else if (code === 500) { %>
+                <i class="fas fa-exclamation-triangle text-6xl text-yellow-500 mb-4"></i>
+                <h1 class="text-4xl font-bold mb-2">500</h1>
+            <% } else { %>
+                <i class="fas fa-exclamation-circle text-6xl text-red-500 mb-4"></i>
+                <h1 class="text-4xl font-bold mb-2">Error</h1>
+            <% } %>
+            
+            <h2 class="text-2xl text-gray-300"><%= msg %></h2>
+        </div>
+        
+        <div class="flex flex-col items-center space-y-4 mt-8">
+            <a href="javascript:history.back()" class="px-6 py-3 bg-gray-800 hover:bg-gray-700 rounded-lg transition flex items-center">
+                <i class="fas fa-arrow-left mr-2"></i> Go Back
+            </a>
+            
+            <a href="/" class="px-6 py-3 bg-green-600 hover:bg-green-700 rounded-lg transition flex items-center">
+                <i class="fas fa-home mr-2"></i> Go to Homepage
+            </a>
+        </div>
+    </div>
+</div> 
