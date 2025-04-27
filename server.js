@@ -37,6 +37,44 @@ const fetchFromTMDB = async (endpoint, params = {}) => {
   }
 };
 
+// Fetch trending items for homepage sliders
+const fetchTrending = async (mediaType = 'all', timeWindow = 'week', page = 1) => {
+  try {
+    const data = await fetchFromTMDB(`/trending/${mediaType}/${timeWindow}`, { page });
+    return data.results || [];
+  } catch (error) {
+    console.error(`Error fetching trending ${mediaType}: ${error.message}`);
+    return [];
+  }
+};
+
+// Fetch featured content for homepage hero section
+const fetchFeaturedContent = async () => {
+  try {
+    // Fetch upcoming movies with backdrop images for the hero section
+    const data = await fetchFromTMDB('/movie/upcoming', { page: 1 });
+    
+    // Filter to only movies with backdrop images and sort by popularity
+    if (data.results && data.results.length > 0) {
+      return data.results
+        .filter(movie => movie.backdrop_path)
+        .sort((a, b) => b.popularity - a.popularity)
+        .slice(0, 5)
+        .map(movie => ({
+          id: movie.id,
+          title: movie.title,
+          overview: movie.overview,
+          backdrop: movie.backdrop_path ? `https://image.tmdb.org/t/p/original${movie.backdrop_path}` : null,
+          poster: movie.poster_path ? `https://image.tmdb.org/t/p/w500${movie.poster_path}` : null
+        }));
+    }
+    return [];
+  } catch (error) {
+    console.error(`Error fetching featured content: ${error.message}`);
+    return [];
+  }
+};
+
 const fetchLatestMovies = async (page = 1) => {
   try {
     // Fetch the latest movies from VidSrc API
@@ -50,12 +88,11 @@ const fetchLatestMovies = async (page = 1) => {
 
 const fetchLatestTVShows = async (page = 1) => {
   try {
-    // Fetch the latest TV shows from VidSrc API
-    const response = await axios.get(`https://vidsrc.xyz/tvshows/latest/page-${page}.json`);
-    return response.data;
+    const data = await fetchFromTMDB('/tv/on_the_air', { page });
+    return data;
   } catch (error) {
     console.error(`Error fetching latest TV shows: ${error.message}`);
-    return { shows: [] };
+    return { results: [] };
   }
 };
 
@@ -71,8 +108,59 @@ const fetchLatestEpisodes = async (page = 1) => {
 };
 
 // Routes for Movies
-app.get('/', (req, res) => {
-  res.redirect('/browse');
+app.get('/', async (req, res) => {
+  try {
+    // Fetch data for all sliders in parallel
+    const [featured, trendingMovies, latestMoviesData, popularShowsData, latestEpisodesData] = await Promise.all([
+      fetchFeaturedContent(),
+      fetchTrending('movie', 'week'),
+      fetchLatestMovies(),
+      fetchFromTMDB('/tv/popular'),
+      fetchLatestEpisodes()
+    ]);
+
+    // Format the data for each slider
+    const formattedTrendingMovies = trendingMovies.slice(0, 15).map(movie => ({
+      id: movie.id,
+      title: movie.title,
+      poster: movie.poster_path ? `https://image.tmdb.org/t/p/w500${movie.poster_path}` : null,
+      backdrop: movie.backdrop_path ? `https://image.tmdb.org/t/p/w1280${movie.backdrop_path}` : null
+    }));
+
+    const latestMovies = (latestMoviesData.movies || []).slice(0, 15).map(movie => ({
+      id: movie.tmdb_id || movie.id,
+      title: movie.title,
+      poster: movie.poster_path ? `https://image.tmdb.org/t/p/w500${movie.poster_path}` : null
+    }));
+
+    const popularShows = (popularShowsData.results || []).slice(0, 15).map(show => ({
+      id: show.id,
+      title: show.name,
+      poster: show.poster_path ? `https://image.tmdb.org/t/p/w500${show.poster_path}` : null
+    }));
+
+    const latestEpisodes = (latestEpisodesData.episodes || []).slice(0, 15).map(episode => ({
+      show_id: episode.show_id,
+      show_title: episode.show_title,
+      season_number: episode.season_number,
+      episode_number: episode.episode_number,
+      name: episode.name,
+      still: episode.still_path ? `https://image.tmdb.org/t/p/w500${episode.still_path}` : null
+    }));
+
+    // Render the home page with all slider data
+    res.render('home', {
+      featured,
+      trendingMovies: formattedTrendingMovies,
+      latestMovies,
+      popularShows,
+      latestEpisodes
+    });
+  } catch (error) {
+    console.error(`Home page error: ${error.message}`);
+    // If there's an error, redirect to the old browse page as fallback
+    res.redirect('/browse');
+  }
 });
 
 app.get('/browse', async (req, res) => {
@@ -316,7 +404,7 @@ app.get('/latest/tv', async (req, res) => {
     const page = req.query.p || 1;
     const data = await fetchLatestTVShows(page);
     
-    if (!data.shows || !Array.isArray(data.shows)) {
+    if (!data.results || !Array.isArray(data.results)) {
       return res.render('error', { 
         msg: "Sorry, could not retrieve latest TV shows. Please try again later.",
         code: 500 
@@ -324,7 +412,7 @@ app.get('/latest/tv', async (req, res) => {
     }
 
     // You may need to modify this based on the actual response structure
-    const shows = data.shows.map(show => ({
+    const shows = data.results.map(show => ({
       id: show.tmdb_id || show.id,
       title: show.name,
       poster: show.poster_path ? `https://image.tmdb.org/t/p/w500${show.poster_path}` : null
