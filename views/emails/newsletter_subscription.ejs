@@ -128,18 +128,31 @@
             <div class="content-section">
                 <h3><span style="color: #10b981;">&#9733;</span> Trending This Week</h3>
                 <div class="movie-grid">
-                    <div class="movie-item">
-                        <img src="https://via.placeholder.com/150x225/2d3748/10b981?text=Movie+1" alt="Movie">
-                        <div class="movie-title">Action Movie Title</div>
-                    </div>
-                    <div class="movie-item">
-                        <img src="https://via.placeholder.com/150x225/2d3748/10b981?text=Movie+2" alt="Movie">
-                        <div class="movie-title">Comedy Film Title</div>
-                    </div>
-                    <div class="movie-item">
-                        <img src="https://via.placeholder.com/150x225/2d3748/10b981?text=Movie+3" alt="Movie">
-                        <div class="movie-title">Drama Movie Title</div>
-                    </div>
+                    <% if (locals.trendingMovies && trendingMovies.length > 0) { %>
+                        <% trendingMovies.forEach(movie => { %>
+                            <div class="movie-item">
+                                <% if (movie.poster) { %>
+                                    <img src="<%= movie.poster %>" alt="<%= movie.title %>" style="width: 150px; height: 225px; object-fit: cover;">
+                                <% } else { %>
+                                    <img src="https://via.placeholder.com/150x225/2d3748/10b981?text=No+Image" alt="<%= movie.title %>" style="width: 150px; height: 225px;">
+                                <% } %>
+                                <div class="movie-title"><%= movie.title %></div>
+                            </div>
+                        <% }); %>
+                    <% } else { %>
+                        <div class="movie-item">
+                            <img src="https://via.placeholder.com/150x225/2d3748/10b981?text=Movie+1" alt="Movie">
+                            <div class="movie-title">Action Movie Title</div>
+                        </div>
+                        <div class="movie-item">
+                            <img src="https://via.placeholder.com/150x225/2d3748/10b981?text=Movie+2" alt="Movie">
+                            <div class="movie-title">Comedy Film Title</div>
+                        </div>
+                        <div class="movie-item">
+                            <img src="https://via.placeholder.com/150x225/2d3748/10b981?text=Movie+3" alt="Movie">
+                            <div class="movie-title">Drama Movie Title</div>
+                        </div>
+                    <% } %>
                 </div>
             </div>
             

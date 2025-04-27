@@ -1028,8 +1028,19 @@ app.post('/api/subscribe', async (req, res) => {
     
     if (added) {
       try {
-        // Render the newsletter subscription template
-        const html = await renderEmailTemplate('newsletter_subscription', { email });
+        // Fetch trending movies for the newsletter
+        const trendingMovies = await fetchTrending('movie', 'week', 1);
+        const formattedTrendingMovies = trendingMovies.slice(0, 3).map(movie => ({
+          title: movie.title,
+          poster: movie.poster_path ? `https://image.tmdb.org/t/p/w500${movie.poster_path}` : null,
+          id: movie.id
+        }));
+        
+        // Render the newsletter subscription template with trending movies
+        const html = await renderEmailTemplate('newsletter_subscription', { 
+          email,
+          trendingMovies: formattedTrendingMovies
+        });
         
         // Send confirmation email
         await sendEmail({
