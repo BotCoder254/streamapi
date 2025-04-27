@@ -1,0 +1,39 @@
+{
+  "name": "StreamAPI",
+  "description": "A streaming API service that fetches movie and TV show data from TMDB and VidSrc",
+  "repository": "https://github.com/BotCoder254/streamapi",
+  "logo": "https://node-js-sample.herokuapp.com/node.png",
+  "keywords": ["node", "express", "streaming", "movies", "api"],
+  "env": {
+    "TMDB_API_KEY": {
+      "description": "Your TMDB API key",
+      "required": true
+    },
+    "EMAIL_HOST": {
+      "description": "SMTP server host",
+      "required": false
+    },
+    "EMAIL_PORT": {
+      "description": "SMTP server port",
+      "required": false,
+      "value": "587"
+    },
+    "EMAIL_USER": {
+      "description": "Email username/address",
+      "required": false
+    },
+    "EMAIL_PASSWORD": {
+      "description": "Email password or app password",
+      "required": false
+    },
+    "EMAIL_FROM": {
+      "description": "From email address",
+      "required": false
+    },
+    "SITE_URL": {
+      "description": "Site URL (with protocol)",
+      "required": false,
+      "value": "https://streamapi.herokuapp.com"
+    }
+  }
+} 
