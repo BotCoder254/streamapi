@@ -1,0 +1,502 @@
+<!-- API Reference Page -->
+<div class="max-w-4xl mx-auto">
+    <div class="mb-8 text-center">
+        <h1 class="text-3xl font-bold mb-4"><i class="fas fa-code mr-2 text-green-400"></i>API Reference</h1>
+        <p class="text-lg text-gray-300">Access movie and TV show data through our API endpoints</p>
+    </div>
+    
+    <div class="bg-gray-800 rounded-xl p-6 md:p-8 shadow-lg mb-8 animate__animated animate__fadeIn">
+        <div class="prose prose-invert max-w-none">
+            <h2 class="text-2xl font-bold mb-4 text-green-400">Introduction</h2>
+            <p class="mb-6">
+                StreamAPI provides a set of RESTful API endpoints that allow you to access our movie and TV show database. 
+                All endpoints return data in JSON format and use standard HTTP response codes to indicate success or failure.
+            </p>
+            
+            <div class="bg-gray-700 p-4 rounded-lg mb-6">
+                <p class="text-sm">
+                    <strong>Base URL:</strong> <code class="bg-gray-900 px-2 py-1 rounded text-green-400"><%= process.env.SITE_URL || 'http://localhost:3000' %>/api</code>
+                </p>
+            </div>
+            
+            <h2 class="text-2xl font-bold mt-8 mb-4 text-green-400">Authentication</h2>
+            <p class="mb-6">
+                Currently, our API endpoints are open and do not require authentication. However, we implement rate limiting 
+                to prevent abuse. Please be considerate with your API usage.
+            </p>
+            
+            <h2 class="text-2xl font-bold mt-8 mb-4 text-green-400">API Endpoints</h2>
+            
+            <!-- Search Endpoint -->
+            <div class="border border-gray-700 rounded-xl overflow-hidden mb-8">
+                <div class="bg-gray-700 p-4 flex justify-between items-center">
+                    <div class="flex items-center">
+                        <span class="px-2 py-1 bg-blue-600 text-xs font-bold rounded mr-3">GET</span>
+                        <h3 class="text-xl font-medium">/search</h3>
+                    </div>
+                    <span class="text-sm bg-gray-600 px-2 py-1 rounded">Search for movies or TV shows</span>
+                </div>
+                <div class="p-4">
+                    <h4 class="font-bold mb-2">Query Parameters</h4>
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full border border-gray-700 mb-4">
+                            <thead>
+                                <tr class="bg-gray-700">
+                                    <th class="px-4 py-2 text-left">Parameter</th>
+                                    <th class="px-4 py-2 text-left">Type</th>
+                                    <th class="px-4 py-2 text-left">Required</th>
+                                    <th class="px-4 py-2 text-left">Description</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr class="border-t border-gray-700">
+                                    <td class="px-4 py-2"><code>query</code></td>
+                                    <td class="px-4 py-2">string</td>
+                                    <td class="px-4 py-2">Yes</td>
+                                    <td class="px-4 py-2">The search query</td>
+                                </tr>
+                                <tr class="border-t border-gray-700">
+                                    <td class="px-4 py-2"><code>type</code></td>
+                                    <td class="px-4 py-2">string</td>
+                                    <td class="px-4 py-2">No</td>
+                                    <td class="px-4 py-2">Type of content: 'movie' or 'tv' (default: 'movie')</td>
+                                </tr>
+                                <tr class="border-t border-gray-700">
+                                    <td class="px-4 py-2"><code>page</code></td>
+                                    <td class="px-4 py-2">integer</td>
+                                    <td class="px-4 py-2">No</td>
+                                    <td class="px-4 py-2">Page number for pagination (default: 1)</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <h4 class="font-bold mb-2">Example Request</h4>
+                    <div class="bg-gray-900 p-3 rounded mb-4 overflow-x-auto">
+                        <code class="text-green-400">
+                            GET /api/search?query=avatar&type=movie&page=1
+                        </code>
+                    </div>
+                    
+                    <h4 class="font-bold mb-2">Example Response</h4>
+                    <div class="bg-gray-900 p-3 rounded mb-4 overflow-x-auto">
+<pre class="text-green-400">
+{
+  "success": true,
+  "results": [
+    {
+      "id": 76600,
+      "title": "Avatar: The Way of Water",
+      "overview": "Set more than a decade after the events of the first film...",
+      "poster": "https://image.tmdb.org/t/p/w500/t6HIqrRAclMCA60NsSmeqe9RmNV.jpg",
+      "backdrop": "https://image.tmdb.org/t/p/original/s16H6tpK2utvwDtzZ8Qy4qm5Emw.jpg",
+      "release_date": "2022-12-14",
+      "vote_average": 7.7
+    },
+    {
+      "id": 19995,
+      "title": "Avatar",
+      "overview": "In the 22nd century, a paraplegic Marine is dispatched to the moon Pandora...",
+      "poster": "https://image.tmdb.org/t/p/w500/jRXYjXNq0Cs2TcJjLkki24MLp7u.jpg",
+      "backdrop": "https://image.tmdb.org/t/p/original/o0s4XsEDfDlvit5pDRKjzXR4pp2.jpg",
+      "release_date": "2009-12-15",
+      "vote_average": 7.6
+    }
+  ],
+  "page": 1,
+  "total_pages": 3,
+  "total_results": 54
+}
+</pre>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Trending Endpoint -->
+            <div class="border border-gray-700 rounded-xl overflow-hidden mb-8">
+                <div class="bg-gray-700 p-4 flex justify-between items-center">
+                    <div class="flex items-center">
+                        <span class="px-2 py-1 bg-blue-600 text-xs font-bold rounded mr-3">GET</span>
+                        <h3 class="text-xl font-medium">/trending</h3>
+                    </div>
+                    <span class="text-sm bg-gray-600 px-2 py-1 rounded">Get trending content</span>
+                </div>
+                <div class="p-4">
+                    <h4 class="font-bold mb-2">Query Parameters</h4>
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full border border-gray-700 mb-4">
+                            <thead>
+                                <tr class="bg-gray-700">
+                                    <th class="px-4 py-2 text-left">Parameter</th>
+                                    <th class="px-4 py-2 text-left">Type</th>
+                                    <th class="px-4 py-2 text-left">Required</th>
+                                    <th class="px-4 py-2 text-left">Description</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr class="border-t border-gray-700">
+                                    <td class="px-4 py-2"><code>mediaType</code></td>
+                                    <td class="px-4 py-2">string</td>
+                                    <td class="px-4 py-2">No</td>
+                                    <td class="px-4 py-2">Media type: 'all', 'movie', 'tv', or 'person' (default: 'all')</td>
+                                </tr>
+                                <tr class="border-t border-gray-700">
+                                    <td class="px-4 py-2"><code>timeWindow</code></td>
+                                    <td class="px-4 py-2">string</td>
+                                    <td class="px-4 py-2">No</td>
+                                    <td class="px-4 py-2">Time window: 'day' or 'week' (default: 'day')</td>
+                                </tr>
+                                <tr class="border-t border-gray-700">
+                                    <td class="px-4 py-2"><code>page</code></td>
+                                    <td class="px-4 py-2">integer</td>
+                                    <td class="px-4 py-2">No</td>
+                                    <td class="px-4 py-2">Page number for pagination (default: 1)</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <h4 class="font-bold mb-2">Example Request</h4>
+                    <div class="bg-gray-900 p-3 rounded mb-4 overflow-x-auto">
+                        <code class="text-green-400">
+                            GET /api/trending?mediaType=movie&timeWindow=week&page=1
+                        </code>
+                    </div>
+                    
+                    <h4 class="font-bold mb-2">Example Response</h4>
+                    <div class="bg-gray-900 p-3 rounded mb-4 overflow-x-auto">
+<pre class="text-green-400">
+{
+  "success": true,
+  "results": [
+    {
+      "id": 667538,
+      "title": "Transformers: Rise of the Beasts",
+      "media_type": "movie",
+      "overview": "When a new threat capable of destroying the entire planet emerges...",
+      "poster": "https://image.tmdb.org/t/p/w500/2vFuG6bWGyQUzYS9d69E5l85nIz.jpg",
+      "backdrop": "https://image.tmdb.org/t/p/original/bz66a19bR6BKsbY8gSZCM4etJiK.jpg",
+      "release_date": "2023-06-06",
+      "vote_average": 7.5
+    },
+    {
+      "id": 298618,
+      "title": "The Flash",
+      "media_type": "movie",
+      "overview": "When his attempt to save his family inadvertently alters the future...",
+      "poster": "https://image.tmdb.org/t/p/w500/rktDFPbfHfUbArZ6OOOKsXcv0Bm.jpg",
+      "backdrop": "https://image.tmdb.org/t/p/original/yF1eOkaYvwiORauRCPWznV9xVvi.jpg",
+      "release_date": "2023-06-13",
+      "vote_average": 7.0
+    }
+  ],
+  "page": 1,
+  "total_pages": 1000,
+  "total_results": 20000
+}
+</pre>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Watchlist Endpoints -->
+            <div class="border border-gray-700 rounded-xl overflow-hidden mb-8">
+                <div class="bg-gray-700 p-4">
+                    <h3 class="text-xl font-medium">Watchlist Endpoints</h3>
+                </div>
+                <div class="p-4">
+                    <p class="mb-4">
+                        The following endpoints allow you to manage a user's watchlist. These endpoints use local storage 
+                        to maintain the watchlist items and do not require user accounts.
+                    </p>
+                    
+                    <!-- Add to Watchlist -->
+                    <div class="border border-gray-700 rounded-lg mb-6">
+                        <div class="bg-gray-700 p-3 flex items-center">
+                            <span class="px-2 py-1 bg-green-600 text-xs font-bold rounded mr-3">POST</span>
+                            <h4 class="font-medium">/watchlist/add</h4>
+                        </div>
+                        <div class="p-3">
+                            <p class="mb-2">Add an item to the watchlist</p>
+                            
+                            <h5 class="font-bold mt-3 mb-2">Request Body</h5>
+                            <div class="bg-gray-900 p-3 rounded mb-3 overflow-x-auto">
+<pre class="text-green-400">
+{
+  "id": "123456",
+  "type": "movie",  // "movie" or "tv"
+  "title": "Movie Title",
+  "poster": "https://image.tmdb.org/t/p/w500/posterPath.jpg"
+}
+</pre>
+                            </div>
+                            
+                            <h5 class="font-bold mb-2">Example Response</h5>
+                            <div class="bg-gray-900 p-3 rounded overflow-x-auto">
+<pre class="text-green-400">
+{
+  "success": true,
+  "message": "Item added to watchlist"
+}
+</pre>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Remove from Watchlist -->
+                    <div class="border border-gray-700 rounded-lg mb-6">
+                        <div class="bg-gray-700 p-3 flex items-center">
+                            <span class="px-2 py-1 bg-red-600 text-xs font-bold rounded mr-3">POST</span>
+                            <h4 class="font-medium">/watchlist/remove</h4>
+                        </div>
+                        <div class="p-3">
+                            <p class="mb-2">Remove an item from the watchlist</p>
+                            
+                            <h5 class="font-bold mt-3 mb-2">Request Body</h5>
+                            <div class="bg-gray-900 p-3 rounded mb-3 overflow-x-auto">
+<pre class="text-green-400">
+{
+  "id": "123456",
+  "type": "movie"  // "movie" or "tv"
+}
+</pre>
+                            </div>
+                            
+                            <h5 class="font-bold mb-2">Example Response</h5>
+                            <div class="bg-gray-900 p-3 rounded overflow-x-auto">
+<pre class="text-green-400">
+{
+  "success": true,
+  "message": "Item removed from watchlist"
+}
+</pre>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Check Watchlist Status -->
+                    <div class="border border-gray-700 rounded-lg">
+                        <div class="bg-gray-700 p-3 flex items-center">
+                            <span class="px-2 py-1 bg-blue-600 text-xs font-bold rounded mr-3">GET</span>
+                            <h4 class="font-medium">/watchlist/check</h4>
+                        </div>
+                        <div class="p-3">
+                            <p class="mb-2">Check if an item is in the watchlist</p>
+                            
+                            <h5 class="font-bold mt-3 mb-2">Query Parameters</h5>
+                            <div class="overflow-x-auto">
+                                <table class="min-w-full border border-gray-700 mb-3">
+                                    <thead>
+                                        <tr class="bg-gray-700">
+                                            <th class="px-4 py-2 text-left">Parameter</th>
+                                            <th class="px-4 py-2 text-left">Type</th>
+                                            <th class="px-4 py-2 text-left">Required</th>
+                                            <th class="px-4 py-2 text-left">Description</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr class="border-t border-gray-700">
+                                            <td class="px-4 py-2"><code>id</code></td>
+                                            <td class="px-4 py-2">string</td>
+                                            <td class="px-4 py-2">Yes</td>
+                                            <td class="px-4 py-2">Item ID</td>
+                                        </tr>
+                                        <tr class="border-t border-gray-700">
+                                            <td class="px-4 py-2"><code>type</code></td>
+                                            <td class="px-4 py-2">string</td>
+                                            <td class="px-4 py-2">Yes</td>
+                                            <td class="px-4 py-2">Item type: 'movie' or 'tv'</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            
+                            <h5 class="font-bold mb-2">Example Request</h5>
+                            <div class="bg-gray-900 p-3 rounded mb-3 overflow-x-auto">
+                                <code class="text-green-400">
+                                    GET /api/watchlist/check?id=123456&type=movie
+                                </code>
+                            </div>
+                            
+                            <h5 class="font-bold mb-2">Example Response</h5>
+                            <div class="bg-gray-900 p-3 rounded overflow-x-auto">
+<pre class="text-green-400">
+{
+  "inWatchlist": true
+}
+</pre>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Newsletter Subscription Endpoint -->
+            <div class="border border-gray-700 rounded-xl overflow-hidden mb-8">
+                <div class="bg-gray-700 p-4 flex justify-between items-center">
+                    <div class="flex items-center">
+                        <span class="px-2 py-1 bg-green-600 text-xs font-bold rounded mr-3">POST</span>
+                        <h3 class="text-xl font-medium">/subscribe</h3>
+                    </div>
+                    <span class="text-sm bg-gray-600 px-2 py-1 rounded">Subscribe to newsletter</span>
+                </div>
+                <div class="p-4">
+                    <p class="mb-4">
+                        Subscribe to our newsletter to receive updates about the latest movies and TV shows.
+                    </p>
+                    
+                    <h4 class="font-bold mt-3 mb-2">Request Body</h4>
+                    <div class="bg-gray-900 p-3 rounded mb-4 overflow-x-auto">
+<pre class="text-green-400">
+{
+  "email": "user@example.com"
+}
+</pre>
+                    </div>
+                    
+                    <h4 class="font-bold mb-2">Example Response</h4>
+                    <div class="bg-gray-900 p-3 rounded mb-4 overflow-x-auto">
+<pre class="text-green-400">
+{
+  "success": true,
+  "message": "Subscription successful! Check your email for confirmation."
+}
+</pre>
+                    </div>
+                    
+                    <h4 class="font-bold mb-2">Possible Error Responses</h4>
+                    <div class="bg-gray-900 p-3 rounded mb-4 overflow-x-auto">
+<pre class="text-green-400">
+{
+  "success": false,
+  "error": "Email already subscribed"
+}
+
+{
+  "success": false,
+  "error": "Please provide a valid email address"
+}
+</pre>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Contact Form Endpoint -->
+            <div class="border border-gray-700 rounded-xl overflow-hidden mb-8">
+                <div class="bg-gray-700 p-4 flex justify-between items-center">
+                    <div class="flex items-center">
+                        <span class="px-2 py-1 bg-green-600 text-xs font-bold rounded mr-3">POST</span>
+                        <h3 class="text-xl font-medium">/contact</h3>
+                    </div>
+                    <span class="text-sm bg-gray-600 px-2 py-1 rounded">Send contact message</span>
+                </div>
+                <div class="p-4">
+                    <p class="mb-4">
+                        Send a message through our contact form.
+                    </p>
+                    
+                    <h4 class="font-bold mt-3 mb-2">Request Body</h4>
+                    <div class="bg-gray-900 p-3 rounded mb-4 overflow-x-auto">
+<pre class="text-green-400">
+{
+  "name": "John Doe",
+  "email": "user@example.com",
+  "message": "Hello, I would like to inquire about..."
+}
+</pre>
+                    </div>
+                    
+                    <h4 class="font-bold mb-2">Example Response</h4>
+                    <div class="bg-gray-900 p-3 rounded mb-4 overflow-x-auto">
+<pre class="text-green-400">
+{
+  "success": true,
+  "message": "Your message has been sent successfully!"
+}
+</pre>
+                    </div>
+                </div>
+            </div>
+            
+            <h2 class="text-2xl font-bold mt-8 mb-4 text-green-400">Error Handling</h2>
+            <p class="mb-4">
+                All API endpoints return standard HTTP status codes to indicate success or failure:
+            </p>
+            
+            <div class="overflow-x-auto mb-8">
+                <table class="min-w-full border border-gray-700">
+                    <thead>
+                        <tr class="bg-gray-700">
+                            <th class="px-4 py-2 text-left">Status Code</th>
+                            <th class="px-4 py-2 text-left">Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr class="border-t border-gray-700">
+                            <td class="px-4 py-2"><code>200 OK</code></td>
+                            <td class="px-4 py-2">The request was successful.</td>
+                        </tr>
+                        <tr class="border-t border-gray-700">
+                            <td class="px-4 py-2"><code>400 Bad Request</code></td>
+                            <td class="px-4 py-2">The request was malformed or missing required parameters.</td>
+                        </tr>
+                        <tr class="border-t border-gray-700">
+                            <td class="px-4 py-2"><code>404 Not Found</code></td>
+                            <td class="px-4 py-2">The requested resource was not found.</td>
+                        </tr>
+                        <tr class="border-t border-gray-700">
+                            <td class="px-4 py-2"><code>409 Conflict</code></td>
+                            <td class="px-4 py-2">The request could not be completed due to a conflict (e.g., email already subscribed).</td>
+                        </tr>
+                        <tr class="border-t border-gray-700">
+                            <td class="px-4 py-2"><code>500 Internal Server Error</code></td>
+                            <td class="px-4 py-2">An error occurred on the server.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            
+            <p class="mb-6">
+                In case of an error, the API will return a JSON response with an <code>error</code> field containing a detailed error message:
+            </p>
+            
+            <div class="bg-gray-900 p-3 rounded mb-8 overflow-x-auto">
+<pre class="text-green-400">
+{
+  "success": false,
+  "error": "Detailed error message"
+}
+</pre>
+            </div>
+            
+            <h2 class="text-2xl font-bold mt-8 mb-4 text-green-400">Rate Limiting</h2>
+            <p class="mb-4">
+                To ensure fair usage of our API, we implement rate limiting. Each IP address is limited to 60 requests per minute. 
+                If you exceed this limit, you will receive a 429 Too Many Requests response.
+            </p>
+            
+            <h2 class="text-2xl font-bold mt-8 mb-4 text-green-400">Attribution</h2>
+            <p class="mb-6">
+                This API uses data from The Movie Database (TMDB). You are required to attribute TMDB as the source of the data 
+                in your application:
+            </p>
+            
+            <div class="bg-gray-700 p-4 rounded-lg mb-6">
+                <p class="italic">
+                    "This product uses the TMDB API but is not endorsed or certified by TMDB."
+                </p>
+            </div>
+            
+            <h2 class="text-2xl font-bold mt-8 mb-4 text-green-400">Contact</h2>
+            <p class="mb-4">
+                If you have any questions or need assistance with our API, please <a href="/contact" class="text-green-400 hover:text-green-300 transition">contact us</a>.
+            </p>
+        </div>
+    </div>
+    
+    <div class="text-center">
+        <a href="/" class="inline-flex items-center text-green-400 hover:text-green-300 transition">
+            <i class="fas fa-arrow-left mr-2"></i> Back to Home
+        </a>
+    </div>
+</div> 

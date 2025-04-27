@@ -1110,6 +1110,19 @@ app.post('/api/contact', async (req, res) => {
   }
 });
 
+// Legal pages routes
+app.get('/terms', (req, res) => {
+  res.render('terms');
+});
+
+app.get('/privacy', (req, res) => {
+  res.render('privacy');
+});
+
+app.get('/copyright', (req, res) => {
+  res.render('copyright');
+});
+
 // Custom 404 handler
 app.use((req, res) => {
   res.status(404).render('error', { msg: 'Page Not Found', code: 404 });

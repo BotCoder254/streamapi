@@ -1,0 +1,103 @@
+<!-- Copyright Page -->
+<div class="max-w-4xl mx-auto">
+    <div class="mb-8 text-center">
+        <h1 class="text-3xl font-bold mb-4"><i class="fas fa-copyright mr-2 text-green-400"></i>Copyright Policy</h1>
+        <p class="text-lg text-gray-300">Updated: <%= new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) %></p>
+    </div>
+    
+    <div class="bg-gray-800 rounded-xl p-6 md:p-8 shadow-lg mb-8 animate__animated animate__fadeIn">
+        <div class="prose prose-invert max-w-none">
+            <p class="mb-6">
+                StreamAPI respects the intellectual property rights of others and expects its users to do the same. 
+                This Copyright Policy outlines how we address copyright issues on our platform.
+            </p>
+            
+            <h2 class="text-xl font-bold mt-8 mb-4 text-green-400">1. Content Sources</h2>
+            <p class="mb-4">
+                StreamAPI provides information about movies and TV shows through data obtained from The Movie Database (TMDB) API 
+                and other third-party sources. We do not host any copyrighted content directly. All media content 
+                (including images, videos, and descriptions) displayed on our website is sourced from these third-party providers.
+            </p>
+            
+            <p class="mb-4">
+                In accordance with our agreement with TMDB, we acknowledge that all movie and TV show information, 
+                including posters, backdrops, and metadata, is provided by TMDB (www.themoviedb.org). We are required to 
+                include the following attribution:
+            </p>
+            
+            <div class="bg-gray-700 p-4 rounded-lg mb-6">
+                <p class="italic">
+                    "This product uses the TMDB API but is not endorsed or certified by TMDB."
+                </p>
+            </div>
+            
+            <h2 class="text-xl font-bold mt-8 mb-4 text-green-400">2. Ownership of Our Content</h2>
+            <p class="mb-4">
+                The StreamAPI website, including its design, text, graphics, logos, icons, images, and software, 
+                is owned by or licensed to StreamAPI and is protected by copyright, trademark, and other intellectual 
+                property laws. Except as expressly permitted, you may not reproduce, modify, distribute, or otherwise 
+                use any materials from our website without our prior written consent.
+            </p>
+            
+            <h2 class="text-xl font-bold mt-8 mb-4 text-green-400">3. Fair Use</h2>
+            <p class="mb-4">
+                We believe in the principle of fair use, which allows limited use of copyrighted material without 
+                permission for purposes such as criticism, comment, news reporting, teaching, scholarship, or research. 
+                However, we encourage users to respect copyright laws and obtain permission when necessary.
+            </p>
+            
+            <h2 class="text-xl font-bold mt-8 mb-4 text-green-400">4. Digital Millennium Copyright Act (DMCA)</h2>
+            <p class="mb-4">
+                StreamAPI complies with the provisions of the Digital Millennium Copyright Act (DMCA). If you believe 
+                that your copyrighted work has been used on our website in a way that constitutes copyright infringement, 
+                please submit a DMCA takedown notice to us with the following information:
+            </p>
+            
+            <ul class="list-disc ml-8 mb-4 space-y-2">
+                <li>A physical or electronic signature of a person authorized to act on behalf of the owner of the copyright that has allegedly been infringed.</li>
+                <li>Identification of the copyrighted work claimed to have been infringed.</li>
+                <li>Identification of the material that is claimed to be infringing and information reasonably sufficient to permit us to locate the material.</li>
+                <li>Information reasonably sufficient to permit us to contact you, such as an address, telephone number, and email address.</li>
+                <li>A statement that you have a good faith belief that use of the material in the manner complained of is not authorized by the copyright owner, its agent, or the law.</li>
+                <li>A statement that the information in the notification is accurate, and under penalty of perjury, that you are authorized to act on behalf of the owner of the copyright that is allegedly infringed.</li>
+            </ul>
+            
+            <p class="mb-4">
+                You can submit your DMCA takedown notice to us via our <a href="/contact" class="text-green-400 hover:text-green-300 transition">contact form</a> 
+                or to the following email address: <span class="text-green-400"><%= process.env.EMAIL_USER || 'contact@streamapi.com' %></span>
+            </p>
+            
+            <h2 class="text-xl font-bold mt-8 mb-4 text-green-400">5. Counter-Notice Procedure</h2>
+            <p class="mb-4">
+                If you believe that your content was removed by mistake or misidentification, you may submit a counter-notice 
+                with the following information:
+            </p>
+            
+            <ul class="list-disc ml-8 mb-4 space-y-2">
+                <li>Your physical or electronic signature.</li>
+                <li>Identification of the material that has been removed and the location at which the material appeared before it was removed.</li>
+                <li>A statement under penalty of perjury that you have a good faith belief that the material was removed or disabled as a result of mistake or misidentification.</li>
+                <li>Your name, address, telephone number, and email address, and a statement that you consent to the jurisdiction of the federal court in the district where you reside, or if you reside outside the United States, in any judicial district in which we may be found, and that you will accept service of process from the person who provided notification of the alleged infringement.</li>
+            </ul>
+            
+            <h2 class="text-xl font-bold mt-8 mb-4 text-green-400">6. Repeat Infringer Policy</h2>
+            <p class="mb-4">
+                In accordance with the DMCA, we have a policy of terminating, in appropriate circumstances, the accounts 
+                of users who are deemed to be repeat infringers. We may also limit access to our website and/or terminate 
+                the accounts of users who infringe the intellectual property rights of others, whether or not there is 
+                any repeat infringement.
+            </p>
+            
+            <h2 class="text-xl font-bold mt-8 mb-4 text-green-400">7. Contact Us</h2>
+            <p class="mb-4">
+                If you have any questions about our Copyright Policy, please <a href="/contact" class="text-green-400 hover:text-green-300 transition">contact us</a>.
+            </p>
+        </div>
+    </div>
+    
+    <div class="text-center">
+        <a href="/" class="inline-flex items-center text-green-400 hover:text-green-300 transition">
+            <i class="fas fa-arrow-left mr-2"></i> Back to Home
+        </a>
+    </div>
+</div> 
