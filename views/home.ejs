@@ -25,10 +25,10 @@
                                         <h1 class="text-4xl md:text-5xl font-bold mb-4"><%= item.title %></h1>
                                         <p class="text-lg text-gray-300 mb-6 line-clamp-3"><%= item.overview || '' %></p>
                                         <div class="flex flex-wrap gap-4">
-                                            <a href="/view/movie/<%= item.id %>" class="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-lg transition flex items-center">
+                                            <a href="/view/movie/<%= item.id %>" class="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-lg transition flex items-center btn-hover-effect">
                                                 <i class="fas fa-play mr-2"></i> Watch Now
                                             </a>
-                                            <a href="/view/movie/<%= item.id %>" class="bg-gray-800 hover:bg-gray-700 text-white font-bold py-3 px-6 rounded-lg transition flex items-center">
+                                            <a href="/view/movie/<%= item.id %>" class="bg-gray-800 hover:bg-gray-700 text-white font-bold py-3 px-6 rounded-lg transition flex items-center btn-hover-effect">
                                                 <i class="fas fa-info-circle mr-2"></i> Details
                                             </a>
                                         </div>
@@ -80,9 +80,17 @@
                             <div class="relative pb-[150%]">
                                 <% if (show.poster) { %>
                                     <img src="<%= show.poster %>" alt="<%= show.title %>" class="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover/card:scale-110" onerror="this.onerror=null; this.src='https://via.placeholder.com/300x450?text=No+Poster'; this.classList.add('object-contain');">
-                                    <div class="absolute inset-0 bg-black/40 opacity-0 group-hover/card:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-                                        <div class="bg-blue-600/80 text-white px-3 py-2 rounded-full font-bold transform -translate-y-4 group-hover/card:translate-y-0 transition-transform duration-300 flex items-center">
-                                            <i class="fas fa-play mr-2"></i> Watch
+                                    <div class="absolute inset-0 bg-gradient-to-b from-black/10 via-transparent to-black/80"></div>
+                                    <div class="absolute inset-0 bg-black/60 opacity-0 group-hover/card:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+                                        <div class="play-icon bg-blue-600/90 text-white rounded-full w-12 h-12 flex items-center justify-center transform scale-0 group-hover/card:scale-100 transition-transform duration-300 animate-pulse">
+                                            <i class="fas fa-play animate-bounce"></i>
+                                        </div>
+                                        <div class="absolute bottom-0 left-0 right-0 p-3 transform translate-y-4 group-hover/card:translate-y-0 transition-transform duration-300">
+                                            <h3 class="text-sm font-bold line-clamp-2 mb-1"><%= show.title %></h3>
+                                            <div class="flex items-center text-xs text-gray-300 space-x-2">
+                                                <span><i class="fas fa-tv mr-1"></i> TV Series</span>
+                                                <span><i class="fas fa-star mr-1 text-yellow-400"></i> 8.2</span>
+                                            </div>
                                         </div>
                                     </div>
                                 <% } else { %>
@@ -90,7 +98,7 @@
                                         <i class="fas fa-tv text-3xl text-gray-600"></i>
                                     </div>
                                 <% } %>
-                                <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black to-transparent py-2 px-3">
+                                <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black to-transparent py-2 px-3 group-hover/card:opacity-0 transition-opacity duration-300">
                                     <h3 class="text-sm font-bold line-clamp-2"><%= show.title %></h3>
                                 </div>
                             </div>
@@ -128,9 +136,17 @@
                             <div class="relative pb-[150%]">
                                 <% if (movie.poster) { %>
                                     <img src="<%= movie.poster %>" alt="<%= movie.title %>" class="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover/card:scale-110" onerror="this.onerror=null; this.src='https://via.placeholder.com/300x450?text=No+Poster'; this.classList.add('object-contain');">
-                                    <div class="absolute inset-0 bg-black/40 opacity-0 group-hover/card:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-                                        <div class="bg-red-600/80 text-white px-3 py-2 rounded-full font-bold transform -translate-y-4 group-hover/card:translate-y-0 transition-transform duration-300 flex items-center">
-                                            <i class="fas fa-play mr-2"></i> Watch
+                                    <div class="absolute inset-0 bg-gradient-to-b from-black/10 via-transparent to-black/80"></div>
+                                    <div class="absolute inset-0 bg-black/60 opacity-0 group-hover/card:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+                                        <div class="play-icon bg-red-600/90 text-white rounded-full w-12 h-12 flex items-center justify-center transform scale-0 group-hover/card:scale-100 transition-transform duration-300 animate-pulse">
+                                            <i class="fas fa-play animate-bounce"></i>
+                                        </div>
+                                        <div class="absolute bottom-0 left-0 right-0 p-3 transform translate-y-4 group-hover/card:translate-y-0 transition-transform duration-300">
+                                            <h3 class="text-sm font-bold line-clamp-2 mb-1"><%= movie.title %></h3>
+                                            <div class="flex items-center text-xs text-gray-300 space-x-2">
+                                                <span><i class="fas fa-fire mr-1 text-red-400"></i> Trending</span>
+                                                <span><i class="fas fa-star mr-1 text-yellow-400"></i> 9.0</span>
+                                            </div>
                                         </div>
                                     </div>
                                 <% } else { %>
@@ -138,7 +154,63 @@
                                         <i class="fas fa-film text-3xl text-gray-600"></i>
                                     </div>
                                 <% } %>
-                                <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black to-transparent py-2 px-3">
+                                <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black to-transparent py-2 px-3 group-hover/card:opacity-0 transition-opacity duration-300">
+                                    <h3 class="text-sm font-bold line-clamp-2"><%= movie.title %></h3>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                <% }); %>
+            </div>
+            
+            <button class="slider-prev absolute top-1/2 left-0 -translate-y-1/2 w-10 h-10 bg-black/50 hover:bg-black/70 text-white rounded-full flex items-center justify-center z-10 opacity-0 group-hover:opacity-100 transition-opacity">
+                <i class="fas fa-chevron-left"></i>
+            </button>
+            <button class="slider-next absolute top-1/2 right-0 -translate-y-1/2 w-10 h-10 bg-black/50 hover:bg-black/70 text-white rounded-full flex items-center justify-center z-10 opacity-0 group-hover:opacity-100 transition-opacity">
+                <i class="fas fa-chevron-right"></i>
+            </button>
+        </div>
+    </div>
+    
+    <!-- Latest Movies Slider Section -->
+    <div class="mb-12">
+        <div class="flex justify-between items-center mb-6">
+            <h2 class="text-2xl font-bold">
+                <i class="fas fa-film mr-2 text-green-400"></i>
+                Latest Movies
+            </h2>
+            <a href="/latest" class="text-green-400 hover:text-green-300 transition flex items-center">
+                View All <i class="fas fa-chevron-right ml-1 text-sm"></i>
+            </a>
+        </div>
+        
+        <div class="content-slider relative group">
+            <div class="content-wrapper flex space-x-4 overflow-x-auto pb-4 snap-x scrollbar-hide">
+                <% latestMovies.forEach(movie => { %>
+                    <div class="movie-card flex-shrink-0 w-[180px] md:w-[200px] snap-start bg-gray-800 rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 group/card">
+                        <a href="/view/movie/<%= movie.id %>">
+                            <div class="relative pb-[150%]">
+                                <% if (movie.poster) { %>
+                                    <img src="<%= movie.poster %>" alt="<%= movie.title %>" class="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover/card:scale-110" onerror="this.onerror=null; this.src='https://via.placeholder.com/300x450?text=No+Poster'; this.classList.add('object-contain');">
+                                    <div class="absolute inset-0 bg-gradient-to-b from-black/10 via-transparent to-black/80"></div>
+                                    <div class="absolute inset-0 bg-black/60 opacity-0 group-hover/card:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+                                        <div class="play-icon bg-green-600/90 text-white rounded-full w-12 h-12 flex items-center justify-center transform scale-0 group-hover/card:scale-100 transition-transform duration-300 animate-pulse">
+                                            <i class="fas fa-play animate-bounce"></i>
+                                        </div>
+                                        <div class="absolute bottom-0 left-0 right-0 p-3 transform translate-y-4 group-hover/card:translate-y-0 transition-transform duration-300">
+                                            <h3 class="text-sm font-bold line-clamp-2 mb-1"><%= movie.title %></h3>
+                                            <div class="flex items-center text-xs text-gray-300 space-x-2">
+                                                <span><i class="fas fa-calendar-alt mr-1"></i> 2023</span>
+                                                <span><i class="fas fa-star mr-1 text-yellow-400"></i> 8.5</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                <% } else { %>
+                                    <div class="absolute inset-0 w-full h-full bg-gray-700 flex items-center justify-center">
+                                        <i class="fas fa-film text-3xl text-gray-600"></i>
+                                    </div>
+                                <% } %>
+                                <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black to-transparent py-2 px-3 group-hover/card:opacity-0 transition-opacity duration-300">
                                     <h3 class="text-sm font-bold line-clamp-2"><%= movie.title %></h3>
                                 </div>
                             </div>
@@ -279,10 +351,10 @@
                                     <h1 class="text-4xl md:text-5xl font-bold mb-4">${item.title}</h1>
                                     <p class="text-lg text-gray-300 mb-6 line-clamp-3">${item.overview || ''}</p>
                                     <div class="flex flex-wrap gap-4">
-                                        <a href="/view/movie/${item.id}" class="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-lg transition flex items-center">
+                                        <a href="/view/movie/${item.id}" class="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-lg transition flex items-center btn-hover-effect">
                                             <i class="fas fa-play mr-2"></i> Watch Now
                                         </a>
-                                        <a href="/view/movie/${item.id}" class="bg-gray-800 hover:bg-gray-700 text-white font-bold py-3 px-6 rounded-lg transition flex items-center">
+                                        <a href="/view/movie/${item.id}" class="bg-gray-800 hover:bg-gray-700 text-white font-bold py-3 px-6 rounded-lg transition flex items-center btn-hover-effect">
                                             <i class="fas fa-info-circle mr-2"></i> Details
                                         </a>
                                     </div>

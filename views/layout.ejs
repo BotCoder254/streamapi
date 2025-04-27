@@ -35,41 +35,138 @@
         .nav-link:hover::after {
             width: 100%;
         }
+        
+        /* Enhanced animations for media cards */
+        @keyframes pulse-glow {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+            50% { box-shadow: 0 0 0 8px rgba(16, 185, 129, 0.3); }
+        }
+        
+        @keyframes bounce-subtle {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-3px); }
+        }
+        
+        .play-icon {
+            animation: pulse-glow 2s infinite;
+        }
+        
+        .play-icon i {
+            animation: bounce-subtle 1.5s infinite;
+        }
+        
+        /* Card hover animations */
+        .movie-card img {
+            transition: transform 0.5s ease, filter 0.5s ease;
+        }
+        
+        .movie-card:hover img {
+            filter: brightness(1.1);
+        }
+        
+        /* Smooth scroll behavior */
+        html {
+            scroll-behavior: smooth;
+        }
+        
+        /* Animated hover effects for buttons */
+        .btn-hover-effect {
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .btn-hover-effect:after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: 0.5s;
+        }
+        
+        .btn-hover-effect:hover:after {
+            left: 100%;
+        }
     </style>
 </head>
 <body class="bg-gray-900 text-white min-h-screen">
     <!-- Navigation -->
     <nav class="bg-gray-800 py-4 sticky top-0 z-50">
-        <div class="container mx-auto px-4 flex items-center justify-between">
-            <a href="/" class="text-2xl font-bold text-green-500 flex items-center">
-                <i class="fas fa-play-circle mr-2"></i>
-                StreamAPI
-            </a>
-            
-            <div class="hidden md:flex space-x-6">
-                <a href="/browse" class="nav-link hover:text-green-400"><i class="fas fa-film mr-1"></i> Movies</a>
-                <a href="/browse/tv" class="nav-link hover:text-green-400"><i class="fas fa-tv mr-1"></i> TV Shows</a>
-                <a href="/latest" class="nav-link hover:text-green-400"><i class="fas fa-clock mr-1"></i> Latest</a>
-                <a href="/top" class="nav-link hover:text-green-400"><i class="fas fa-star mr-1"></i> Top Rated</a>
-            </div>
-            
-            <div class="flex items-center">
-                <a href="/search" class="p-2 rounded-lg bg-gray-700 hover:bg-gray-600 transition mr-2">
-                    <i class="fas fa-search"></i>
+        <div class="container mx-auto px-4">
+            <div class="flex items-center justify-between">
+                <a href="/" class="text-2xl font-bold text-green-500 flex items-center">
+                    <i class="fas fa-play-circle mr-2"></i>
+                    StreamAPI
                 </a>
-                <button class="md:hidden p-2" id="mobile-menu-button">
-                    <i class="fas fa-bars"></i>
-                </button>
+                
+                <!-- Desktop Navigation -->
+                <div class="hidden md:flex items-center space-x-6">
+                    <a href="/browse" class="nav-link hover:text-green-400"><i class="fas fa-film mr-1"></i> Movies</a>
+                    <a href="/browse/tv" class="nav-link hover:text-green-400"><i class="fas fa-tv mr-1"></i> TV Shows</a>
+                    <a href="/latest" class="nav-link hover:text-green-400"><i class="fas fa-clock mr-1"></i> Latest</a>
+                    <a href="/top" class="nav-link hover:text-green-400"><i class="fas fa-star mr-1"></i> Top Rated</a>
+                </div>
+                
+                <!-- Search Bar -->
+                <div class="hidden md:block flex-grow max-w-md mx-6">
+                    <div class="relative">
+                        <input 
+                            type="text" 
+                            id="navbar-search" 
+                            placeholder="Search for movies or TV shows..." 
+                            class="w-full bg-gray-700 text-white border border-gray-600 rounded-full py-2 pl-10 pr-4 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent text-sm transition-all"
+                        >
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <i class="fas fa-search text-gray-400"></i>
+                        </div>
+                        <!-- Search Results Dropdown (hidden by default) -->
+                        <div id="search-results" class="absolute mt-2 w-full bg-gray-800 border border-gray-700 rounded-lg shadow-xl overflow-hidden hidden z-50 max-h-96 overflow-y-auto">
+                            <!-- Results will be populated by JavaScript -->
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="flex items-center">
+                    <a href="/search" class="p-2 rounded-lg bg-gray-700 hover:bg-gray-600 transition mr-2 md:hidden">
+                        <i class="fas fa-search"></i>
+                    </a>
+                    <button class="md:hidden p-2" id="mobile-menu-button">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                </div>
             </div>
-        </div>
-        
-        <!-- Mobile menu (hidden by default) -->
-        <div class="md:hidden hidden" id="mobile-menu">
-            <div class="px-4 py-3 space-y-3 bg-gray-800 animate__animated animate__fadeIn">
-                <a href="/browse" class="block hover:text-green-400"><i class="fas fa-film mr-1"></i> Movies</a>
-                <a href="/browse/tv" class="block hover:text-green-400"><i class="fas fa-tv mr-1"></i> TV Shows</a>
-                <a href="/latest" class="block hover:text-green-400"><i class="fas fa-clock mr-1"></i> Latest</a>
-                <a href="/top" class="block hover:text-green-400"><i class="fas fa-star mr-1"></i> Top Rated</a>
+            
+            <!-- Mobile menu (hidden by default) -->
+            <div class="md:hidden hidden" id="mobile-menu">
+                <div class="mt-3 px-2 pt-2 pb-3 space-y-1 animate__animated animate__fadeIn">
+                    <!-- Mobile Search -->
+                    <div class="relative mb-3">
+                        <input 
+                            type="text" 
+                            id="mobile-navbar-search" 
+                            placeholder="Search movies & TV..." 
+                            class="w-full bg-gray-700 text-white border border-gray-600 rounded-full py-2 pl-10 pr-4 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent text-sm"
+                        >
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <i class="fas fa-search text-gray-400"></i>
+                        </div>
+                    </div>
+                    
+                    <a href="/browse" class="block px-3 py-2 rounded-md hover:bg-gray-700 hover:text-green-400 transition-colors">
+                        <i class="fas fa-film mr-1"></i> Movies
+                    </a>
+                    <a href="/browse/tv" class="block px-3 py-2 rounded-md hover:bg-gray-700 hover:text-green-400 transition-colors">
+                        <i class="fas fa-tv mr-1"></i> TV Shows
+                    </a>
+                    <a href="/latest" class="block px-3 py-2 rounded-md hover:bg-gray-700 hover:text-green-400 transition-colors">
+                        <i class="fas fa-clock mr-1"></i> Latest
+                    </a>
+                    <a href="/top" class="block px-3 py-2 rounded-md hover:bg-gray-700 hover:text-green-400 transition-colors">
+                        <i class="fas fa-star mr-1"></i> Top Rated
+                    </a>
+                </div>
             </div>
         </div>
     </nav>
@@ -120,7 +217,124 @@
                 card.classList.add('animate__animated', 'animate__fadeIn');
                 card.style.animationDelay = `${index * 0.05}s`;
             });
+            
+            // Setup real-time search
+            setupSearch();
         });
+        
+        // Real-time search functionality
+        function setupSearch() {
+            const searchInput = document.getElementById('navbar-search');
+            const mobileSearchInput = document.getElementById('mobile-navbar-search');
+            const searchResults = document.getElementById('search-results');
+            
+            let searchTimeout;
+            
+            // Handle search input (desktop)
+            if (searchInput) {
+                searchInput.addEventListener('focus', () => {
+                    searchResults.classList.remove('hidden');
+                });
+                
+                // Close search results when clicking outside
+                document.addEventListener('click', (e) => {
+                    if (!searchInput.contains(e.target) && !searchResults.contains(e.target)) {
+                        searchResults.classList.add('hidden');
+                    }
+                });
+                
+                searchInput.addEventListener('input', (e) => {
+                    const query = e.target.value.trim();
+                    
+                    // Clear previous timeout
+                    clearTimeout(searchTimeout);
+                    
+                    if (query.length < 2) {
+                        searchResults.innerHTML = '<div class="p-4 text-gray-400 text-sm">Type at least 2 characters to search</div>';
+                        return;
+                    }
+                    
+                    // Show loading indicator
+                    searchResults.innerHTML = '<div class="p-4 text-center"><i class="fas fa-spinner fa-spin text-green-500"></i></div>';
+                    
+                    // Debounce the search to avoid too many requests
+                    searchTimeout = setTimeout(() => {
+                        performSearch(query);
+                    }, 500);
+                });
+            }
+            
+            // Handle mobile search
+            if (mobileSearchInput) {
+                mobileSearchInput.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') {
+                        const query = e.target.value.trim();
+                        if (query.length >= 2) {
+                            window.location.href = `/results?q=${encodeURIComponent(query)}`;
+                        }
+                    }
+                });
+            }
+            
+            // Function to perform search and display results
+            async function performSearch(query) {
+                try {
+                    const response = await fetch(`/api/search?q=${encodeURIComponent(query)}&limit=5`);
+                    
+                    if (!response.ok) {
+                        throw new Error('Search failed');
+                    }
+                    
+                    const data = await response.json();
+                    
+                    if (data.results.length === 0) {
+                        searchResults.innerHTML = '<div class="p-4 text-gray-400 text-sm">No results found</div>';
+                        return;
+                    }
+                    
+                    // Build results HTML
+                    let resultsHTML = '';
+                    
+                    data.results.forEach(item => {
+                        const mediaType = item.media_type || 'movie';
+                        const title = item.title || item.name;
+                        const posterUrl = item.poster_path ? 
+                            `https://image.tmdb.org/t/p/w92${item.poster_path}` : 
+                            'https://via.placeholder.com/92x138?text=No+Image';
+                        
+                        resultsHTML += `
+                            <a href="/view/${mediaType}/${item.id}" class="flex items-center p-2 hover:bg-gray-700 transition-colors border-b border-gray-700 last:border-0">
+                                <div class="w-10 h-15 flex-shrink-0 mr-3">
+                                    <img src="${posterUrl}" alt="${title}" class="w-full h-full object-cover rounded">
+                                </div>
+                                <div class="flex-grow">
+                                    <h4 class="text-sm font-medium">${title}</h4>
+                                    <div class="flex items-center mt-1">
+                                        <span class="text-xs text-gray-400">${mediaType === 'tv' ? 'TV Show' : 'Movie'}</span>
+                                        ${item.vote_average ? `<span class="ml-2 text-xs bg-gray-700 px-1.5 py-0.5 rounded flex items-center"><i class="fas fa-star text-yellow-400 mr-1 text-[10px]"></i>${item.vote_average.toFixed(1)}</span>` : ''}
+                                    </div>
+                                </div>
+                                <i class="fas fa-chevron-right text-gray-500 text-xs"></i>
+                            </a>
+                        `;
+                    });
+                    
+                    // Add view all link
+                    resultsHTML += `
+                        <a href="/results?q=${encodeURIComponent(query)}" class="block p-3 text-center text-green-400 hover:text-green-300 text-sm font-medium">
+                            View all results <i class="fas fa-arrow-right ml-1"></i>
+                        </a>
+                    `;
+                    
+                    searchResults.innerHTML = resultsHTML;
+                    searchResults.classList.remove('hidden');
+                    
+                } catch (error) {
+                    console.error('Search error:', error);
+                    searchResults.innerHTML = '<div class="p-4 text-red-400 text-sm">Error performing search</div>';
+                }
+            }
+        }
     </script>
 </body>
 </html> 

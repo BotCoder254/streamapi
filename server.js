@@ -621,6 +621,55 @@ app.get('/api', (req, res) => {
   res.render('api');
 });
 
+// API endpoint for real-time search (used by the navbar search)
+app.get('/api/search', async (req, res) => {
+  try {
+    const query = req.query.q;
+    const limit = parseInt(req.query.limit) || 5;
+    
+    if (!query || query.length < 2) {
+      return res.status(400).json({ error: 'Query must be at least 2 characters' });
+    }
+    
+    // Search for both movies and TV shows in parallel
+    const [movieData, tvData] = await Promise.all([
+      fetchFromTMDB('/search/movie', { query, page: 1 }),
+      fetchFromTMDB('/search/tv', { query, page: 1 })
+    ]);
+    
+    let combinedResults = [];
+    
+    // Process movie results
+    if (movieData.results && movieData.results.length > 0) {
+      const movieResults = movieData.results.map(movie => ({
+        ...movie,
+        media_type: 'movie'
+      }));
+      combinedResults = combinedResults.concat(movieResults);
+    }
+    
+    // Process TV show results
+    if (tvData.results && tvData.results.length > 0) {
+      const tvResults = tvData.results.map(show => ({
+        ...show,
+        media_type: 'tv'
+      }));
+      combinedResults = combinedResults.concat(tvResults);
+    }
+    
+    // Sort by popularity (descending)
+    combinedResults.sort((a, b) => b.popularity - a.popularity);
+    
+    // Limit the number of results
+    combinedResults = combinedResults.slice(0, limit);
+    
+    res.json({ results: combinedResults });
+  } catch (error) {
+    console.error(`API search error: ${error.message}`);
+    res.status(500).json({ error: 'Search failed' });
+  }
+});
+
 // Custom 404 handler
 app.use((req, res) => {
   res.status(404).render('error', { msg: 'Page Not Found', code: 404 });
