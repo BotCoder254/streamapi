@@ -74,10 +74,54 @@
         <!-- Player Section -->
         <div id="player-container" class="hidden mb-8">
             <div class="bg-black rounded-xl overflow-hidden shadow-2xl relative" style="padding-top: 56.25%;">
-                <iframe id="movie-player" src="" frameborder="0" class="absolute inset-0 w-full h-full" allowfullscreen></iframe>
-                <button id="close-player" class="absolute top-4 right-4 bg-gray-800/80 hover:bg-gray-700 text-white rounded-full w-10 h-10 flex items-center justify-center shadow-lg">
-                    <i class="fas fa-times"></i>
-                </button>
+                <div class="movie-player-container absolute inset-0 w-full h-full">
+                    <!-- Loading Overlay -->
+                    <div id="player-loading-overlay" class="absolute inset-0 flex flex-col items-center justify-center z-10 bg-black/90 backdrop-filter backdrop-blur-sm">
+                        <div class="relative mb-6">
+                            <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-16 h-16 rounded-full bg-green-500/20 animate-pulse"></div>
+                            <div class="w-12 h-12 border-4 border-gray-600 border-t-green-500 rounded-full animate-spin"></div>
+                        </div>
+                        <p class="text-white text-lg font-medium">Loading movie...</p>
+                        <p id="player-loading-title" class="text-sm text-gray-400 mt-2"></p>
+                    </div>
+                    
+                    <iframe 
+                        id="movie-player" 
+                        src="" 
+                        frameborder="0" 
+                        class="absolute inset-0 w-full h-full" 
+                        allowfullscreen
+                        referrerpolicy="no-referrer"
+                        allow="autoplay; encrypted-media; picture-in-picture"
+                        loading="lazy"
+                    ></iframe>
+                    
+                    <!-- Player Controls -->
+                    <div class="player-controls absolute bottom-0 left-0 right-0 z-10 p-4">
+                        <div class="flex justify-between items-center">
+                            <!-- Left side controls -->
+                            <div class="opacity-0 transition-opacity duration-300 hover:opacity-100">
+                                <span id="player-title" class="text-white text-sm md:text-base font-medium drop-shadow-lg hidden md:inline-block"></span>
+                            </div>
+                            
+                            <!-- Right side controls -->
+                            <div class="flex gap-3 opacity-0 transition-opacity duration-300 hover:opacity-100">
+                                <button id="player-fullscreen-btn" class="bg-gray-800/80 hover:bg-gray-700 text-white rounded-full w-10 h-10 flex items-center justify-center shadow-lg transition-transform hover:-translate-y-1 active:translate-y-0">
+                                    <i class="fas fa-expand"></i>
+                                </button>
+                                <a id="open-dedicated-player" href="#" target="_blank" class="bg-green-600/80 hover:bg-green-500 text-white rounded-full w-10 h-10 flex items-center justify-center shadow-lg transition-transform hover:-translate-y-1 active:translate-y-0" title="Open in dedicated player">
+                                    <i class="fas fa-external-link-alt"></i>
+                                </a>
+                                <button id="close-player" class="bg-gray-800/80 hover:bg-gray-700 text-white rounded-full w-10 h-10 flex items-center justify-center shadow-lg transition-transform hover:-translate-y-1 active:translate-y-0">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Gradient overlay for better UI visibility -->
+                    <div class="absolute inset-0 pointer-events-none bg-gradient-to-t from-black/40 via-transparent to-black/20 opacity-50"></div>
+                </div>
             </div>
         </div>
         
@@ -143,7 +187,12 @@
         const playBtn = document.querySelector('.play-btn');
         const playerContainer = document.getElementById('player-container');
         const moviePlayer = document.getElementById('movie-player');
+        const playerLoadingOverlay = document.getElementById('player-loading-overlay');
+        const playerLoadingTitle = document.getElementById('player-loading-title');
+        const playerTitle = document.getElementById('player-title');
         const closePlayer = document.getElementById('close-player');
+        const fullscreenBtn = document.getElementById('player-fullscreen-btn');
+        const openDedicatedPlayer = document.getElementById('open-dedicated-player');
         
         // Add bounce effect on hover for play button
         if (playBtn) {
@@ -160,12 +209,32 @@
             playBtn.addEventListener('click', function(e) {
                 e.preventDefault();
                 const embedUrl = this.getAttribute('href');
+                const movieTitle = '<%= movie.title %>';
+                
+                // Set up the player
                 moviePlayer.src = embedUrl;
+                playerLoadingTitle.textContent = movieTitle;
+                playerTitle.textContent = movieTitle;
+                
+                // Open dedicated player link
+                openDedicatedPlayer.href = `/api/player?id=<%= movie.tmdbId %>&title=${encodeURIComponent(movieTitle)}`;
+                
+                // Show the player container
                 playerContainer.classList.remove('hidden');
                 playerContainer.classList.add('animate__animated', 'animate__fadeIn');
                 
                 // Scroll to player
                 playerContainer.scrollIntoView({ behavior: 'smooth' });
+                
+                // Handle loading state
+                moviePlayer.addEventListener('load', function() {
+                    setTimeout(() => {
+                        playerLoadingOverlay.classList.add('animate__animated', 'animate__fadeOut');
+                        setTimeout(() => {
+                            playerLoadingOverlay.style.display = 'none';
+                        }, 500);
+                    }, 1500);
+                });
             });
         }
         
@@ -176,8 +245,63 @@
                     playerContainer.classList.add('hidden');
                     playerContainer.classList.remove('animate__fadeOut');
                     moviePlayer.src = '';
+                    // Reset loading overlay for next time
+                    playerLoadingOverlay.classList.remove('animate__fadeOut');
+                    playerLoadingOverlay.style.display = 'flex';
                 }, 500);
             });
+        }
+        
+        // Fullscreen button handling
+        if (fullscreenBtn) {
+            fullscreenBtn.addEventListener('click', function() {
+                try {
+                    const playerWrapper = document.querySelector('.movie-player-container');
+                    
+                    if (document.fullscreenElement) {
+                        document.exitFullscreen().catch(err => {
+                            console.warn(`Error exiting fullscreen: ${err.message}`);
+                            // Fallbacks for various browsers
+                            if (document.webkitExitFullscreen) {
+                                document.webkitExitFullscreen();
+                            } else if (document.mozCancelFullScreen) {
+                                document.mozCancelFullScreen();
+                            } else if (document.msExitFullscreen) {
+                                document.msExitFullscreen();
+                            }
+                        });
+                    } else {
+                        if (playerWrapper.requestFullscreen) {
+                            playerWrapper.requestFullscreen().catch(err => {
+                                console.warn(`Error enabling fullscreen: ${err.message}`);
+                            });
+                        } else if (playerWrapper.webkitRequestFullscreen) { /* Safari */
+                            playerWrapper.webkitRequestFullscreen();
+                        } else if (playerWrapper.msRequestFullscreen) { /* IE11 */
+                            playerWrapper.msRequestFullscreen();
+                        }
+                    }
+                } catch (err) {
+                    console.error('Fullscreen error:', err);
+                }
+            });
+            
+            // Update fullscreen button icon
+            document.addEventListener('fullscreenchange', updateFullscreenButton);
+            document.addEventListener('webkitfullscreenchange', updateFullscreenButton);
+            document.addEventListener('mozfullscreenchange', updateFullscreenButton);
+            document.addEventListener('MSFullscreenChange', updateFullscreenButton);
+            
+            function updateFullscreenButton() {
+                if (document.fullscreenElement || document.webkitFullscreenElement || 
+                    document.mozFullScreenElement || document.msFullscreenElement) {
+                    fullscreenBtn.innerHTML = '<i class="fas fa-compress"></i>';
+                    fullscreenBtn.title = 'Exit Full Screen';
+                } else {
+                    fullscreenBtn.innerHTML = '<i class="fas fa-expand"></i>';
+                    fullscreenBtn.title = 'Full Screen';
+                }
+            }
         }
         
         // Favorite button animation

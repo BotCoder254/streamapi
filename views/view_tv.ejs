@@ -3,14 +3,35 @@
     <% if (episode && episode.id) { %>
         <!-- Episode Player Section -->
         <div class="mb-8 bg-black rounded-xl overflow-hidden shadow-2xl relative" style="padding-top: 56.25%;">
-            <iframe 
-                src="<%= episode.embedUrl %>" 
-                frameborder="0" 
-                class="absolute inset-0 w-full h-full" 
-                allowfullscreen
-                referrerpolicy="no-referrer"
-                allow="autoplay; encrypted-media; picture-in-picture"
-            ></iframe>
+            <div class="episode-player-container absolute inset-0 w-full h-full">
+                <div class="player-loading-overlay absolute inset-0 flex flex-col items-center justify-center z-10 bg-black/90 backdrop-filter backdrop-blur-sm">
+                    <div class="relative mb-6">
+                        <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-16 h-16 rounded-full bg-green-500/20 animate-pulse"></div>
+                        <div class="w-12 h-12 border-4 border-gray-600 border-t-green-500 rounded-full animate-spin"></div>
+                    </div>
+                    <p class="text-white text-lg font-medium">Loading episode...</p>
+                    <p class="text-sm text-gray-400 mt-2">S<%= episode.season %>:E<%= episode.episode %> - <%= episode.title %></p>
+                </div>
+                <iframe 
+                    src="<%= episode.embedUrl %>" 
+                    frameborder="0" 
+                    class="absolute inset-0 w-full h-full" 
+                    allowfullscreen
+                    referrerpolicy="no-referrer"
+                    allow="autoplay; encrypted-media; picture-in-picture"
+                    title="<%= episode.title %>"
+                    loading="lazy"
+                ></iframe>
+                <div class="player-controls absolute bottom-4 right-4 z-10 opacity-0 transition-opacity duration-300 hover:opacity-100 flex gap-3">
+                    <button class="player-fullscreen-btn bg-gray-800/80 hover:bg-gray-700 text-white rounded-full w-10 h-10 flex items-center justify-center shadow-lg transition-transform hover:-translate-y-1 active:translate-y-0">
+                        <i class="fas fa-expand"></i>
+                    </button>
+                    <a href="/api/player?id=<%= episode.id %>&season=<%= episode.season %>&episode=<%= episode.episode %>&title=<%= encodeURIComponent(episode.title) %>" target="_blank" class="bg-green-600/80 hover:bg-green-500 text-white rounded-full w-10 h-10 flex items-center justify-center shadow-lg transition-transform hover:-translate-y-1 active:translate-y-0" title="Open in dedicated player">
+                        <i class="fas fa-external-link-alt"></i>
+                    </a>
+                </div>
+                <div class="absolute inset-0 pointer-events-none bg-gradient-to-t from-black/20 to-transparent opacity-50"></div>
+            </div>
         </div>
 
         <!-- Episode Info Section -->
@@ -206,6 +227,72 @@
                     this.classList.remove('animate__animated', 'animate__headShake');
                 }, 2000);
             });
+        }
+
+        // Enhanced Player Functionality
+        const playerContainer = document.querySelector('.episode-player-container');
+        const playerIframe = playerContainer?.querySelector('iframe');
+        const playerLoadingOverlay = playerContainer?.querySelector('.player-loading-overlay');
+        const fullscreenBtn = playerContainer?.querySelector('.player-fullscreen-btn');
+        
+        if (playerIframe && playerLoadingOverlay) {
+            playerIframe.addEventListener('load', function() {
+                setTimeout(() => {
+                    playerLoadingOverlay.classList.add('animate__animated', 'animate__fadeOut');
+                    setTimeout(() => {
+                        playerLoadingOverlay.style.display = 'none';
+                    }, 500);
+                }, 1500);
+            });
+        }
+        
+        if (fullscreenBtn && playerIframe) {
+            fullscreenBtn.addEventListener('click', function() {
+                try {
+                    if (document.fullscreenElement) {
+                        document.exitFullscreen().catch(err => {
+                            console.warn(`Error exiting fullscreen: ${err.message}`);
+                            if (document.webkitExitFullscreen) {
+                                document.webkitExitFullscreen();
+                            } else if (document.mozCancelFullScreen) {
+                                document.mozCancelFullScreen();
+                            } else if (document.msExitFullscreen) {
+                                document.msExitFullscreen();
+                            }
+                        });
+                    } else {
+                        const elem = playerContainer;
+                        if (elem.requestFullscreen) {
+                            elem.requestFullscreen().catch(err => {
+                                console.warn(`Error enabling fullscreen: ${err.message}`);
+                            });
+                        } else if (elem.webkitRequestFullscreen) { /* Safari */
+                            elem.webkitRequestFullscreen();
+                        } else if (elem.msRequestFullscreen) { /* IE11 */
+                            elem.msRequestFullscreen();
+                        }
+                    }
+                } catch (err) {
+                    console.error('Fullscreen error:', err);
+                }
+            });
+            
+            // Update fullscreen button icon based on fullscreen state
+            document.addEventListener('fullscreenchange', updateFullscreenButton);
+            document.addEventListener('webkitfullscreenchange', updateFullscreenButton);
+            document.addEventListener('mozfullscreenchange', updateFullscreenButton);
+            document.addEventListener('MSFullscreenChange', updateFullscreenButton);
+            
+            function updateFullscreenButton() {
+                if (document.fullscreenElement || document.webkitFullscreenElement || 
+                    document.mozFullScreenElement || document.msFullscreenElement) {
+                    fullscreenBtn.innerHTML = '<i class="fas fa-compress"></i>';
+                    fullscreenBtn.title = 'Exit Full Screen';
+                } else {
+                    fullscreenBtn.innerHTML = '<i class="fas fa-expand"></i>';
+                    fullscreenBtn.title = 'Full Screen';
+                }
+            }
         }
     });
 </script> 

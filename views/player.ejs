@@ -2,12 +2,14 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>StreamAPI Player</title>
     <!-- Tailwind CSS via CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Font Awesome for icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Animation library -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
     <style>
         body {
             margin: 0;
@@ -15,29 +17,70 @@
             overflow: hidden;
             height: 100vh;
             background-color: #000;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
         }
+        
+        /* Improved loading animation */
         .loading {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 30;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background-color: rgba(0, 0, 0, 0.9);
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+        }
+        
+        @keyframes pulse-ring {
+            0% { transform: scale(0.8); opacity: 0.8; }
+            50% { transform: scale(1.1); opacity: 0.5; }
+            100% { transform: scale(0.8); opacity: 0.8; }
+        }
+        
+        @keyframes pulse-dot {
+            0% { transform: scale(0.8); }
+            50% { transform: scale(1); }
+            100% { transform: scale(0.8); }
+        }
+        
+        .spinner-container {
+            position: relative;
+            margin-bottom: 24px;
+        }
+        
+        .spinner-ring {
             position: absolute;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            z-index: 10;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background-color: rgba(16, 185, 129, 0.2);
+            animation: pulse-ring 2s cubic-bezier(0.455, 0.03, 0.515, 0.955) infinite;
         }
+        
+        .spinner {
+            position: relative;
+            width: 60px;
+            height: 60px;
+            border: 3px solid rgba(255, 255, 255, 0.1);
+            border-left-color: #10B981;
+            border-radius: 50%;
+            animation: spin 1s linear infinite, pulse-dot 2s cubic-bezier(0.455, 0.03, 0.515, 0.955) infinite;
+        }
+        
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
-        .spinner {
-            border: 4px solid rgba(255, 255, 255, 0.1);
-            border-left-color: #10B981;
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            animation: spin 1s linear infinite;
-        }
+        
         .iframe-container {
             position: absolute;
             top: 0;
@@ -45,47 +88,128 @@
             width: 100%;
             height: 100%;
             opacity: 0;
-            transition: opacity 0.5s ease;
+            transition: opacity 0.8s ease;
         }
+        
         .iframe-container.loaded {
             opacity: 1;
         }
+        
         iframe {
             width: 100%;
             height: 100%;
             border: none;
+            background-color: #000;
         }
+        
+        /* Enhanced controls */
         .controls {
             position: absolute;
             bottom: 20px;
             right: 20px;
             z-index: 20;
             display: flex;
-            gap: 10px;
+            gap: 12px;
         }
+        
+        @media (max-width: 640px) {
+            .controls {
+                bottom: 15px;
+                right: 15px;
+            }
+        }
+        
         .control-btn {
             background-color: rgba(31, 41, 55, 0.8);
             color: white;
             border: none;
             border-radius: 50%;
-            width: 40px;
-            height: 40px;
+            width: 48px;
+            height: 48px;
             display: flex;
             justify-content: center;
             align-items: center;
             cursor: pointer;
-            transition: background-color 0.2s ease;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
         }
+        
+        @media (max-width: 640px) {
+            .control-btn {
+                width: 42px;
+                height: 42px;
+            }
+        }
+        
         .control-btn:hover {
             background-color: rgba(31, 41, 55, 1);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        
+        .control-btn:active {
+            transform: translateY(0);
+        }
+        
+        /* Top info bar */
+        .player-info {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            padding: 16px 20px;
+            background: linear-gradient(to bottom, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0) 100%);
+            z-index: 20;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            opacity: 1;
+            transition: opacity 0.3s ease, transform 0.3s ease;
+            transform: translateY(0);
+        }
+        
+        .player-info.hidden {
+            opacity: 0;
+            transform: translateY(-100%);
+        }
+        
+        /* Additional player controls */
+        .additional-controls {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            z-index: 20;
+            display: flex;
+            gap: 12px;
+        }
+        
+        @media (max-width: 640px) {
+            .additional-controls {
+                bottom: 15px;
+                left: 15px;
+            }
+        }
+        
+        /* Custom video overlay effects */
+        .overlay-effect {
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            background: radial-gradient(circle at center, transparent 60%, rgba(0,0,0,0.4) 100%);
+            z-index: 10;
+            opacity: 0.7;
         }
     </style>
 </head>
 <body>
-    <!-- Loading Indicator -->
-    <div class="loading" id="loading">
-        <div class="spinner mb-4"></div>
-        <p class="text-white text-lg">Loading Stream...</p>
+    <!-- Improved Loading Indicator -->
+    <div class="loading animate__animated animate__fadeIn" id="loading">
+        <div class="spinner-container">
+            <div class="spinner-ring"></div>
+            <div class="spinner"></div>
+        </div>
+        <p class="text-white text-lg font-medium animate__animated animate__fadeIn animate__delay-1s">Loading your stream...</p>
+        <p class="text-gray-400 text-sm mt-2 animate__animated animate__fadeIn animate__delay-1s">Please wait while we prepare your content</p>
     </div>
     
     <!-- Player -->
@@ -97,10 +221,32 @@
             allowfullscreen
             referrerpolicy="no-referrer"
             allow="autoplay; encrypted-media; picture-in-picture"
+            title="StreamAPI Player"
         ></iframe>
+        <div class="overlay-effect"></div>
     </div>
     
-    <!-- Controls -->
+    <!-- Player Info Bar (appears on hover) -->
+    <div class="player-info" id="player-info">
+        <div class="flex items-center">
+            <h1 class="text-white font-bold text-lg md:text-xl truncate max-w-[250px] sm:max-w-xs md:max-w-md">
+                <i class="fas fa-play-circle text-green-500 mr-2"></i> 
+                <span id="content-title">StreamAPI Player</span>
+            </h1>
+        </div>
+        <div class="text-gray-300 text-sm hidden sm:block">
+            <i class="fas fa-signal mr-1"></i> <span id="quality-indicator">HD</span>
+        </div>
+    </div>
+    
+    <!-- Additional Controls (left side) -->
+    <div class="additional-controls">
+        <button class="control-btn" id="back-btn" title="Back to Details">
+            <i class="fas fa-arrow-left"></i>
+        </button>
+    </div>
+    
+    <!-- Main Controls (right side) -->
     <div class="controls">
         <button class="control-btn" id="fullscreen-btn" title="Full Screen">
             <i class="fas fa-expand"></i>
@@ -115,26 +261,81 @@
             const loading = document.getElementById('loading');
             const playerContainer = document.getElementById('player-container');
             const playerIframe = document.getElementById('player-iframe');
+            const playerInfo = document.getElementById('player-info');
             const fullscreenBtn = document.getElementById('fullscreen-btn');
             const closeBtn = document.getElementById('close-btn');
+            const backBtn = document.getElementById('back-btn');
+            const contentTitle = document.getElementById('content-title');
+            const qualityIndicator = document.getElementById('quality-indicator');
             
-            // Hide loading after iframe loads
+            // Set content title if available
+            if (window.location.search) {
+                const params = new URLSearchParams(window.location.search);
+                if (params.get('title')) {
+                    contentTitle.textContent = params.get('title');
+                }
+            }
+            
+            // Enhanced loading effect with better transitions
             playerIframe.addEventListener('load', function() {
                 setTimeout(() => {
-                    loading.style.display = 'none';
+                    loading.classList.add('animate__fadeOut');
+                    setTimeout(() => {
+                        loading.style.display = 'none';
+                    }, 500);
                     playerContainer.classList.add('loaded');
-                }, 1000); // Add slight delay to ensure content is ready
+                }, 1500); // Slightly longer delay for better user experience
             });
             
-            // Fullscreen functionality
+            // Auto-hide player info after 5 seconds
+            let infoTimeout = setTimeout(() => {
+                playerInfo.classList.add('hidden');
+            }, 5000);
+            
+            // Show/hide player info on mouse movement
+            document.addEventListener('mousemove', function() {
+                playerInfo.classList.remove('hidden');
+                clearTimeout(infoTimeout);
+                infoTimeout = setTimeout(() => {
+                    playerInfo.classList.add('hidden');
+                }, 5000);
+            });
+            
+            // Fullscreen functionality with enhanced error handling
             fullscreenBtn.addEventListener('click', function() {
-                if (document.fullscreenElement) {
-                    document.exitFullscreen();
-                } else {
-                    playerContainer.requestFullscreen().catch(err => {
-                        console.error(`Error attempting to enable fullscreen: ${err.message}`);
-                    });
+                try {
+                    if (document.fullscreenElement) {
+                        document.exitFullscreen().catch(err => {
+                            console.warn(`Error attempting to exit fullscreen: ${err.message}`);
+                            // Fallback for browsers that don't support standard fullscreen API
+                            if (document.webkitExitFullscreen) {
+                                document.webkitExitFullscreen();
+                            } else if (document.mozCancelFullScreen) {
+                                document.mozCancelFullScreen();
+                            } else if (document.msExitFullscreen) {
+                                document.msExitFullscreen();
+                            }
+                        });
+                    } else {
+                        const elem = playerContainer;
+                        if (elem.requestFullscreen) {
+                            elem.requestFullscreen().catch(err => {
+                                console.warn(`Error attempting to enable fullscreen: ${err.message}`);
+                            });
+                        } else if (elem.webkitRequestFullscreen) { /* Safari */
+                            elem.webkitRequestFullscreen();
+                        } else if (elem.msRequestFullscreen) { /* IE11 */
+                            elem.msRequestFullscreen();
+                        }
+                    }
+                } catch (err) {
+                    console.error('Fullscreen error:', err);
                 }
+            });
+            
+            // Back button functionality
+            backBtn.addEventListener('click', function() {
+                window.history.back();
             });
             
             // Close player functionality
@@ -142,23 +343,55 @@
                 window.close();
             });
             
-            // Handle escape key for fullscreen
+            // Handle escape key for fullscreen and esc key for back
             document.addEventListener('keydown', function(e) {
                 if (e.key === 'Escape' && document.fullscreenElement) {
                     document.exitFullscreen();
                 }
+                // Use backspace for back functionality
+                if (e.key === 'Backspace') {
+                    window.history.back();
+                }
             });
             
-            // Update fullscreen button icon
-            document.addEventListener('fullscreenchange', function() {
-                if (document.fullscreenElement) {
+            // Support for mobile devices - detect orientation change
+            window.addEventListener('orientationchange', function() {
+                // Force layout recalculation to ensure proper display
+                setTimeout(() => {
+                    const currentHeight = window.innerHeight;
+                    document.body.style.height = `${currentHeight}px`;
+                }, 100);
+            });
+            
+            // Update fullscreen button icon with better cross-browser support
+            document.addEventListener('fullscreenchange', updateFullscreenButton);
+            document.addEventListener('webkitfullscreenchange', updateFullscreenButton);
+            document.addEventListener('mozfullscreenchange', updateFullscreenButton);
+            document.addEventListener('MSFullscreenChange', updateFullscreenButton);
+            
+            function updateFullscreenButton() {
+                if (document.fullscreenElement || document.webkitFullscreenElement || 
+                    document.mozFullScreenElement || document.msFullscreenElement) {
                     fullscreenBtn.innerHTML = '<i class="fas fa-compress"></i>';
                     fullscreenBtn.title = 'Exit Full Screen';
                 } else {
                     fullscreenBtn.innerHTML = '<i class="fas fa-expand"></i>';
                     fullscreenBtn.title = 'Full Screen';
                 }
-            });
+            }
+            
+            // Simulate quality changes (for visual effect)
+            setTimeout(() => {
+                qualityIndicator.textContent = 'HD 1080p';
+            }, 3000);
+            
+            // Fix for iOS Safari viewport height issues
+            function fixViewportHeight() {
+                document.documentElement.style.setProperty('--vh', `${window.innerHeight * 0.01}px`);
+            }
+            
+            window.addEventListener('resize', fixViewportHeight);
+            fixViewportHeight();
         });
     </script>
 </body>

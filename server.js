@@ -355,18 +355,29 @@ app.get('/api/player', async (req, res) => {
   try {
     const tmdbId = req.query.id;
     const imdbId = req.query.imdb;
+    const title = req.query.title || 'StreamAPI Player';
+    const season = req.query.season;
+    const episode = req.query.episode;
     const subUrl = req.query.sub_url;
     const dsLang = req.query.ds_lang;
+    const posterPath = req.query.poster;
     
     if (!tmdbId && !imdbId) {
       return res.status(400).send("Either TMDB ID or IMDB ID is required!");
     }
     
     let embedUrl;
+    let mediaType = 'movie';
     
-    if (imdbId) {
+    // Handle TV episodes
+    if (season && episode) {
+      mediaType = 'tv';
+      embedUrl = `${VIDSRC_EMBED_BASE}/tv/${tmdbId}/${season}-${episode}`;
+    } else if (imdbId) {
+      // Handle movies with IMDB ID
       embedUrl = `${VIDSRC_EMBED_BASE}/movie/${imdbId}`;
     } else {
+      // Handle movies with TMDB ID
       embedUrl = `${VIDSRC_EMBED_BASE}/movie/${tmdbId}`;
     }
     
@@ -380,9 +391,23 @@ app.get('/api/player', async (req, res) => {
       embedUrl += `?${queryString}`;
     }
     
-    res.render('player', { embedUrl });
+    // Pass additional context to the player template
+    res.render('player', { 
+      embedUrl,
+      title,
+      mediaType,
+      tmdbId,
+      imdbId,
+      season,
+      episode,
+      posterPath
+    });
   } catch (error) {
-    res.status(500).send("An error occurred while loading the player.");
+    console.error(`Player error: ${error.message}`);
+    res.status(500).render('error', { 
+      msg: "An error occurred while loading the player.",
+      code: 500 
+    });
   }
 });
 
