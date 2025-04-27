@@ -1,0 +1,171 @@
+<!-- Contact Page -->
+<div class="py-8 animate__animated animate__fadeIn">
+    <div class="max-w-3xl mx-auto">
+        <!-- Contact Header -->
+        <div class="text-center mb-10">
+            <h1 class="text-4xl font-bold mb-4">Get In Touch</h1>
+            <p class="text-xl text-gray-400">We'd love to hear from you!</p>
+        </div>
+        
+        <!-- Contact Form -->
+        <div class="bg-gray-800 p-6 rounded-lg shadow-lg mb-12">
+            <% if (locals.success) { %>
+                <div class="bg-green-600 text-white p-4 rounded-lg mb-6 animate__animated animate__fadeIn">
+                    <div class="flex items-center">
+                        <i class="fas fa-check-circle text-2xl mr-2"></i>
+                        <div>
+                            <h3 class="font-bold">Message Sent Successfully!</h3>
+                            <p>Thank you for contacting us. We'll get back to you as soon as possible.</p>
+                        </div>
+                    </div>
+                </div>
+            <% } %>
+            
+            <% if (locals.error) { %>
+                <div class="bg-red-600 text-white p-4 rounded-lg mb-6 animate__animated animate__fadeIn">
+                    <div class="flex items-center">
+                        <i class="fas fa-exclamation-circle text-2xl mr-2"></i>
+                        <div>
+                            <h3 class="font-bold">Error Sending Message</h3>
+                            <p><%= locals.error %></p>
+                        </div>
+                    </div>
+                </div>
+            <% } %>
+            
+            <form action="/contact" method="POST" class="space-y-6" id="contact-form">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label for="name" class="block text-gray-300 mb-2">Your Name</label>
+                        <input 
+                            type="text" 
+                            id="name" 
+                            name="name" 
+                            placeholder="John Doe" 
+                            class="w-full bg-gray-700 border border-gray-600 rounded-lg py-3 px-4 text-white focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition"
+                            required
+                        >
+                    </div>
+                    <div>
+                        <label for="email" class="block text-gray-300 mb-2">Your Email</label>
+                        <input 
+                            type="email" 
+                            id="email" 
+                            name="email" 
+                            placeholder="your@email.com" 
+                            class="w-full bg-gray-700 border border-gray-600 rounded-lg py-3 px-4 text-white focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition"
+                            required
+                        >
+                    </div>
+                </div>
+                
+                <div>
+                    <label for="subject" class="block text-gray-300 mb-2">Subject</label>
+                    <input 
+                        type="text" 
+                        id="subject" 
+                        name="subject" 
+                        placeholder="How can we help you?" 
+                        class="w-full bg-gray-700 border border-gray-600 rounded-lg py-3 px-4 text-white focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition"
+                        required
+                    >
+                </div>
+                
+                <div>
+                    <label for="message" class="block text-gray-300 mb-2">Message</label>
+                    <textarea 
+                        id="message" 
+                        name="message" 
+                        rows="6" 
+                        placeholder="Your message here..." 
+                        class="w-full bg-gray-700 border border-gray-600 rounded-lg py-3 px-4 text-white focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition"
+                        required
+                    ></textarea>
+                </div>
+                
+                <div>
+                    <button type="submit" class="w-full bg-green-600 hover:bg-green-700 transition text-white font-bold py-3 px-4 rounded-lg flex items-center justify-center btn-hover-effect">
+                        <i class="fas fa-paper-plane mr-2"></i> Send Message
+                    </button>
+                </div>
+            </form>
+        </div>
+        
+        <!-- Contact Information -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+            <div class="bg-gray-800 p-6 rounded-lg text-center hover:bg-gray-700 transition">
+                <div class="text-green-500 text-3xl mb-3">
+                    <i class="fas fa-envelope"></i>
+                </div>
+                <h3 class="text-xl font-bold mb-2">Email Us</h3>
+                <p class="text-gray-400">support@streamapi.com</p>
+            </div>
+            
+            <div class="bg-gray-800 p-6 rounded-lg text-center hover:bg-gray-700 transition">
+                <div class="text-green-500 text-3xl mb-3">
+                    <i class="fas fa-phone"></i>
+                </div>
+                <h3 class="text-xl font-bold mb-2">Call Us</h3>
+                <p class="text-gray-400">+1 (555) 123-4567</p>
+            </div>
+            
+            <div class="bg-gray-800 p-6 rounded-lg text-center hover:bg-gray-700 transition">
+                <div class="text-green-500 text-3xl mb-3">
+                    <i class="fas fa-map-marker-alt"></i>
+                </div>
+                <h3 class="text-xl font-bold mb-2">Visit Us</h3>
+                <p class="text-gray-400">123 Streaming St, Web City</p>
+            </div>
+        </div>
+        
+        <!-- FAQ Section -->
+        <div class="mb-12">
+            <h2 class="text-2xl font-bold mb-6 text-center">Frequently Asked Questions</h2>
+            
+            <div class="space-y-4">
+                <div class="bg-gray-800 rounded-lg overflow-hidden">
+                    <button class="w-full text-left p-4 focus:outline-none flex justify-between items-center faq-toggle">
+                        <span class="font-bold">How do I create an account?</span>
+                        <i class="fas fa-chevron-down text-green-500 transition-transform"></i>
+                    </button>
+                    <div class="faq-content hidden px-4 pb-4 text-gray-400">
+                        <p>Creating an account is simple. Just click on the "Sign Up" button in the top right corner and follow the instructions. You'll need to provide a valid email address and create a password.</p>
+                    </div>
+                </div>
+                
+                <div class="bg-gray-800 rounded-lg overflow-hidden">
+                    <button class="w-full text-left p-4 focus:outline-none flex justify-between items-center faq-toggle">
+                        <span class="font-bold">Is StreamAPI free to use?</span>
+                        <i class="fas fa-chevron-down text-green-500 transition-transform"></i>
+                    </button>
+                    <div class="faq-content hidden px-4 pb-4 text-gray-400">
+                        <p>Yes, StreamAPI is completely free to use. We provide access to information about movies and TV shows without any subscription fees.</p>
+                    </div>
+                </div>
+                
+                <div class="bg-gray-800 rounded-lg overflow-hidden">
+                    <button class="w-full text-left p-4 focus:outline-none flex justify-between items-center faq-toggle">
+                        <span class="font-bold">How do I add items to my watchlist?</span>
+                        <i class="fas fa-chevron-down text-green-500 transition-transform"></i>
+                    </button>
+                    <div class="faq-content hidden px-4 pb-4 text-gray-400">
+                        <p>To add an item to your watchlist, simply navigate to the movie or TV show page and click on the "Add to Watchlist" button. You can view and manage your watchlist by clicking on the bookmark icon in the navigation bar.</p>
+                    </div>
+                </div>
+                
+                <div class="bg-gray-800 rounded-lg overflow-hidden">
+                    <button class="w-full text-left p-4 focus:outline-none flex justify-between items-center faq-toggle">
+                        <span class="font-bold">How can I request a new feature?</span>
+                        <i class="fas fa-chevron-down text-green-500 transition-transform"></i>
+                    </button>
+                    <div class="faq-content hidden px-4 pb-4 text-gray-400">
+                        <p>We're always looking to improve StreamAPI! You can request new features by filling out the contact form above. We value your feedback and consider all suggestions for future updates.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- JavaScript for FAQ Toggle -->
+<script src="/js/contact.js"></script> 

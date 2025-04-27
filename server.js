@@ -4,6 +4,7 @@ const axios = require('axios');
 const path = require('path');
 const cors = require('cors');
 const expressLayouts = require('express-ejs-layouts');
+const nodemailer = require('nodemailer');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
@@ -50,6 +51,41 @@ const watchlistStorage = {
     };
   }
 };
+
+// Simple in-memory storage for newsletter subscribers
+const newsletterStorage = {
+  subscribers: [],
+  
+  addSubscriber(email) {
+    // Check if email already exists
+    const exists = this.subscribers.some(subscriber => subscriber.email === email);
+    
+    if (!exists) {
+      this.subscribers.push({
+        email,
+        date: new Date().toISOString()
+      });
+      return true;
+    }
+    return false;
+  },
+  
+  getSubscribers() {
+    return this.subscribers;
+  }
+};
+
+// Configure nodemailer
+const transporter = nodemailer.createTransport({
+  // For development, we'll log to console rather than sending real emails
+  // In production, replace this with actual SMTP credentials
+  host: 'smtp.mailtrap.io',
+  port: 2525,
+  auth: {
+    user: 'your_mailtrap_user', // replace in production
+    pass: 'your_mailtrap_pass'  // replace in production
+  }
+});
 
 // Middleware
 app.use(cors());
@@ -839,6 +875,119 @@ app.get('/api/watchlist/check', async (req, res) => {
   } catch (error) {
     console.error(`Check watchlist error: ${error.message}`);
     res.status(500).json({ success: false, message: 'Failed to check watchlist' });
+  }
+});
+
+// Contact page route
+app.get('/contact', (req, res) => {
+  res.render('contact');
+});
+
+// Process contact form submission
+app.post('/contact', async (req, res) => {
+  try {
+    const { name, email, subject, message } = req.body;
+    
+    // Basic validation
+    if (!name || !email || !subject || !message) {
+      return res.render('contact', { 
+        error: 'All fields are required'
+      });
+    }
+    
+    // Email content
+    const mailOptions = {
+      from: email,
+      to: 'support@streamapi.com', // Replace with your email in production
+      subject: `Contact Form: ${subject}`,
+      text: `Name: ${name}\nEmail: ${email}\n\nMessage:\n${message}`,
+      html: `
+        <h2>New Contact Form Submission</h2>
+        <p><strong>Name:</strong> ${name}</p>
+        <p><strong>Email:</strong> ${email}</p>
+        <p><strong>Subject:</strong> ${subject}</p>
+        <h3>Message:</h3>
+        <p>${message.replace(/\n/g, '<br>')}</p>
+      `
+    };
+    
+    // Send email
+    // Uncomment the following in production:
+    // await transporter.sendMail(mailOptions);
+    
+    // For development, just log to console
+    console.log('New contact form submission:', mailOptions);
+    
+    // Render contact page with success message
+    res.render('contact', { success: true });
+  } catch (error) {
+    console.error('Contact form error:', error);
+    res.render('contact', { 
+      error: 'There was an error processing your request. Please try again later.'
+    });
+  }
+});
+
+// API route for newsletter subscription
+app.post('/api/subscribe', (req, res) => {
+  try {
+    const { email } = req.body;
+    
+    // Basic validation
+    if (!email) {
+      return res.json({
+        success: false,
+        message: 'Email is required'
+      });
+    }
+    
+    if (!email.match(/^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/)) {
+      return res.json({
+        success: false,
+        message: 'Please enter a valid email address'
+      });
+    }
+    
+    // Add subscriber
+    const added = newsletterStorage.addSubscriber(email);
+    
+    if (added) {
+      // Email content for confirmation
+      const mailOptions = {
+        from: 'newsletter@streamapi.com',
+        to: email,
+        subject: 'Welcome to StreamAPI Newsletter',
+        text: 'Thank you for subscribing to our newsletter. You will now receive updates on the latest movies and TV shows.',
+        html: `
+          <h2>Welcome to StreamAPI Newsletter!</h2>
+          <p>Thank you for subscribing to our newsletter. You will now receive updates on the latest movies and TV shows.</p>
+          <p>If you didn't subscribe to our newsletter, please ignore this email.</p>
+        `
+      };
+      
+      // Send email
+      // Uncomment the following in production:
+      // transporter.sendMail(mailOptions);
+      
+      // For development, just log to console
+      console.log('New newsletter subscription:', email);
+      
+      return res.json({
+        success: true,
+        message: 'Successfully subscribed to newsletter'
+      });
+    } else {
+      return res.json({
+        success: false,
+        message: 'This email is already subscribed'
+      });
+    }
+  } catch (error) {
+    console.error('Newsletter subscription error:', error);
+    res.json({
+      success: false,
+      message: 'Server error. Please try again later.'
+    });
   }
 });
 

@@ -108,6 +108,7 @@
                     <a href="/latest" class="nav-link hover:text-green-400"><i class="fas fa-clock mr-1"></i> Latest</a>
                     <a href="/top" class="nav-link hover:text-green-400"><i class="fas fa-star mr-1"></i> Top Rated</a>
                     <a href="/watchlist" class="nav-link hover:text-green-400"><i class="fas fa-bookmark mr-1"></i> Watchlist</a>
+                    <a href="/contact" class="nav-link hover:text-green-400"><i class="fas fa-envelope mr-1"></i> Contact</a>
                 </div>
                 
                 <!-- Search Bar -->
@@ -173,6 +174,9 @@
                     <a href="/watchlist" class="block px-3 py-2 rounded-md hover:bg-gray-700 hover:text-green-400 transition-colors">
                         <i class="fas fa-bookmark mr-1"></i> Watchlist
                     </a>
+                    <a href="/contact" class="block px-3 py-2 rounded-md hover:bg-gray-700 hover:text-green-400 transition-colors">
+                        <i class="fas fa-envelope mr-1"></i> Contact
+                    </a>
                 </div>
             </div>
         </div>
@@ -186,23 +190,82 @@
     <!-- Footer -->
     <footer class="bg-gray-800 text-gray-400 py-8">
         <div class="container mx-auto px-4">
-            <div class="flex flex-col md:flex-row justify-between items-center">
-                <div class="mb-4 md:mb-0">
-                    <h2 class="text-xl font-bold text-green-500 flex items-center">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                <!-- About -->
+                <div>
+                    <h2 class="text-xl font-bold text-green-500 flex items-center mb-4">
                         <i class="fas fa-play-circle mr-2"></i>
                         StreamAPI
                     </h2>
-                    <p class="mt-2">Your ultimate streaming destination</p>
+                    <p class="mb-4">Your ultimate streaming destination for discovering movies and TV shows. Access the latest releases, top-rated content, and manage your personal watchlist.</p>
+                    <div class="flex space-x-4">
+                        <a href="#" class="hover:text-white transition"><i class="fab fa-github text-xl"></i></a>
+                        <a href="#" class="hover:text-white transition"><i class="fab fa-twitter text-xl"></i></a>
+                        <a href="#" class="hover:text-white transition"><i class="fab fa-discord text-xl"></i></a>
+                        <a href="#" class="hover:text-white transition"><i class="fab fa-instagram text-xl"></i></a>
+                    </div>
                 </div>
-                <div class="flex space-x-4">
-                    <a href="#" class="hover:text-white transition"><i class="fab fa-github text-2xl"></i></a>
-                    <a href="#" class="hover:text-white transition"><i class="fab fa-twitter text-2xl"></i></a>
-                    <a href="#" class="hover:text-white transition"><i class="fab fa-discord text-2xl"></i></a>
+                
+                <!-- Quick Links -->
+                <div>
+                    <h3 class="text-lg font-bold mb-4 text-white">Quick Links</h3>
+                    <ul class="space-y-2">
+                        <li><a href="/browse" class="hover:text-green-400 transition"><i class="fas fa-chevron-right text-xs mr-2"></i>Movies</a></li>
+                        <li><a href="/browse/tv" class="hover:text-green-400 transition"><i class="fas fa-chevron-right text-xs mr-2"></i>TV Shows</a></li>
+                        <li><a href="/latest" class="hover:text-green-400 transition"><i class="fas fa-chevron-right text-xs mr-2"></i>Latest Releases</a></li>
+                        <li><a href="/top" class="hover:text-green-400 transition"><i class="fas fa-chevron-right text-xs mr-2"></i>Top Rated</a></li>
+                        <li><a href="/watchlist" class="hover:text-green-400 transition"><i class="fas fa-chevron-right text-xs mr-2"></i>My Watchlist</a></li>
+                    </ul>
+                </div>
+                
+                <!-- Legal -->
+                <div>
+                    <h3 class="text-lg font-bold mb-4 text-white">Legal</h3>
+                    <ul class="space-y-2">
+                        <li><a href="#" class="hover:text-green-400 transition"><i class="fas fa-chevron-right text-xs mr-2"></i>Terms of Service</a></li>
+                        <li><a href="#" class="hover:text-green-400 transition"><i class="fas fa-chevron-right text-xs mr-2"></i>Privacy Policy</a></li>
+                        <li><a href="#" class="hover:text-green-400 transition"><i class="fas fa-chevron-right text-xs mr-2"></i>Copyright</a></li>
+                        <li><a href="/contact" class="hover:text-green-400 transition"><i class="fas fa-chevron-right text-xs mr-2"></i>Contact Us</a></li>
+                    </ul>
+                </div>
+                
+                <!-- Newsletter -->
+                <div>
+                    <h3 class="text-lg font-bold mb-4 text-white">Newsletter</h3>
+                    <p class="mb-4">Subscribe to our newsletter to get updates on the latest movies and TV shows.</p>
+                    
+                    <form id="newsletter-form" action="/api/subscribe" method="POST" class="space-y-3">
+                        <div class="relative">
+                            <input 
+                                type="email" 
+                                name="email" 
+                                placeholder="your@email.com" 
+                                class="w-full bg-gray-700 border border-gray-600 rounded-lg py-2 pl-3 pr-10 text-white focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent text-sm transition"
+                                required
+                            >
+                            <button type="submit" class="absolute right-2 top-1/2 transform -translate-y-1/2 text-green-500 hover:text-green-400 transition">
+                                <i class="fas fa-paper-plane"></i>
+                            </button>
+                        </div>
+                        
+                        <!-- Success message (hidden by default) -->
+                        <div id="newsletter-success" class="hidden text-green-500 text-sm animate__animated animate__fadeIn">
+                            <i class="fas fa-check-circle mr-1"></i> Thank you for subscribing!
+                        </div>
+                        
+                        <!-- Error message (hidden by default) -->
+                        <div id="newsletter-error" class="hidden text-red-500 text-sm animate__animated animate__fadeIn">
+                            <i class="fas fa-exclamation-circle mr-1"></i> <span id="newsletter-error-message">Error subscribing.</span>
+                        </div>
+                    </form>
                 </div>
             </div>
-            <div class="mt-6 text-center text-sm">
-                <p>Powered by TMDB API. This product uses the TMDB API but is not endorsed or certified by TMDB.</p>
-                <p class="mt-2">&copy; <%= new Date().getFullYear() %> StreamAPI. All rights reserved.</p>
+            
+            <hr class="border-gray-700 my-6">
+            
+            <div class="flex flex-col md:flex-row justify-between items-center">
+                <p class="text-sm">Powered by TMDB API. This product uses the TMDB API but is not endorsed or certified by TMDB.</p>
+                <p class="text-sm mt-2 md:mt-0">&copy; <%= new Date().getFullYear() %> StreamAPI. All rights reserved.</p>
             </div>
         </div>
     </footer>
@@ -227,7 +290,57 @@
             
             // Setup real-time search
             setupSearch();
+            
+            // Setup newsletter form
+            setupNewsletterForm();
         });
+        
+        // Newsletter form handler
+        function setupNewsletterForm() {
+            const newsletterForm = document.getElementById('newsletter-form');
+            const successMessage = document.getElementById('newsletter-success');
+            const errorMessage = document.getElementById('newsletter-error');
+            const errorMessageText = document.getElementById('newsletter-error-message');
+            
+            if (newsletterForm) {
+                newsletterForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    
+                    // Hide any existing messages
+                    successMessage.classList.add('hidden');
+                    errorMessage.classList.add('hidden');
+                    
+                    const email = this.email.value.trim();
+                    
+                    fetch('/api/subscribe', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ email }),
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            // Show success message
+                            successMessage.classList.remove('hidden');
+                            
+                            // Clear the form
+                            newsletterForm.reset();
+                        } else {
+                            // Show error message
+                            errorMessageText.textContent = data.message || 'Error subscribing to newsletter.';
+                            errorMessage.classList.remove('hidden');
+                        }
+                    })
+                    .catch(error => {
+                        // Show error message
+                        errorMessageText.textContent = 'Network error. Please try again later.';
+                        errorMessage.classList.remove('hidden');
+                    });
+                });
+            }
+        }
         
         // Real-time search functionality
         function setupSearch() {
