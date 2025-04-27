@@ -77,9 +77,24 @@ const fetchFeaturedContent = async () => {
 
 const fetchLatestMovies = async (page = 1) => {
   try {
-    // Fetch the latest movies from VidSrc API
-    const response = await axios.get(`https://vidsrc.xyz/movies/latest/page-${page}.json`);
-    return response.data;
+    // Use TMDB API to fetch the latest movies (now_playing endpoint)
+    const data = await fetchFromTMDB('/movie/now_playing', { page });
+    
+    // Format the response to match the expected structure
+    if (data && data.results) {
+      return { 
+        movies: data.results.map(movie => ({
+          tmdb_id: movie.id,
+          id: movie.id,
+          title: movie.title,
+          poster_path: movie.poster_path
+        })),
+        page: data.page,
+        total_pages: data.total_pages 
+      };
+    }
+    
+    return { movies: [] };
   } catch (error) {
     console.error(`Error fetching latest movies: ${error.message}`);
     return { movies: [] };
@@ -159,7 +174,7 @@ app.get('/', async (req, res) => {
   } catch (error) {
     console.error(`Home page error: ${error.message}`);
     // If there's an error, redirect to the old browse page as fallback
-    res.redirect('/browse');
+  res.redirect('/browse');
   }
 });
 
