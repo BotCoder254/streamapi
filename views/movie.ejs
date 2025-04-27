@@ -63,6 +63,17 @@
                             <i class="fas fa-play mr-2 group-hover:animate-ping"></i> Watch Now
                         </a>
                         
+                        <button 
+                            class="watchlist-toggle px-6 py-3 bg-gray-700 hover:bg-gray-600 rounded-lg transition flex items-center shadow-lg hover:shadow-xl"
+                            data-id="<%= movie.tmdbId %>"
+                            data-type="movie"
+                            data-title="<%= movie.title %>"
+                            data-poster="<%= movie.poster %>"
+                            data-year="<%= movie.year %>"
+                        >
+                            <i class="fas fa-bookmark mr-2"></i> Add to Watchlist
+                        </button>
+                        
                         <button class="favorite-btn px-6 py-3 bg-gray-700 hover:bg-gray-600 rounded-lg transition flex items-center shadow-lg hover:shadow-xl">
                             <i class="far fa-heart mr-2"></i> Add to Favorites
                         </button>
@@ -333,4 +344,7 @@
             });
         });
     });
-</script> 
+</script>
+
+<!-- Include Watchlist JS -->
+<script src="/js/watchlist.js"></script> 

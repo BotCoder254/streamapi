@@ -1,0 +1,211 @@
+<!-- Watchlist Page -->
+<div class="mb-8">
+    <div class="flex justify-between items-center mb-6">
+        <h1 class="text-3xl font-bold"><i class="fas fa-bookmark mr-2 text-green-400"></i>My Watchlist</h1>
+    </div>
+    
+    <% if (items && items.length > 0) { %>
+        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
+            <% items.forEach(item => { %>
+                <div class="movie-card bg-gray-800 rounded-lg overflow-hidden shadow-lg watchlist-item" data-id="<%= item.id %>" data-type="<%= item.type %>">
+                    <a href="/view/<%= item.type === 'tv' ? 'tv' : 'movie' %>/<%= item.id %>">
+                        <div class="relative pb-[150%] group">
+                            <% if (item.poster) { %>
+                                <img src="<%= item.poster %>" alt="<%= item.title %>" class="absolute inset-0 w-full h-full object-cover">
+                            <% } else { %>
+                                <div class="absolute inset-0 w-full h-full bg-gray-700 flex items-center justify-center">
+                                    <i class="fas fa-<%= item.type === 'tv' ? 'tv' : 'film' %> text-4xl text-gray-500"></i>
+                                </div>
+                            <% } %>
+                            
+                            <!-- Remove Button -->
+                            <button class="absolute top-2 right-2 bg-red-600 hover:bg-red-700 text-white rounded-full p-2 opacity-0 group-hover:opacity-100 transition-opacity watchlist-remove">
+                                <i class="fas fa-trash-alt text-xs"></i>
+                            </button>
+                            
+                            <!-- Play Icon with Bounce Animation -->
+                            <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                                <div class="play-icon bg-green-600/80 rounded-full p-4 transform group-hover:scale-110 transition-transform">
+                                    <i class="fas fa-play text-xl"></i>
+                                </div>
+                            </div>
+                            
+                            <!-- Item Details on Hover -->
+                            <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black to-transparent py-2 px-3 transform translate-y-0 group-hover:translate-y-0 transition-transform">
+                                <h3 class="text-sm md:text-base font-bold line-clamp-2"><%= item.title %></h3>
+                                <div class="mt-1 flex justify-between">
+                                    <span class="text-xs px-1.5 py-0.5 bg-<%= item.type === 'tv' ? 'blue' : 'green' %>-600 rounded">
+                                        <%= item.type === 'tv' ? 'TV' : 'Movie' %>
+                                    </span>
+                                    <% if (item.year) { %>
+                                        <span class="text-xs text-gray-300"><%= item.year %></span>
+                                    <% } %>
+                                </div>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+            <% }); %>
+        </div>
+
+        <!-- Pagination -->
+        <% if (pagination && pagination.totalPages > 1) { %>
+            <div class="mt-8 flex justify-center">
+                <div class="flex space-x-1">
+                    <% if (pagination.currentPage > 1) { %>
+                        <a href="/watchlist?page=<%= pagination.currentPage - 1 %>" class="px-4 py-2 bg-gray-800 rounded-l-lg hover:bg-gray-700 transition">
+                            <i class="fas fa-chevron-left"></i>
+                        </a>
+                    <% } else { %>
+                        <span class="px-4 py-2 bg-gray-800 opacity-50 rounded-l-lg">
+                            <i class="fas fa-chevron-left"></i>
+                        </span>
+                    <% } %>
+
+                    <% for(let i = 1; i <= pagination.totalPages; i++) { %>
+                        <% if (i === pagination.currentPage) { %>
+                            <span class="px-4 py-2 bg-green-600 font-bold"><%= i %></span>
+                        <% } else { %>
+                            <a href="/watchlist?page=<%= i %>" class="px-4 py-2 bg-gray-800 hover:bg-gray-700 transition"><%= i %></a>
+                        <% } %>
+                    <% } %>
+
+                    <% if (pagination.currentPage < pagination.totalPages) { %>
+                        <a href="/watchlist?page=<%= pagination.currentPage + 1 %>" class="px-4 py-2 bg-gray-800 rounded-r-lg hover:bg-gray-700 transition">
+                            <i class="fas fa-chevron-right"></i>
+                        </a>
+                    <% } else { %>
+                        <span class="px-4 py-2 bg-gray-800 opacity-50 rounded-r-lg">
+                            <i class="fas fa-chevron-right"></i>
+                        </span>
+                    <% } %>
+                </div>
+            </div>
+        <% } %>
+    <% } else { %>
+        <div class="text-center py-16 animate__animated animate__fadeIn">
+            <i class="fas fa-bookmark text-6xl text-gray-600 mb-6"></i>
+            <h2 class="text-2xl font-bold mb-2">Your Watchlist is Empty</h2>
+            <p class="text-gray-400 mb-8">Add movies and TV shows to your watchlist to keep track of what you want to watch.</p>
+            
+            <div class="flex flex-col sm:flex-row items-center justify-center space-y-4 sm:space-y-0 sm:space-x-4">
+                <a href="/browse" class="px-6 py-3 bg-green-600 hover:bg-green-700 rounded-lg transition flex items-center">
+                    <i class="fas fa-film mr-2"></i> Browse Movies
+                </a>
+                
+                <a href="/browse/tv" class="px-6 py-3 bg-gray-800 hover:bg-gray-700 rounded-lg transition flex items-center">
+                    <i class="fas fa-tv mr-2"></i> Browse TV Shows
+                </a>
+            </div>
+        </div>
+    <% } %>
+</div>
+
+<!-- Notification Toast (hidden by default) -->
+<div id="notification-toast" class="fixed bottom-4 right-4 px-4 py-3 rounded-lg shadow-lg hidden animate__animated animate__fadeInUp z-50">
+    <span id="notification-message"></span>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Handle remove buttons
+        const removeButtons = document.querySelectorAll('.watchlist-remove');
+        
+        removeButtons.forEach(button => {
+            button.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                
+                const itemCard = this.closest('.watchlist-item');
+                const id = itemCard.dataset.id;
+                const type = itemCard.dataset.type;
+                
+                // Confirm removal
+                if (confirm('Remove this item from your watchlist?')) {
+                    // Animate the removal
+                    itemCard.classList.add('animate__animated', 'animate__fadeOut');
+                    
+                    // Remove after animation completes
+                    setTimeout(() => {
+                        fetch('/api/watchlist/remove', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({ id, type }),
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                // Remove the item from DOM
+                                itemCard.remove();
+                                
+                                // Check if watchlist is now empty
+                                const remainingItems = document.querySelectorAll('.watchlist-item');
+                                if (remainingItems.length === 0) {
+                                    // Show empty state
+                                    const container = document.querySelector('.grid');
+                                    container.innerHTML = `
+                                    <div class="col-span-full text-center py-16 animate__animated animate__fadeIn">
+                                        <i class="fas fa-bookmark text-6xl text-gray-600 mb-6"></i>
+                                        <h2 class="text-2xl font-bold mb-2">Your Watchlist is Empty</h2>
+                                        <p class="text-gray-400 mb-8">Add movies and TV shows to your watchlist to keep track of what you want to watch.</p>
+                                        
+                                        <div class="flex flex-col sm:flex-row items-center justify-center space-y-4 sm:space-y-0 sm:space-x-4">
+                                            <a href="/browse" class="px-6 py-3 bg-green-600 hover:bg-green-700 rounded-lg transition flex items-center">
+                                                <i class="fas fa-film mr-2"></i> Browse Movies
+                                            </a>
+                                            
+                                            <a href="/browse/tv" class="px-6 py-3 bg-gray-800 hover:bg-gray-700 rounded-lg transition flex items-center">
+                                                <i class="fas fa-tv mr-2"></i> Browse TV Shows
+                                            </a>
+                                        </div>
+                                    </div>
+                                    `;
+                                }
+                                
+                                showNotification('Removed from watchlist', 'success');
+                            } else {
+                                showNotification('Failed to remove from watchlist', 'error');
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                            showNotification('An error occurred', 'error');
+                        });
+                    }, 300);
+                }
+            });
+        });
+        
+        // Function to show notifications
+        function showNotification(message, type = 'info') {
+            const toast = document.getElementById('notification-toast');
+            const messageElement = document.getElementById('notification-message');
+            
+            // Set message
+            messageElement.textContent = message;
+            
+            // Set color based on type
+            if (type === 'success') {
+                toast.className = 'fixed bottom-4 right-4 px-4 py-3 rounded-lg shadow-lg bg-green-600 text-white animate__animated animate__fadeInUp z-50';
+            } else if (type === 'error') {
+                toast.className = 'fixed bottom-4 right-4 px-4 py-3 rounded-lg shadow-lg bg-red-600 text-white animate__animated animate__fadeInUp z-50';
+            } else {
+                toast.className = 'fixed bottom-4 right-4 px-4 py-3 rounded-lg shadow-lg bg-blue-600 text-white animate__animated animate__fadeInUp z-50';
+            }
+            
+            // Show the toast
+            toast.classList.remove('hidden');
+            
+            // Hide after 3 seconds
+            setTimeout(() => {
+                toast.classList.add('animate__fadeOutDown');
+                setTimeout(() => {
+                    toast.classList.add('hidden');
+                    toast.classList.remove('animate__fadeOutDown');
+                }, 300);
+            }, 3000);
+        }
+    });
+</script> 

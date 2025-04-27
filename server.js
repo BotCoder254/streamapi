@@ -11,6 +11,46 @@ const PORT = process.env.PORT || 3000;
 const TMDB_API_KEY = 'fdbc5d0ea9e499aaeba73d29c21726be';
 const VIDSRC_EMBED_BASE = 'https://vidsrc.xyz/embed';
 
+// Simple in-memory storage for watchlist (in a real app, this would be a database)
+const watchlistStorage = {
+  items: [],
+  
+  addItem(item) {
+    // Check if item already exists in watchlist
+    const exists = this.items.some(existing => 
+      existing.id === item.id && existing.type === item.type
+    );
+    
+    if (!exists) {
+      item.added_date = new Date().toLocaleDateString();
+      this.items.push(item);
+      return true;
+    }
+    return false;
+  },
+  
+  removeItem(id, type) {
+    const initialLength = this.items.length;
+    this.items = this.items.filter(item => !(item.id === id && item.type === type));
+    return this.items.length < initialLength;
+  },
+  
+  getItems(page = 1, limit = 20) {
+    const startIndex = (page - 1) * limit;
+    const endIndex = startIndex + limit;
+    const paginatedItems = this.items.slice(startIndex, endIndex);
+    
+    return {
+      watchlist: paginatedItems,
+      pagination: {
+        total: this.items.length,
+        current_page: page,
+        total_pages: Math.ceil(this.items.length / limit) || 1
+      }
+    };
+  }
+};
+
 // Middleware
 app.use(cors());
 app.use(express.json());
@@ -707,6 +747,98 @@ app.get('/api/search', async (req, res) => {
   } catch (error) {
     console.error(`API search error: ${error.message}`);
     res.status(500).json({ error: 'Search failed' });
+  }
+});
+
+// Watchlist Routes
+app.get('/watchlist', async (req, res) => {
+  try {
+    const page = parseInt(req.query.page) || 1;
+    const { watchlist, pagination } = watchlistStorage.getItems(page);
+    
+    // For empty watchlist, just render the template
+    if (watchlist.length === 0) {
+      return res.render('watchlist', { items: [], pagination: null });
+    }
+    
+    // Format pagination to match what's expected in the template
+    const paginationData = {
+      totalPages: pagination.total_pages,
+      currentPage: pagination.current_page,
+      total: pagination.total
+    };
+    
+    // Render the watchlist page
+    res.render('watchlist', { 
+      items: watchlist, 
+      pagination: paginationData 
+    });
+  } catch (error) {
+    console.error(`Watchlist error: ${error.message}`);
+    res.render('error', { 
+      msg: "An error occurred while retrieving your watchlist.",
+      code: 500 
+    });
+  }
+});
+
+// API endpoints for watchlist management
+app.post('/api/watchlist/add', async (req, res) => {
+  try {
+    const { id, type, title, poster, year } = req.body;
+    
+    if (!id || !type || !title) {
+      return res.status(400).json({ success: false, message: 'Missing required fields' });
+    }
+    
+    const success = watchlistStorage.addItem({ id, type, title, poster, year });
+    
+    res.json({ 
+      success, 
+      message: success ? 'Added to watchlist' : 'Item already in watchlist' 
+    });
+  } catch (error) {
+    console.error(`Add to watchlist error: ${error.message}`);
+    res.status(500).json({ success: false, message: 'Failed to add to watchlist' });
+  }
+});
+
+app.post('/api/watchlist/remove', async (req, res) => {
+  try {
+    const { id, type } = req.body;
+    
+    if (!id || !type) {
+      return res.status(400).json({ success: false, message: 'Missing required fields' });
+    }
+    
+    const success = watchlistStorage.removeItem(id, type);
+    
+    res.json({ 
+      success, 
+      message: success ? 'Removed from watchlist' : 'Item not found in watchlist' 
+    });
+  } catch (error) {
+    console.error(`Remove from watchlist error: ${error.message}`);
+    res.status(500).json({ success: false, message: 'Failed to remove from watchlist' });
+  }
+});
+
+app.get('/api/watchlist/check', async (req, res) => {
+  try {
+    const { id, type } = req.query;
+    
+    if (!id || !type) {
+      return res.status(400).json({ success: false, message: 'Missing required fields' });
+    }
+    
+    const inWatchlist = watchlistStorage.items.some(item => 
+      item.id === id && item.type === type
+    );
+    
+    res.json({ inWatchlist });
+  } catch (error) {
+    console.error(`Check watchlist error: ${error.message}`);
+    res.status(500).json({ success: false, message: 'Failed to check watchlist' });
   }
 });
 
