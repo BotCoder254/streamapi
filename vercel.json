@@ -3,10 +3,19 @@
   "builds": [
     {
       "src": "server.js",
-      "use": "@vercel/node"
+      "use": "@vercel/node",
+      "config": {
+        "includeFiles": ["views/**", "public/**"],
+        "buildCommand": "./vercel.sh"
+      }
     }
   ],
   "routes": [
+    {
+      "src": "/public/(.*)",
+      "headers": { "cache-control": "public, max-age=31536000, immutable" },
+      "dest": "/public/$1"
+    },
     {
       "src": "/(.*)",
       "dest": "/server.js"
@@ -14,5 +23,17 @@
   ],
   "env": {
     "NODE_ENV": "production"
+  },
+  "github": {
+    "enabled": true,
+    "silent": false,
+    "autoJobCancelation": true
+  },
+  "git": {
+    "deploymentEnabled": {
+      "main": true,
+      "master": true,
+      "production": true
+    }
   }
 } 
