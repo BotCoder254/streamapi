@@ -742,7 +742,7 @@ app.get('/api', (req, res) => {
 // Update Search API
 app.get('/api/search', async (req, res) => {
   try {
-    const { query, type = 'movie', page = 1 } = req.query;
+    const { q: query, type = 'movie', page = 1, limit } = req.query;
     
     if (!query) {
       return handleApiError(res, "Search query is required", 400);
@@ -761,15 +761,21 @@ app.get('/api/search', async (req, res) => {
       return handleApiError(res, "Failed to retrieve search results", 500);
     }
     
-    const formattedResults = searchResults.results.map(item => ({
+    let formattedResults = searchResults.results.map(item => ({
       id: item.id,
       title: type === 'movie' ? item.title : item.name,
+      media_type: type,
       overview: item.overview,
       poster: item.poster_path ? `https://image.tmdb.org/t/p/w500${item.poster_path}` : null,
       backdrop: item.backdrop_path ? `https://image.tmdb.org/t/p/original${item.backdrop_path}` : null,
       release_date: type === 'movie' ? item.release_date : item.first_air_date,
       vote_average: item.vote_average
     }));
+    
+    // Apply limit if specified
+    if (limit && !isNaN(parseInt(limit))) {
+      formattedResults = formattedResults.slice(0, parseInt(limit));
+    }
     
     res.json({
       success: true,

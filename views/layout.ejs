@@ -431,7 +431,7 @@
             // Function to perform search and display results
             async function performSearch(query) {
                 try {
-                    const response = await fetch(`/api/search?q=${encodeURIComponent(query)}&limit=5`);
+                    const response = await fetch(`/api/search?q=${encodeURIComponent(query)}&type=movie&limit=5`);
                     
                     if (!response.ok) {
                         throw new Error('Search failed');
@@ -450,8 +450,8 @@
                     data.results.forEach(item => {
                         const mediaType = item.media_type || 'movie';
                         const title = item.title || item.name;
-                        const posterUrl = item.poster_path ? 
-                            `https://image.tmdb.org/t/p/w92${item.poster_path}` : 
+                        const posterUrl = item.poster ? 
+                            item.poster : 
                             'https://via.placeholder.com/92x138?text=No+Image';
                         
                         resultsHTML += `
