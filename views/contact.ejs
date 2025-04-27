@@ -15,7 +15,7 @@
                         <i class="fas fa-check-circle text-2xl mr-2"></i>
                         <div>
                             <h3 class="font-bold">Message Sent Successfully!</h3>
-                            <p>Thank you for contacting us. We'll get back to you as soon as possible.</p>
+                            <p><%= locals.message || "Thank you for contacting us. We'll get back to you as soon as possible." %></p>
                         </div>
                     </div>
                 </div>
@@ -42,6 +42,7 @@
                             id="name" 
                             name="name" 
                             placeholder="John Doe" 
+                            value="<%= locals.formData ? formData.name : '' %>"
                             class="w-full bg-gray-700 border border-gray-600 rounded-lg py-3 px-4 text-white focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition"
                             required
                         >
@@ -53,6 +54,7 @@
                             id="email" 
                             name="email" 
                             placeholder="your@email.com" 
+                            value="<%= locals.formData ? formData.email : '' %>"
                             class="w-full bg-gray-700 border border-gray-600 rounded-lg py-3 px-4 text-white focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition"
                             required
                         >
@@ -66,6 +68,7 @@
                         id="subject" 
                         name="subject" 
                         placeholder="How can we help you?" 
+                        value="<%= locals.formData ? formData.subject : '' %>"
                         class="w-full bg-gray-700 border border-gray-600 rounded-lg py-3 px-4 text-white focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition"
                         required
                     >
@@ -80,7 +83,7 @@
                         placeholder="Your message here..." 
                         class="w-full bg-gray-700 border border-gray-600 rounded-lg py-3 px-4 text-white focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition"
                         required
-                    ></textarea>
+                    ><%= locals.formData ? formData.message : '' %></textarea>
                 </div>
                 
                 <div>

@@ -1,16 +1,24 @@
 // server.js
+require('dotenv').config();
 const express = require('express');
 const axios = require('axios');
 const path = require('path');
 const cors = require('cors');
 const expressLayouts = require('express-ejs-layouts');
 const nodemailer = require('nodemailer');
+const ejs = require('ejs');
+const fs = require('fs');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
 // Configuration
-const TMDB_API_KEY = 'fdbc5d0ea9e499aaeba73d29c21726be';
+const TMDB_API_KEY = process.env.TMDB_API_KEY;
 const VIDSRC_EMBED_BASE = 'https://vidsrc.xyz/embed';
+
+// Site Configuration
+const SITE_URL = process.env.SITE_URL || 'http://localhost:3000';
+const SITE_AUTHOR = process.env.SITE_AUTHOR || '@BotCoder254';
+const SITE_AUTHOR_URL = process.env.SITE_AUTHOR_URL || 'https://github.com/BotCoder254';
 
 // Simple in-memory storage for watchlist (in a real app, this would be a database)
 const watchlistStorage = {
@@ -77,15 +85,48 @@ const newsletterStorage = {
 
 // Configure nodemailer
 const transporter = nodemailer.createTransport({
-  // For development, we'll log to console rather than sending real emails
-  // In production, replace this with actual SMTP credentials
-  host: 'smtp.mailtrap.io',
-  port: 2525,
+  host: process.env.EMAIL_HOST || 'smtp.gmail.com',
+  port: process.env.EMAIL_PORT || 587,
+  secure: false, // true for 465, false for other ports
   auth: {
-    user: 'your_mailtrap_user', // replace in production
-    pass: 'your_mailtrap_pass'  // replace in production
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASSWORD
+  },
+  tls: {
+    rejectUnauthorized: false // Allow self-signed certificates in development
   }
 });
+
+// Email template rendering function
+const renderEmailTemplate = async (templateName, data) => {
+  const templatePath = path.join(__dirname, 'views', 'emails', `${templateName}.ejs`);
+  try {
+    const template = fs.readFileSync(templatePath, 'utf-8');
+    const html = ejs.render(template, { ...data, siteUrl: SITE_URL });
+    return html;
+  } catch (error) {
+    console.error(`Error rendering email template: ${templateName}`, error);
+    throw error;
+  }
+};
+
+// Function to send an email
+const sendEmail = async (options) => {
+  const mailOptions = {
+    from: process.env.EMAIL_FROM || 'StreamAPI <noreply@streamapi.com>',
+    ...options
+  };
+
+  try {
+    // Always attempt to send the email regardless of environment
+    const info = await transporter.sendMail(mailOptions);
+    console.log('Email sent: ', info.messageId);
+    return info;
+  } catch (error) {
+    console.error('Error sending email:', error);
+    throw error;
+  }
+};
 
 // Middleware
 app.use(cors());
@@ -891,14 +932,43 @@ app.post('/contact', async (req, res) => {
     // Basic validation
     if (!name || !email || !subject || !message) {
       return res.render('contact', { 
-        error: 'All fields are required'
+        error: 'All fields are required',
+        formData: req.body // Send the form data back to pre-fill the form
       });
     }
     
-    // Email content
-    const mailOptions = {
-      from: email,
-      to: 'support@streamapi.com', // Replace with your email in production
+    // Validate email format
+    const emailRegex = /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/;
+    if (!emailRegex.test(email)) {
+      return res.render('contact', { 
+        error: 'Please provide a valid email address',
+        formData: req.body
+      });
+    }
+    
+    // Render the email template
+    const html = await renderEmailTemplate('contact_confirmation', {
+      name,
+      email,
+      subject,
+      message
+    });
+    
+    // Send confirmation email to the user
+    try {
+      await sendEmail({
+        to: email,
+        subject: 'Thank you for contacting StreamAPI',
+        html
+      });
+    } catch (emailError) {
+      console.error('Error sending confirmation email:', emailError);
+      // Continue processing even if the confirmation email fails
+    }
+    
+    // Email content for admin notification
+    const adminMailOptions = {
+      to: process.env.EMAIL_USER,
       subject: `Contact Form: ${subject}`,
       text: `Name: ${name}\nEmail: ${email}\n\nMessage:\n${message}`,
       html: `
@@ -911,25 +981,30 @@ app.post('/contact', async (req, res) => {
       `
     };
     
-    // Send email
-    // Uncomment the following in production:
-    // await transporter.sendMail(mailOptions);
-    
-    // For development, just log to console
-    console.log('New contact form submission:', mailOptions);
+    // Send notification to admin
+    try {
+      await sendEmail(adminMailOptions);
+    } catch (adminEmailError) {
+      console.error('Error sending admin notification:', adminEmailError);
+      // Continue processing even if the admin notification fails
+    }
     
     // Render contact page with success message
-    res.render('contact', { success: true });
+    res.render('contact', { 
+      success: true,
+      message: 'Thank you for your message! We will get back to you as soon as possible.'
+    });
   } catch (error) {
     console.error('Contact form error:', error);
     res.render('contact', { 
-      error: 'There was an error processing your request. Please try again later.'
+      error: 'There was an error processing your request. Please try again later.',
+      formData: req.body
     });
   }
 });
 
 // API route for newsletter subscription
-app.post('/api/subscribe', (req, res) => {
+app.post('/api/subscribe', async (req, res) => {
   try {
     const { email } = req.body;
     
@@ -952,39 +1027,38 @@ app.post('/api/subscribe', (req, res) => {
     const added = newsletterStorage.addSubscriber(email);
     
     if (added) {
-      // Email content for confirmation
-      const mailOptions = {
-        from: 'newsletter@streamapi.com',
-        to: email,
-        subject: 'Welcome to StreamAPI Newsletter',
-        text: 'Thank you for subscribing to our newsletter. You will now receive updates on the latest movies and TV shows.',
-        html: `
-          <h2>Welcome to StreamAPI Newsletter!</h2>
-          <p>Thank you for subscribing to our newsletter. You will now receive updates on the latest movies and TV shows.</p>
-          <p>If you didn't subscribe to our newsletter, please ignore this email.</p>
-        `
-      };
-      
-      // Send email
-      // Uncomment the following in production:
-      // transporter.sendMail(mailOptions);
-      
-      // For development, just log to console
-      console.log('New newsletter subscription:', email);
-      
-      return res.json({
-        success: true,
-        message: 'Successfully subscribed to newsletter'
-      });
+      try {
+        // Render the newsletter subscription template
+        const html = await renderEmailTemplate('newsletter_subscription', { email });
+        
+        // Send confirmation email
+        await sendEmail({
+          to: email,
+          subject: 'Welcome to StreamAPI Newsletter',
+          html
+        });
+        
+        return res.json({
+          success: true,
+          message: 'Successfully subscribed to newsletter! Please check your email for confirmation.'
+        });
+      } catch (emailError) {
+        console.error('Newsletter email error:', emailError);
+        // Return an error if the email sending failed
+        return res.json({
+          success: false,
+          message: 'Your subscription was recorded, but we could not send the confirmation email. Please contact support if you do not receive a confirmation.'
+        });
+      }
     } else {
       return res.json({
         success: false,
-        message: 'This email is already subscribed'
+        message: 'This email is already subscribed to our newsletter'
       });
     }
   } catch (error) {
     console.error('Newsletter subscription error:', error);
-    res.json({
+    res.status(500).json({
       success: false,
       message: 'Server error. Please try again later.'
     });

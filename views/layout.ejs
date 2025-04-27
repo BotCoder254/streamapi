@@ -244,13 +244,14 @@
                                 required
                             >
                             <button type="submit" class="absolute right-2 top-1/2 transform -translate-y-1/2 text-green-500 hover:text-green-400 transition">
-                                <i class="fas fa-paper-plane"></i>
+                                <i class="fas fa-paper-plane newsletter-submit-icon"></i>
+                                <i class="fas fa-spinner fa-spin newsletter-loading-icon hidden"></i>
                             </button>
                         </div>
                         
                         <!-- Success message (hidden by default) -->
                         <div id="newsletter-success" class="hidden text-green-500 text-sm animate__animated animate__fadeIn">
-                            <i class="fas fa-check-circle mr-1"></i> Thank you for subscribing!
+                            <i class="fas fa-check-circle mr-1"></i> Thank you for subscribing! Check your email for confirmation.
                         </div>
                         
                         <!-- Error message (hidden by default) -->
@@ -266,6 +267,9 @@
             <div class="flex flex-col md:flex-row justify-between items-center">
                 <p class="text-sm">Powered by TMDB API. This product uses the TMDB API but is not endorsed or certified by TMDB.</p>
                 <p class="text-sm mt-2 md:mt-0">&copy; <%= new Date().getFullYear() %> StreamAPI. All rights reserved.</p>
+            </div>
+            <div class="text-center mt-4">
+                <p class="text-sm text-gray-500">Created with 💚 by <a href="https://github.com/BotCoder254" class="text-green-500 hover:text-green-400 transition">@BotCoder254</a></p>
             </div>
         </div>
     </footer>
@@ -301,6 +305,8 @@
             const successMessage = document.getElementById('newsletter-success');
             const errorMessage = document.getElementById('newsletter-error');
             const errorMessageText = document.getElementById('newsletter-error-message');
+            const submitIcon = document.querySelector('.newsletter-submit-icon');
+            const loadingIcon = document.querySelector('.newsletter-loading-icon');
             
             if (newsletterForm) {
                 newsletterForm.addEventListener('submit', function(e) {
@@ -310,7 +316,23 @@
                     successMessage.classList.add('hidden');
                     errorMessage.classList.add('hidden');
                     
+                    // Show loading state
+                    submitIcon.classList.add('hidden');
+                    loadingIcon.classList.remove('hidden');
+                    
                     const email = this.email.value.trim();
+                    
+                    // Validate email format client-side
+                    const emailRegex = /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/;
+                    if (!emailRegex.test(email)) {
+                        errorMessageText.textContent = 'Please enter a valid email address';
+                        errorMessage.classList.remove('hidden');
+                        
+                        // Reset loading state
+                        submitIcon.classList.remove('hidden');
+                        loadingIcon.classList.add('hidden');
+                        return;
+                    }
                     
                     fetch('/api/subscribe', {
                         method: 'POST',
@@ -321,6 +343,10 @@
                     })
                     .then(response => response.json())
                     .then(data => {
+                        // Reset loading state
+                        submitIcon.classList.remove('hidden');
+                        loadingIcon.classList.add('hidden');
+                        
                         if (data.success) {
                             // Show success message
                             successMessage.classList.remove('hidden');
@@ -334,9 +360,14 @@
                         }
                     })
                     .catch(error => {
+                        // Reset loading state
+                        submitIcon.classList.remove('hidden');
+                        loadingIcon.classList.add('hidden');
+                        
                         // Show error message
                         errorMessageText.textContent = 'Network error. Please try again later.';
                         errorMessage.classList.remove('hidden');
+                        console.error('Newsletter subscription error:', error);
                     });
                 });
             }

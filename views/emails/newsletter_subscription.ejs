@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welcome to StreamAPI Newsletter</title>
+    <style>
+        /* Email-specific styles */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #f8f9fa;
+            background-color: #1a202c;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .email-header {
+            text-align: center;
+            padding: 20px 0;
+            background-color: #2d3748;
+            border-radius: 8px 8px 0 0;
+        }
+        .email-logo {
+            font-size: 24px;
+            font-weight: bold;
+            color: #10b981;
+            text-decoration: none;
+        }
+        .email-body {
+            background-color: #374151;
+            padding: 30px;
+            border-radius: 0 0 8px 8px;
+        }
+        .email-footer {
+            text-align: center;
+            padding: 20px 0;
+            font-size: 12px;
+            color: #9ca3af;
+        }
+        .button {
+            display: inline-block;
+            background-color: #10b981;
+            color: white;
+            text-decoration: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            margin-top: 20px;
+            font-weight: bold;
+        }
+        h1, h2, h3 {
+            color: #f8f9fa;
+        }
+        .social-links {
+            text-align: center;
+            margin-top: 20px;
+        }
+        .social-links a {
+            display: inline-block;
+            margin: 0 10px;
+            color: #9ca3af;
+            text-decoration: none;
+        }
+        hr {
+            border: 0;
+            height: 1px;
+            background: #4b5563;
+            margin: 30px 0;
+        }
+        .content-section {
+            background-color: #2d3748;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .movie-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-top: 20px;
+        }
+        .movie-item {
+            text-align: center;
+        }
+        .movie-item img {
+            width: 100%;
+            border-radius: 5px;
+            margin-bottom: 5px;
+        }
+        .movie-title {
+            font-size: 12px;
+            color: #e2e8f0;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="email-header">
+            <div class="email-logo">
+                <span style="color: #10b981;">&#9658;</span> StreamAPI
+            </div>
+        </div>
+        
+        <div class="email-body">
+            <h1>Welcome to StreamAPI Newsletter!</h1>
+            
+            <p>Hello there,</p>
+            
+            <p>Thank you for subscribing to the StreamAPI newsletter! You'll now receive the latest updates on movies, TV shows, and other exciting content delivered straight to your inbox.</p>
+            
+            <div class="content-section">
+                <h3><span style="color: #10b981;">&#9733;</span> What to expect from our newsletter:</h3>
+                <ul>
+                    <li>Weekly updates on new movie and TV show releases</li>
+                    <li>Personalized recommendations based on popular trends</li>
+                    <li>Exclusive insights and behind-the-scenes content</li>
+                    <li>Special announcements and platform updates</li>
+                </ul>
+            </div>
+            
+            <div class="content-section">
+                <h3><span style="color: #10b981;">&#9733;</span> Trending This Week</h3>
+                <div class="movie-grid">
+                    <div class="movie-item">
+                        <img src="https://via.placeholder.com/150x225/2d3748/10b981?text=Movie+1" alt="Movie">
+                        <div class="movie-title">Action Movie Title</div>
+                    </div>
+                    <div class="movie-item">
+                        <img src="https://via.placeholder.com/150x225/2d3748/10b981?text=Movie+2" alt="Movie">
+                        <div class="movie-title">Comedy Film Title</div>
+                    </div>
+                    <div class="movie-item">
+                        <img src="https://via.placeholder.com/150x225/2d3748/10b981?text=Movie+3" alt="Movie">
+                        <div class="movie-title">Drama Movie Title</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div style="text-align: center;">
+                <a href="<%= siteUrl %>" class="button">Visit StreamAPI</a>
+            </div>
+            
+            <hr>
+            
+            <p>We're excited to have you as part of our community!</p>
+            
+            <p>Best regards,<br>The StreamAPI Team</p>
+        </div>
+        
+        <div class="email-footer">
+            <div class="social-links">
+                <a href="#">Github</a> &bull;
+                <a href="#">Twitter</a> &bull;
+                <a href="#">Discord</a> &bull;
+                <a href="#">Instagram</a>
+            </div>
+            
+            <p>&copy; <%= new Date().getFullYear() %> StreamAPI. All rights reserved.</p>
+            <p>Created by <a href="https://github.com/BotCoder254" style="color: #10b981;">@BotCoder254</a></p>
+            
+            <p style="margin-top: 20px; font-size: 11px;">
+                This email was sent to <%= email %>. If you didn't subscribe to our newsletter, you can safely ignore this email or <a href="<%= siteUrl %>/unsubscribe?email=<%= email %>" style="color: #10b981;">unsubscribe here</a>.
+            </p>
+        </div>
+    </div>
+</body>
+</html> 
