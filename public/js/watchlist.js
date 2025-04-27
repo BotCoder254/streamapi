@@ -75,7 +75,12 @@ function initWatchlistRemoveButtons() {
               },
               body: JSON.stringify({ id, type }),
             })
-            .then(response => response.json())
+            .then(response => {
+              if (!response.ok) {
+                throw new Error('Network response was not ok');
+              }
+              return response.json();
+            })
             .then(data => {
               if (data.success) {
                 // Remove the item from DOM
@@ -109,7 +114,7 @@ function initWatchlistRemoveButtons() {
                 
                 showNotification('Removed from watchlist', 'success');
               } else {
-                showNotification('Failed to remove from watchlist', 'error');
+                showNotification(data.message || 'Failed to remove from watchlist', 'error');
               }
             })
             .catch(error => {
@@ -128,7 +133,12 @@ function initWatchlistRemoveButtons() {
  */
 function checkWatchlistStatus(id, type, buttonElement) {
   fetch(`/api/watchlist/check?id=${id}&type=${type}`)
-    .then(response => response.json())
+    .then(response => {
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
+      }
+      return response.json();
+    })
     .then(data => {
       if (data.inWatchlist) {
         buttonElement.classList.add('in-watchlist', 'bg-green-600');
@@ -156,7 +166,12 @@ function addToWatchlist(item, buttonElement) {
     },
     body: JSON.stringify(item),
   })
-  .then(response => response.json())
+  .then(response => {
+    if (!response.ok) {
+      throw new Error('Network response was not ok');
+    }
+    return response.json();
+  })
   .then(data => {
     if (data.success) {
       buttonElement.classList.add('in-watchlist', 'bg-green-600');
@@ -164,7 +179,7 @@ function addToWatchlist(item, buttonElement) {
       buttonElement.innerHTML = '<i class="fas fa-check mr-2"></i> In Watchlist';
       showNotification('Added to watchlist', 'success');
     } else {
-      showNotification(data.message, 'info');
+      showNotification(data.message || 'Item already in watchlist', 'info');
     }
   })
   .catch(error => {
@@ -184,7 +199,12 @@ function removeFromWatchlist(id, type, buttonElement) {
     },
     body: JSON.stringify({ id, type }),
   })
-  .then(response => response.json())
+  .then(response => {
+    if (!response.ok) {
+      throw new Error('Network response was not ok');
+    }
+    return response.json();
+  })
   .then(data => {
     if (data.success) {
       buttonElement.classList.remove('in-watchlist', 'bg-green-600');
@@ -192,7 +212,7 @@ function removeFromWatchlist(id, type, buttonElement) {
       buttonElement.innerHTML = '<i class="fas fa-plus mr-2"></i> Add to Watchlist';
       showNotification('Removed from watchlist', 'success');
     } else {
-      showNotification(data.message, 'info');
+      showNotification(data.message || 'Failed to remove from watchlist', 'info');
     }
   })
   .catch(error => {

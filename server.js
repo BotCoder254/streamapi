@@ -239,6 +239,21 @@ const fetchLatestEpisodes = async (page = 1) => {
   }
 };
 
+// Helper error handler function to standardize error responses
+const handleError = (res, message, code = 500) => {
+  console.error(`Error (${code}): ${message}`);
+  return res.status(code).render('error', { 
+    msg: message,
+    code: code 
+  });
+};
+
+// Add a helper function for API error responses to complement handleError for page errors
+function handleApiError(res, message, code = 500) {
+  console.error(`API Error (${code}): ${message}`);
+  return res.status(code).json({ success: false, error: message });
+}
+
 // Routes for Movies
 app.get('/', async (req, res) => {
   try {
@@ -301,10 +316,7 @@ app.get('/browse', async (req, res) => {
     const data = await fetchFromTMDB('/movie/popular', { page });
     
     if (!data.results) {
-      return res.render('error', { 
-        msg: "Sorry, could not retrieve movie data. Please try again later.",
-        code: 500 
-      });
+      return handleError(res, "Sorry, could not retrieve movie data. Please try again later.", 500);
     }
 
     const movies = data.results.map(movie => ({
@@ -315,10 +327,7 @@ app.get('/browse', async (req, res) => {
     
     res.render('index', { movies, page });
   } catch (error) {
-    res.render('error', { 
-      msg: "An error occurred while retrieving movies.",
-      code: 500 
-    });
+    handleError(res, "An error occurred while retrieving movies.", 500);
   }
 });
 
@@ -328,10 +337,7 @@ app.get('/latest', async (req, res) => {
     const data = await fetchLatestMovies(page);
     
     if (!data.movies || !Array.isArray(data.movies)) {
-      return res.render('error', { 
-        msg: "Sorry, could not retrieve latest movies. Please try again later.",
-        code: 500 
-      });
+      return handleError(res, "Sorry, could not retrieve latest movies. Please try again later.", 500);
     }
 
     // You may need to modify this based on the actual response structure
@@ -343,10 +349,7 @@ app.get('/latest', async (req, res) => {
     
     res.render('latest', { movies, page });
   } catch (error) {
-    res.render('error', { 
-      msg: "An error occurred while retrieving latest movies.",
-      code: 500 
-    });
+    handleError(res, "An error occurred while retrieving latest movies.", 500);
   }
 });
 
@@ -356,10 +359,7 @@ app.get('/top', async (req, res) => {
     const data = await fetchFromTMDB('/movie/top_rated', { page });
     
     if (!data.results) {
-      return res.render('error', { 
-        msg: "Sorry, could not retrieve movie data. Please try again later.",
-        code: 500 
-      });
+      return handleError(res, "Sorry, could not retrieve movie data. Please try again later.", 500);
     }
 
     const movies = data.results.map(movie => ({
@@ -370,10 +370,7 @@ app.get('/top', async (req, res) => {
     
     res.render('top', { movies, page });
   } catch (error) {
-    res.render('error', { 
-      msg: "An error occurred while retrieving top rated movies.",
-      code: 500 
-    });
+    handleError(res, "An error occurred while retrieving top rated movies.", 500);
   }
 });
 
@@ -393,17 +390,11 @@ app.get('/results', async (req, res) => {
     const data = await fetchFromTMDB('/search/movie', { query, page });
     
     if (!data.results) {
-      return res.render('error', { 
-        msg: "Sorry, could not retrieve search results. Please try again later.",
-        code: 500 
-      });
+      return handleError(res, "Sorry, could not retrieve search results. Please try again later.", 500);
     }
     
     if (data.results.length === 0) {
-      return res.render('error', { 
-        msg: "Sorry, No Movies Found!",
-        code: 404 
-      });
+      return handleError(res, `No movies found matching "${query}"`, 404);
     }
     
     const movies = data.results.map(movie => ({
@@ -414,10 +405,7 @@ app.get('/results', async (req, res) => {
     
     res.render('results', { movies, query, page });
   } catch (error) {
-    res.render('error', { 
-      msg: "An error occurred during search.",
-      code: 500 
-    });
+    handleError(res, "An error occurred during search.", 500);
   }
 });
 
@@ -535,10 +523,7 @@ app.get('/browse/tv', async (req, res) => {
     const data = await fetchFromTMDB('/tv/popular', { page });
     
     if (!data.results) {
-      return res.render('error', { 
-        msg: "Sorry, could not retrieve TV show data. Please try again later.",
-        code: 500 
-      });
+      return handleError(res, "Sorry, could not retrieve TV show data. Please try again later.", 500);
     }
 
     const shows = data.results.map(show => ({
@@ -549,10 +534,7 @@ app.get('/browse/tv', async (req, res) => {
     
     res.render('tv_browse', { shows, page });
   } catch (error) {
-    res.render('error', { 
-      msg: "An error occurred while retrieving TV shows.",
-      code: 500 
-    });
+    handleError(res, "An error occurred while retrieving TV shows.", 500);
   }
 });
 
@@ -562,10 +544,7 @@ app.get('/latest/tv', async (req, res) => {
     const data = await fetchLatestTVShows(page);
     
     if (!data.results || !Array.isArray(data.results)) {
-      return res.render('error', { 
-        msg: "Sorry, could not retrieve latest TV shows. Please try again later.",
-        code: 500 
-      });
+      return handleError(res, "Sorry, could not retrieve latest TV shows. Please try again later.", 500);
     }
 
     // You may need to modify this based on the actual response structure
@@ -577,10 +556,7 @@ app.get('/latest/tv', async (req, res) => {
     
     res.render('latest_tv', { shows, page });
   } catch (error) {
-    res.render('error', { 
-      msg: "An error occurred while retrieving latest TV shows.",
-      code: 500 
-    });
+    handleError(res, "An error occurred while retrieving latest TV shows.", 500);
   }
 });
 
@@ -590,10 +566,7 @@ app.get('/latest/episodes', async (req, res) => {
     const data = await fetchLatestEpisodes(page);
     
     if (!data.episodes || !Array.isArray(data.episodes)) {
-      return res.render('error', { 
-        msg: "Sorry, could not retrieve latest episodes. Please try again later.",
-        code: 500 
-      });
+      return handleError(res, "Sorry, could not retrieve latest episodes. Please try again later.", 500);
     }
 
     // You may need to modify this based on the actual response structure
@@ -601,10 +574,7 @@ app.get('/latest/episodes', async (req, res) => {
     
     res.render('latest_episodes', { episodes, page });
   } catch (error) {
-    res.render('error', { 
-      msg: "An error occurred while retrieving latest episodes.",
-      code: 500 
-    });
+    handleError(res, "An error occurred while retrieving latest episodes.", 500);
   }
 });
 
@@ -651,17 +621,11 @@ app.get('/results/tv', async (req, res) => {
     const data = await fetchFromTMDB('/search/tv', { query, page });
     
     if (!data.results) {
-      return res.render('error', { 
-        msg: "Sorry, could not retrieve search results. Please try again later.",
-        code: 500 
-      });
+      return handleError(res, "Sorry, could not retrieve search results. Please try again later.", 500);
     }
     
     if (data.results.length === 0) {
-      return res.render('error', { 
-        msg: "Sorry, No TV Shows Found!",
-        code: 404 
-      });
+      return handleError(res, `No TV shows found matching "${query}"`, 404);
     }
     
     const shows = data.results.map(show => ({
@@ -672,10 +636,7 @@ app.get('/results/tv', async (req, res) => {
     
     res.render('results_tv', { shows, query, page });
   } catch (error) {
-    res.render('error', { 
-      msg: "An error occurred during search.",
-      code: 500 
-    });
+    handleError(res, "An error occurred during search.", 500);
   }
 });
 
@@ -778,52 +739,92 @@ app.get('/api', (req, res) => {
   res.render('api');
 });
 
-// API endpoint for real-time search (used by the navbar search)
+// Update Search API
 app.get('/api/search', async (req, res) => {
   try {
-    const query = req.query.q;
-    const limit = parseInt(req.query.limit) || 5;
+    const { query, type = 'movie', page = 1 } = req.query;
     
-    if (!query || query.length < 2) {
-      return res.status(400).json({ error: 'Query must be at least 2 characters' });
+    if (!query) {
+      return handleApiError(res, "Search query is required", 400);
     }
     
-    // Search for both movies and TV shows in parallel
-    const [movieData, tvData] = await Promise.all([
-      fetchFromTMDB('/search/movie', { query, page: 1 }),
-      fetchFromTMDB('/search/tv', { query, page: 1 })
-    ]);
-    
-    let combinedResults = [];
-    
-    // Process movie results
-    if (movieData.results && movieData.results.length > 0) {
-      const movieResults = movieData.results.map(movie => ({
-        ...movie,
-        media_type: 'movie'
-      }));
-      combinedResults = combinedResults.concat(movieResults);
+    if (type !== 'movie' && type !== 'tv') {
+      return handleApiError(res, "Invalid search type. Must be 'movie' or 'tv'", 400);
     }
     
-    // Process TV show results
-    if (tvData.results && tvData.results.length > 0) {
-      const tvResults = tvData.results.map(show => ({
-        ...show,
-        media_type: 'tv'
-      }));
-      combinedResults = combinedResults.concat(tvResults);
+    const searchResults = await fetchFromTMDB(
+      `/search/${type}`,
+      { query, page, include_adult: false }
+    );
+    
+    if (!searchResults || !searchResults.results) {
+      return handleApiError(res, "Failed to retrieve search results", 500);
     }
     
-    // Sort by popularity (descending)
-    combinedResults.sort((a, b) => b.popularity - a.popularity);
+    const formattedResults = searchResults.results.map(item => ({
+      id: item.id,
+      title: type === 'movie' ? item.title : item.name,
+      overview: item.overview,
+      poster: item.poster_path ? `https://image.tmdb.org/t/p/w500${item.poster_path}` : null,
+      backdrop: item.backdrop_path ? `https://image.tmdb.org/t/p/original${item.backdrop_path}` : null,
+      release_date: type === 'movie' ? item.release_date : item.first_air_date,
+      vote_average: item.vote_average
+    }));
     
-    // Limit the number of results
-    combinedResults = combinedResults.slice(0, limit);
-    
-    res.json({ results: combinedResults });
+    res.json({
+      success: true,
+      results: formattedResults,
+      page: searchResults.page,
+      total_pages: searchResults.total_pages,
+      total_results: searchResults.total_results
+    });
   } catch (error) {
-    console.error(`API search error: ${error.message}`);
-    res.status(500).json({ error: 'Search failed' });
+    handleApiError(res, "Failed to process search request", 500);
+  }
+});
+
+// API endpoint for trending content
+app.get('/api/trending', async (req, res) => {
+  try {
+    const { mediaType = 'all', timeWindow = 'day', page = 1 } = req.query;
+    
+    if (!['all', 'movie', 'tv', 'person'].includes(mediaType)) {
+      return handleApiError(res, "Invalid media type. Must be 'all', 'movie', 'tv', or 'person'", 400);
+    }
+    
+    if (!['day', 'week'].includes(timeWindow)) {
+      return handleApiError(res, "Invalid time window. Must be 'day' or 'week'", 400);
+    }
+    
+    const trendingData = await fetchTrending(mediaType, timeWindow, page);
+    
+    if (!trendingData || !trendingData.results) {
+      return handleApiError(res, "Failed to retrieve trending content", 500);
+    }
+    
+    const formattedResults = trendingData.results.map(item => {
+      const isMovie = item.media_type === 'movie' || mediaType === 'movie';
+      return {
+        id: item.id,
+        title: isMovie ? item.title : item.name,
+        media_type: item.media_type || mediaType,
+        overview: item.overview,
+        poster: item.poster_path ? `https://image.tmdb.org/t/p/w500${item.poster_path}` : null,
+        backdrop: item.backdrop_path ? `https://image.tmdb.org/t/p/original${item.backdrop_path}` : null,
+        release_date: isMovie ? item.release_date : item.first_air_date,
+        vote_average: item.vote_average
+      };
+    });
+    
+    res.json({
+      success: true,
+      results: formattedResults,
+      page: trendingData.page,
+      total_pages: trendingData.total_pages,
+      total_results: trendingData.total_results
+    });
+  } catch (error) {
+    handleApiError(res, "Failed to retrieve trending content", 500);
   }
 });
 
@@ -862,21 +863,26 @@ app.get('/watchlist', async (req, res) => {
 // API endpoints for watchlist management
 app.post('/api/watchlist/add', async (req, res) => {
   try {
-    const { id, type, title, poster, year } = req.body;
+    const { id, type, title, poster } = req.body;
     
     if (!id || !type || !title) {
-      return res.status(400).json({ success: false, message: 'Missing required fields' });
+      return handleApiError(res, "Missing required fields", 400);
     }
     
-    const success = watchlistStorage.addItem({ id, type, title, poster, year });
-    
-    res.json({ 
-      success, 
-      message: success ? 'Added to watchlist' : 'Item already in watchlist' 
+    const added = watchlistStorage.addItem({ 
+      id, 
+      type, 
+      title, 
+      poster: poster || null 
     });
+    
+    if (!added) {
+      return handleApiError(res, "Item already exists in watchlist", 409);
+    }
+    
+    res.json({ success: true, message: "Item added to watchlist" });
   } catch (error) {
-    console.error(`Add to watchlist error: ${error.message}`);
-    res.status(500).json({ success: false, message: 'Failed to add to watchlist' });
+    handleApiError(res, "Failed to add item to watchlist", 500);
   }
 });
 
@@ -884,19 +890,23 @@ app.post('/api/watchlist/remove', async (req, res) => {
   try {
     const { id, type } = req.body;
     
-    if (!id || !type) {
-      return res.status(400).json({ success: false, message: 'Missing required fields' });
+    if (!id) {
+      return handleApiError(res, "Missing item ID", 400);
     }
     
-    const success = watchlistStorage.removeItem(id, type);
+    if (!type) {
+      return handleApiError(res, "Missing item type", 400);
+    }
     
-    res.json({ 
-      success, 
-      message: success ? 'Removed from watchlist' : 'Item not found in watchlist' 
-    });
+    const removed = watchlistStorage.removeItem(id, type);
+    
+    if (!removed) {
+      return handleApiError(res, "Item not found in watchlist", 404);
+    }
+    
+    res.json({ success: true, message: "Item removed from watchlist" });
   } catch (error) {
-    console.error(`Remove from watchlist error: ${error.message}`);
-    res.status(500).json({ success: false, message: 'Failed to remove from watchlist' });
+    handleApiError(res, "Failed to remove item from watchlist", 500);
   }
 });
 
@@ -1008,71 +1018,95 @@ app.post('/api/subscribe', async (req, res) => {
   try {
     const { email } = req.body;
     
-    // Basic validation
     if (!email) {
-      return res.json({
-        success: false,
-        message: 'Email is required'
-      });
+      return handleApiError(res, "Email is required", 400);
     }
     
-    if (!email.match(/^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/)) {
-      return res.json({
-        success: false,
-        message: 'Please enter a valid email address'
-      });
+    // Simple email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return handleApiError(res, "Please provide a valid email address", 400);
     }
     
-    // Add subscriber
     const added = newsletterStorage.addSubscriber(email);
     
-    if (added) {
-      try {
-        // Fetch trending movies for the newsletter
-        const trendingMovies = await fetchTrending('movie', 'week', 1);
-        const formattedTrendingMovies = trendingMovies.slice(0, 3).map(movie => ({
+    if (!added) {
+      return handleApiError(res, "Email already subscribed", 409);
+    }
+    
+    try {
+      // Fetch trending movies for the newsletter
+      const trendingData = await fetchTrending('movie', 'week', 1);
+      let trendingMovies = [];
+      
+      if (trendingData && trendingData.results) {
+        trendingMovies = trendingData.results.slice(0, 3).map(movie => ({
+          id: movie.id,
           title: movie.title,
-          poster: movie.poster_path ? `https://image.tmdb.org/t/p/w500${movie.poster_path}` : null,
-          id: movie.id
+          poster: movie.poster_path ? `https://image.tmdb.org/t/p/w500${movie.poster_path}` : null
         }));
-        
-        // Render the newsletter subscription template with trending movies
-        const html = await renderEmailTemplate('newsletter_subscription', { 
-          email,
-          trendingMovies: formattedTrendingMovies
-        });
-        
-        // Send confirmation email
-        await sendEmail({
-          to: email,
-          subject: 'Welcome to StreamAPI Newsletter',
-          html
-        });
-        
-        return res.json({
-          success: true,
-          message: 'Successfully subscribed to newsletter! Please check your email for confirmation.'
-        });
-      } catch (emailError) {
-        console.error('Newsletter email error:', emailError);
-        // Return an error if the email sending failed
-        return res.json({
-          success: false,
-          message: 'Your subscription was recorded, but we could not send the confirmation email. Please contact support if you do not receive a confirmation.'
-        });
       }
-    } else {
-      return res.json({
-        success: false,
-        message: 'This email is already subscribed to our newsletter'
+      
+      // Render email template with subscriber email and trending movies
+      const html = await renderEmailTemplate('newsletter_subscription', {
+        email,
+        trendingMovies
       });
+      
+      // Send confirmation email
+      const mailOptions = {
+        from: process.env.EMAIL_FROM,
+        to: email,
+        subject: 'Welcome to StreamAPI Newsletter!',
+        html
+      };
+      
+      await sendEmail(mailOptions);
+      res.json({ success: true, message: "Subscription successful! Check your email for confirmation." });
+    } catch (emailError) {
+      console.error("Email sending error:", emailError);
+      // Still return success as the subscription was added
+      res.json({ success: true, message: "Subscription successful, but confirmation email could not be sent." });
     }
   } catch (error) {
-    console.error('Newsletter subscription error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Server error. Please try again later.'
+    handleApiError(res, "Failed to process subscription", 500);
+  }
+});
+
+// Update contact form endpoint
+app.post('/api/contact', async (req, res) => {
+  try {
+    const { name, email, message } = req.body;
+    
+    if (!name || !email || !message) {
+      return handleApiError(res, "All fields are required", 400);
+    }
+    
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return handleApiError(res, "Please provide a valid email address", 400);
+    }
+    
+    // Render email template
+    const html = await renderEmailTemplate('contact_form', {
+      name,
+      email,
+      message,
+      date: new Date().toLocaleString()
     });
+    
+    // Send email
+    const mailOptions = {
+      from: process.env.EMAIL_FROM,
+      to: process.env.ADMIN_EMAIL || process.env.EMAIL_FROM,
+      subject: `Contact Form: Message from ${name}`,
+      html
+    };
+    
+    await sendEmail(mailOptions);
+    res.json({ success: true, message: "Your message has been sent successfully!" });
+  } catch (error) {
+    handleApiError(res, "Failed to send message", 500);
   }
 });
 
