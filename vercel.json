@@ -3,18 +3,25 @@
   "builds": [
     {
       "src": "server.js",
-      "use": "@vercel/node",
-      "config": {
-        "includeFiles": ["views/**", "public/**"],
-        "buildCommand": "./vercel.sh"
-      }
+      "use": "@vercel/node"
     }
   ],
   "routes": [
     {
       "src": "/public/(.*)",
-      "headers": { "cache-control": "public, max-age=31536000, immutable" },
       "dest": "/public/$1"
+    },
+    {
+      "src": "/js/(.*)",
+      "dest": "/public/js/$1"
+    },
+    {
+      "src": "/css/(.*)",
+      "dest": "/public/css/$1"
+    },
+    {
+      "src": "/images/(.*)",
+      "dest": "/public/images/$1"
     },
     {
       "src": "/(.*)",
