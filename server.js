@@ -8,6 +8,9 @@ const expressLayouts = require('express-ejs-layouts');
 const nodemailer = require('nodemailer');
 const ejs = require('ejs');
 const fs = require('fs');
+const os = require('os');
+const useragent = require('useragent');
+const session = require('express-session');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
@@ -137,6 +140,40 @@ app.use(expressLayouts);
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 app.set('layout', 'layout');
+
+// Initialize session middleware
+app.use(session({
+  secret: 'streamapi-secret-key',
+  resave: false,
+  saveUninitialized: true,
+  cookie: { secure: process.env.NODE_ENV === 'production' }
+}));
+
+// Add middleware for OS detection and time tracking
+app.use((req, res, next) => {
+  // Detect OS from user agent
+  const agent = useragent.parse(req.headers['user-agent']);
+  const osInfo = {
+    name: agent.os.family,
+    version: agent.os.toVersion()
+  };
+  
+  // Initialize or update session time
+  const sessionStart = req.session?.startTime || Date.now();
+  if (!req.session?.startTime) {
+    req.session.startTime = sessionStart;
+  }
+  
+  // Calculate time spent
+  const timeSpent = Date.now() - sessionStart;
+  
+  // Add to res.locals for access in templates
+  res.locals.userOS = osInfo;
+  res.locals.timeSpent = timeSpent;
+  res.locals.sessionStart = sessionStart;
+  
+  next();
+});
 
 // Helper functions
 const fetchFromTMDB = async (endpoint, params = {}) => {
@@ -283,56 +320,19 @@ function handleApiError(res, message, code = 500) {
 // Routes for Movies
 app.get('/', async (req, res) => {
   try {
-    // Fetch data for all sliders in parallel
-    const [featured, trendingMovies, latestMoviesData, popularShowsData, latestEpisodesData] = await Promise.all([
-      fetchFeaturedContent(),
-      fetchTrending('movie', 'week'),
-      fetchLatestMovies(),
-      fetchFromTMDB('/tv/popular'),
-      fetchLatestEpisodes()
-    ]);
-
-    // Format the data for each slider
-    const formattedTrendingMovies = trendingMovies.slice(0, 15).map(movie => ({
-      id: movie.id,
-      title: movie.title,
-      poster: movie.poster_path ? `https://image.tmdb.org/t/p/w500${movie.poster_path}` : null,
-      backdrop: movie.backdrop_path ? `https://image.tmdb.org/t/p/w1280${movie.backdrop_path}` : null
-    }));
-
-    const latestMovies = (latestMoviesData.movies || []).slice(0, 15).map(movie => ({
-      id: movie.tmdb_id || movie.id,
-      title: movie.title,
-      poster: movie.poster_path ? `https://image.tmdb.org/t/p/w500${movie.poster_path}` : null
-    }));
-
-    const popularShows = (popularShowsData.results || []).slice(0, 15).map(show => ({
-      id: show.id,
-      title: show.name,
-      poster: show.poster_path ? `https://image.tmdb.org/t/p/w500${show.poster_path}` : null
-    }));
-
-    const latestEpisodes = (latestEpisodesData.episodes || []).slice(0, 15).map(episode => ({
-      show_id: episode.show_id,
-      show_title: episode.show_title,
-      season_number: episode.season_number,
-      episode_number: episode.episode_number,
-      name: episode.name,
-      still: episode.still_path ? `https://image.tmdb.org/t/p/w500${episode.still_path}` : null
-    }));
-
-    // Render the home page with all slider data
-    res.render('home', {
-      featured,
-      trendingMovies: formattedTrendingMovies,
-      latestMovies,
-      popularShows,
-      latestEpisodes
+    const page = parseInt(req.query.p) || 1;
+    const movies = await fetchLatestMovies(page);
+    
+    res.render('index', {
+      movies,
+      page,
+      userOS: res.locals.userOS,
+      timeSpent: res.locals.timeSpent,
+      sessionStart: res.locals.sessionStart
     });
   } catch (error) {
-    console.error(`Home page error: ${error.message}`);
-    // If there's an error, redirect to the old browse page as fallback
-  res.redirect('/browse');
+    console.error('Error:', error);
+    handleError(res, 'Failed to fetch movies');
   }
 });
 

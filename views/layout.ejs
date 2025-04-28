@@ -95,7 +95,9 @@
     <!-- Navigation -->
     <nav class="bg-gray-800 py-4 sticky top-0 z-50">
         <div class="container mx-auto px-4">
+            <!-- Main Navigation Bar -->
             <div class="flex items-center justify-between">
+                <!-- Logo -->
                 <a href="/" class="text-2xl font-bold text-green-500 flex items-center">
                     <i class="fas fa-play-circle mr-2"></i>
                     StreamAPI
@@ -103,12 +105,21 @@
                 
                 <!-- Desktop Navigation -->
                 <div class="hidden md:flex items-center space-x-6">
-                    <a href="/browse" class="nav-link hover:text-green-400"><i class="fas fa-film mr-1"></i> Movies</a>
-                    <a href="/browse/tv" class="nav-link hover:text-green-400"><i class="fas fa-tv mr-1"></i> TV Shows</a>
-                    <a href="/latest" class="nav-link hover:text-green-400"><i class="fas fa-clock mr-1"></i> Latest</a>
-                    <a href="/top" class="nav-link hover:text-green-400"><i class="fas fa-star mr-1"></i> Top Rated</a>
-                    <a href="/watchlist" class="nav-link hover:text-green-400"><i class="fas fa-bookmark mr-1"></i> Watchlist</a>
-                    <a href="/contact" class="nav-link hover:text-green-400"><i class="fas fa-envelope mr-1"></i> Contact</a>
+                    <a href="/browse" class="nav-link hover:text-green-400 flex items-center">
+                        <i class="fas fa-film mr-1"></i> Movies
+                    </a>
+                    <a href="/browse/tv" class="nav-link hover:text-green-400 flex items-center">
+                        <i class="fas fa-tv mr-1"></i> TV Shows
+                    </a>
+                    <a href="/latest" class="nav-link hover:text-green-400 flex items-center">
+                        <i class="fas fa-clock mr-1"></i> Latest
+                    </a>
+                    <a href="/top" class="nav-link hover:text-green-400 flex items-center">
+                        <i class="fas fa-star mr-1"></i> Top Rated
+                    </a>
+                    <a href="/watchlist" class="nav-link hover:text-green-400 flex items-center">
+                        <i class="fas fa-bookmark mr-1"></i> Watchlist
+                    </a>
                 </div>
                 
                 <!-- Search Bar -->
@@ -123,31 +134,47 @@
                         <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                             <i class="fas fa-search text-gray-400"></i>
                         </div>
-                        <!-- Search Results Dropdown (hidden by default) -->
+                        <!-- Search Results Dropdown -->
                         <div id="search-results" class="absolute mt-2 w-full bg-gray-800 border border-gray-700 rounded-lg shadow-xl overflow-hidden hidden z-50 max-h-96 overflow-y-auto">
-                            <!-- Results will be populated by JavaScript -->
+                            <!-- Results populated by JavaScript -->
                         </div>
                     </div>
                 </div>
                 
-                <div class="flex items-center">
-                    <a href="/search" class="p-2 rounded-lg bg-gray-700 hover:bg-gray-600 transition mr-2 md:hidden">
-                        <i class="fas fa-search"></i>
-                    </a>
-                    <a href="/watchlist" class="p-2 rounded-lg bg-gray-700 hover:bg-gray-600 transition mr-2">
-                        <i class="fas fa-bookmark"></i>
-                    </a>
-                    <button class="md:hidden p-2" id="mobile-menu-button">
-                        <i class="fas fa-bars"></i>
-                    </button>
+                <!-- Right Side Items -->
+                <div class="flex items-center space-x-4">
+                    <!-- System Info -->
+                    <div class="hidden lg:flex items-center space-x-4 text-sm text-gray-400">
+                        <div class="flex items-center">
+                            <i class="fas fa-desktop mr-2"></i>
+                            <span><%= userOS.name %> <%= userOS.version %></span>
+                        </div>
+                        <div class="flex items-center" id="timeSpent">
+                            <i class="fas fa-clock mr-2"></i>
+                            <span>00:00:00</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Mobile Search & Menu Buttons -->
+                    <div class="flex items-center space-x-2">
+                        <a href="/search" class="p-2 rounded-lg bg-gray-700 hover:bg-gray-600 transition md:hidden">
+                            <i class="fas fa-search"></i>
+                        </a>
+                        <a href="/watchlist" class="p-2 rounded-lg bg-gray-700 hover:bg-gray-600 transition">
+                            <i class="fas fa-bookmark"></i>
+                        </a>
+                        <button class="md:hidden p-2 rounded-lg bg-gray-700 hover:bg-gray-600 transition" id="mobile-menu-button">
+                            <i class="fas fa-bars"></i>
+                        </button>
+                    </div>
                 </div>
             </div>
             
-            <!-- Mobile menu (hidden by default) -->
-            <div class="md:hidden hidden" id="mobile-menu">
-                <div class="mt-3 px-2 pt-2 pb-3 space-y-1 animate__animated animate__fadeIn">
+            <!-- Mobile Menu -->
+            <div class="md:hidden hidden animate__animated animate__fadeIn" id="mobile-menu">
+                <div class="mt-4 px-2 pt-2 pb-3 space-y-2">
                     <!-- Mobile Search -->
-                    <div class="relative mb-3">
+                    <div class="relative mb-4">
                         <input 
                             type="text" 
                             id="mobile-navbar-search" 
@@ -159,24 +186,36 @@
                         </div>
                     </div>
                     
-                    <a href="/browse" class="block px-3 py-2 rounded-md hover:bg-gray-700 hover:text-green-400 transition-colors">
-                        <i class="fas fa-film mr-1"></i> Movies
+                    <!-- Mobile Navigation Links -->
+                    <a href="/browse" class="block px-3 py-2 rounded-lg hover:bg-gray-700 hover:text-green-400 transition-colors flex items-center">
+                        <i class="fas fa-film mr-2"></i> Movies
                     </a>
-                    <a href="/browse/tv" class="block px-3 py-2 rounded-md hover:bg-gray-700 hover:text-green-400 transition-colors">
-                        <i class="fas fa-tv mr-1"></i> TV Shows
+                    <a href="/browse/tv" class="block px-3 py-2 rounded-lg hover:bg-gray-700 hover:text-green-400 transition-colors flex items-center">
+                        <i class="fas fa-tv mr-2"></i> TV Shows
                     </a>
-                    <a href="/latest" class="block px-3 py-2 rounded-md hover:bg-gray-700 hover:text-green-400 transition-colors">
-                        <i class="fas fa-clock mr-1"></i> Latest
+                    <a href="/latest" class="block px-3 py-2 rounded-lg hover:bg-gray-700 hover:text-green-400 transition-colors flex items-center">
+                        <i class="fas fa-clock mr-2"></i> Latest
                     </a>
-                    <a href="/top" class="block px-3 py-2 rounded-md hover:bg-gray-700 hover:text-green-400 transition-colors">
-                        <i class="fas fa-star mr-1"></i> Top Rated
+                    <a href="/top" class="block px-3 py-2 rounded-lg hover:bg-gray-700 hover:text-green-400 transition-colors flex items-center">
+                        <i class="fas fa-star mr-2"></i> Top Rated
                     </a>
-                    <a href="/watchlist" class="block px-3 py-2 rounded-md hover:bg-gray-700 hover:text-green-400 transition-colors">
-                        <i class="fas fa-bookmark mr-1"></i> Watchlist
+                    <a href="/watchlist" class="block px-3 py-2 rounded-lg hover:bg-gray-700 hover:text-green-400 transition-colors flex items-center">
+                        <i class="fas fa-bookmark mr-2"></i> Watchlist
                     </a>
-                    <a href="/contact" class="block px-3 py-2 rounded-md hover:bg-gray-700 hover:text-green-400 transition-colors">
-                        <i class="fas fa-envelope mr-1"></i> Contact
-                    </a>
+                    
+                    <!-- Mobile System Info -->
+                    <div class="mt-4 pt-4 border-t border-gray-700">
+                        <div class="flex items-center justify-between text-sm text-gray-400">
+                            <div class="flex items-center">
+                                <i class="fas fa-desktop mr-2"></i>
+                                <span><%= userOS.name %> <%= userOS.version %></span>
+                            </div>
+                            <div class="flex items-center">
+                                <i class="fas fa-clock mr-2"></i>
+                                <span class="mobile-time-spent">00:00:00</span>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -487,6 +526,27 @@
                 }
             }
         }
+
+        // Time spent tracking
+        document.addEventListener('DOMContentLoaded', function() {
+            const startTime = parseInt('<%= sessionStart %>', 10);
+            const timeSpentElement = document.querySelector('#timeSpent span');
+            
+            function updateTimeSpent() {
+                const now = Date.now();
+                const diff = now - startTime;
+                
+                const hours = Math.floor(diff / (1000 * 60 * 60));
+                const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+                
+                timeSpentElement.textContent = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+            }
+            
+            // Update immediately and then every second
+            updateTimeSpent();
+            setInterval(updateTimeSpent, 1000);
+        });
     </script>
 </body>
 </html> 
