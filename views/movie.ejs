@@ -117,6 +117,33 @@
                             
                             <!-- Right side controls -->
                             <div class="flex gap-3 opacity-0 transition-opacity duration-300 hover:opacity-100">
+                                <!-- Download Options Dropdown -->
+                                <div class="relative group">
+                                    <button class="bg-gray-800/80 hover:bg-gray-700 text-white rounded-full w-10 h-10 flex items-center justify-center shadow-lg transition-transform hover:-translate-y-1 active:translate-y-0">
+                                        <i class="fas fa-download"></i>
+                                    </button>
+                                    <!-- Download Quality Options -->
+                                    <div class="absolute bottom-full right-0 mb-2 w-48 bg-gray-800 rounded-lg shadow-xl hidden group-hover:block" id="download-options-menu">
+                                        <div class="p-2 space-y-1">
+                                            <a href="#" class="download-option flex items-center justify-between px-4 py-2 text-sm text-white hover:bg-gray-700 rounded" data-quality="1080p">
+                                                <span>1080p Full HD</span>
+                                                <i class="fas fa-download text-xs"></i>
+                                            </a>
+                                            <a href="#" class="download-option flex items-center justify-between px-4 py-2 text-sm text-white hover:bg-gray-700 rounded" data-quality="720p">
+                                                <span>720p HD</span>
+                                                <i class="fas fa-download text-xs"></i>
+                                            </a>
+                                            <a href="#" class="download-option flex items-center justify-between px-4 py-2 text-sm text-white hover:bg-gray-700 rounded" data-quality="480p">
+                                                <span>480p SD</span>
+                                                <i class="fas fa-download text-xs"></i>
+                                            </a>
+                                            <a href="#" class="download-option flex items-center justify-between px-4 py-2 text-sm text-white hover:bg-gray-700 rounded" data-quality="360p">
+                                                <span>360p SD</span>
+                                                <i class="fas fa-download text-xs"></i>
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
                                 <button id="player-fullscreen-btn" class="bg-gray-800/80 hover:bg-gray-700 text-white rounded-full w-10 h-10 flex items-center justify-center shadow-lg transition-transform hover:-translate-y-1 active:translate-y-0">
                                     <i class="fas fa-expand"></i>
                                 </button>
@@ -333,6 +360,98 @@
                     moviePlayer.webkitRequestFullscreen();
                 } else if (moviePlayer.msRequestFullscreen) {
                     moviePlayer.msRequestFullscreen();
+                }
+            });
+        }
+        
+        // Download functionality
+        const downloadOptions = document.querySelectorAll('.download-option');
+        downloadOptions.forEach(option => {
+            option.addEventListener('click', function(e) {
+                e.preventDefault();
+                const quality = this.dataset.quality;
+                const movieId = '<%= movie.tmdbId %>';
+                const title = '<%= movie.title %>';
+                
+                // Show loading state
+                const originalContent = this.innerHTML;
+                this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Preparing...';
+                
+                // Fetch download info from the API
+                fetch(`/api/download?id=${movieId}&type=movie&quality=${quality}&title=${encodeURIComponent(title)}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            // Update display with file size
+                            const sizeInfo = document.createElement('span');
+                            sizeInfo.className = 'text-gray-400 text-xs ml-1';
+                            sizeInfo.textContent = `(${data.file_size_formatted})`;
+                            
+                            // Reset the content
+                            this.innerHTML = originalContent;
+                            
+                            // Add file size to the option
+                            const textSpan = this.querySelector('span');
+                            textSpan.appendChild(sizeInfo);
+                            
+                            // Create a download link and click it
+                            const downloadLink = document.createElement('a');
+                            downloadLink.href = data.download_url;
+                            downloadLink.download = `${title}_${quality}.mp4`;
+                            document.body.appendChild(downloadLink);
+                            downloadLink.click();
+                            document.body.removeChild(downloadLink);
+                        } else {
+                            this.innerHTML = originalContent;
+                            alert('Error preparing download. Please try again.');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Download error:', error);
+                        this.innerHTML = originalContent;
+                        alert('Error preparing download. Please try again.');
+                    });
+            });
+        });
+        
+        // Preload file sizes for download options
+        const downloadOptionsMenu = document.getElementById('download-options-menu');
+        const downloadDropdownBtn = document.querySelector('.fa-download').closest('button');
+        
+        if (downloadDropdownBtn && downloadOptionsMenu) {
+            // Listen for mouse enter to load file sizes
+            downloadDropdownBtn.addEventListener('mouseenter', function() {
+                // Only load if sizes haven't been loaded yet
+                if (!downloadOptionsMenu.dataset.sizesLoaded) {
+                    const movieId = '<%= movie.tmdbId %>';
+                    const title = '<%= movie.title %>';
+                    
+                    // Get all quality options
+                    const qualities = ['1080p', '720p', '480p', '360p'];
+                    
+                    // Fetch file sizes for all qualities
+                    qualities.forEach(quality => {
+                        fetch(`/api/download?id=${movieId}&type=movie&quality=${quality}&title=${encodeURIComponent(title)}`)
+                            .then(response => response.json())
+                            .then(data => {
+                                if (data.success) {
+                                    // Find the option for this quality
+                                    const option = downloadOptionsMenu.querySelector(`[data-quality="${quality}"]`);
+                                    if (option) {
+                                        // Add file size to the option
+                                        const textSpan = option.querySelector('span');
+                                        const sizeInfo = document.createElement('span');
+                                        sizeInfo.className = 'text-gray-400 text-xs ml-1';
+                                        sizeInfo.textContent = `(${data.file_size_formatted})`;
+                                        textSpan.appendChild(sizeInfo);
+                                    }
+                                }
+                            })
+                            .catch(error => console.error('Error loading file size:', error));
+                    });
+                    
+                    // Mark as loaded
+                    downloadOptionsMenu.dataset.sizesLoaded = 'true';
                 }
             });
         }

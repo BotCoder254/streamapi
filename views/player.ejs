@@ -244,6 +244,33 @@
         <button class="control-btn" id="back-btn" title="Back to Details">
             <i class="fas fa-arrow-left"></i>
         </button>
+        
+        <!-- Download Options Dropdown -->
+        <div class="relative group">
+            <button class="control-btn" title="Download">
+                <i class="fas fa-download"></i>
+            </button>
+            <div class="absolute bottom-full left-0 mb-2 w-48 bg-gray-800 rounded-lg shadow-xl hidden group-hover:block z-30" id="download-options-menu">
+                <div class="p-2 space-y-1">
+                    <a href="#" class="download-option flex items-center justify-between px-4 py-2 text-sm text-white hover:bg-gray-700 rounded" data-quality="1080p">
+                        <span>1080p Full HD</span>
+                        <i class="fas fa-download text-xs"></i>
+                    </a>
+                    <a href="#" class="download-option flex items-center justify-between px-4 py-2 text-sm text-white hover:bg-gray-700 rounded" data-quality="720p">
+                        <span>720p HD</span>
+                        <i class="fas fa-download text-xs"></i>
+                    </a>
+                    <a href="#" class="download-option flex items-center justify-between px-4 py-2 text-sm text-white hover:bg-gray-700 rounded" data-quality="480p">
+                        <span>480p SD</span>
+                        <i class="fas fa-download text-xs"></i>
+                    </a>
+                    <a href="#" class="download-option flex items-center justify-between px-4 py-2 text-sm text-white hover:bg-gray-700 rounded" data-quality="360p">
+                        <span>360p SD</span>
+                        <i class="fas fa-download text-xs"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
     </div>
     
     <!-- Main Controls (right side) -->
@@ -392,6 +419,116 @@
             
             window.addEventListener('resize', fixViewportHeight);
             fixViewportHeight();
+            
+            // Download options functionality
+            const downloadOptions = document.querySelectorAll('.download-option');
+            downloadOptions.forEach(option => {
+                option.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const quality = this.dataset.quality;
+                    
+                    // Get parameters from URL
+                    const params = new URLSearchParams(window.location.search);
+                    const id = params.get('id');
+                    const type = params.get('type') || 'movie';
+                    const title = params.get('title') || 'Video';
+                    const season = params.get('season');
+                    const episode = params.get('episode');
+                    
+                    if (!id) {
+                        alert('Missing content ID. Cannot download.');
+                        return;
+                    }
+                    
+                    // Show loading state
+                    const originalContent = this.innerHTML;
+                    this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Preparing...';
+                    
+                    // Fetch download info from the API
+                    fetch(`/api/download?id=${id}&type=${type}&quality=${quality}&title=${encodeURIComponent(title)}${season ? `&season=${season}` : ''}${episode ? `&episode=${episode}` : ''}`)
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                // Update display with file size
+                                const sizeInfo = document.createElement('span');
+                                sizeInfo.className = 'text-gray-400 text-xs ml-1';
+                                sizeInfo.textContent = `(${data.file_size_formatted})`;
+                                
+                                // Reset the content
+                                this.innerHTML = originalContent;
+                                
+                                // Add file size to the option
+                                const textSpan = this.querySelector('span');
+                                textSpan.appendChild(sizeInfo);
+                                
+                                // Create a download link and click it
+                                const downloadLink = document.createElement('a');
+                                downloadLink.href = data.download_url;
+                                downloadLink.download = `${title}${season ? `_S${season}` : ''}${episode ? `E${episode}` : ''}_${quality}.mp4`;
+                                document.body.appendChild(downloadLink);
+                                downloadLink.click();
+                                document.body.removeChild(downloadLink);
+                            } else {
+                                this.innerHTML = originalContent;
+                                alert('Error preparing download. Please try again.');
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Download error:', error);
+                            this.innerHTML = originalContent;
+                            alert('Error preparing download. Please try again.');
+                        });
+                });
+            });
+            
+            // Preload file sizes for download options
+            const downloadOptionsMenu = document.getElementById('download-options-menu');
+            const downloadDropdownBtn = document.querySelector('.fa-download').closest('button');
+            
+            if (downloadDropdownBtn && downloadOptionsMenu) {
+                // Listen for mouse enter to load file sizes
+                downloadDropdownBtn.addEventListener('mouseenter', function() {
+                    // Only load if sizes haven't been loaded yet
+                    if (!downloadOptionsMenu.dataset.sizesLoaded) {
+                        // Get parameters from URL
+                        const params = new URLSearchParams(window.location.search);
+                        const id = params.get('id');
+                        const type = params.get('type') || 'movie';
+                        const title = params.get('title') || 'Video';
+                        const season = params.get('season');
+                        const episode = params.get('episode');
+                        
+                        if (!id) return;
+                        
+                        // Get all quality options
+                        const qualities = ['1080p', '720p', '480p', '360p'];
+                        
+                        // Fetch file sizes for all qualities
+                        qualities.forEach(quality => {
+                            fetch(`/api/download?id=${id}&type=${type}&quality=${quality}&title=${encodeURIComponent(title)}${season ? `&season=${season}` : ''}${episode ? `&episode=${episode}` : ''}`)
+                                .then(response => response.json())
+                                .then(data => {
+                                    if (data.success) {
+                                        // Find the option for this quality
+                                        const option = downloadOptionsMenu.querySelector(`[data-quality="${quality}"]`);
+                                        if (option) {
+                                            // Add file size to the option
+                                            const textSpan = option.querySelector('span');
+                                            const sizeInfo = document.createElement('span');
+                                            sizeInfo.className = 'text-gray-400 text-xs ml-1';
+                                            sizeInfo.textContent = `(${data.file_size_formatted})`;
+                                            textSpan.appendChild(sizeInfo);
+                                        }
+                                    }
+                                })
+                                .catch(error => console.error('Error loading file size:', error));
+                        });
+                        
+                        // Mark as loaded
+                        downloadOptionsMenu.dataset.sizesLoaded = 'true';
+                    }
+                });
+            }
         });
     </script>
 </body>

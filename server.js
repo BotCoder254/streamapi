@@ -1185,6 +1185,222 @@ app.use((req, res) => {
   res.status(404).render('error', { msg: 'Page Not Found', code: 404 });
 });
 
+// API endpoint for video downloads
+app.get('/api/download', async (req, res) => {
+  try {
+    const { id, type, quality, title, season, episode } = req.query;
+    
+    // Validate required parameters
+    if (!id) {
+      return handleApiError(res, "ID is required", 400);
+    }
+    
+    if (!quality) {
+      return handleApiError(res, "Quality is required", 400);
+    }
+
+    // Validate quality value
+    const validQualities = ['1080p', '720p', '480p', '360p'];
+    if (!validQualities.includes(quality)) {
+      return handleApiError(res, "Invalid quality value. Must be one of: 1080p, 720p, 480p, 360p", 400);
+    }
+
+    // Validate type if provided
+    if (type && !['movie', 'tv'].includes(type)) {
+      return handleApiError(res, "Invalid type value. Must be either 'movie' or 'tv'", 400);
+    }
+
+    // Validate season and episode numbers if type is 'tv'
+    if (type === 'tv') {
+      if (!season || !episode) {
+        return handleApiError(res, "Season and episode numbers are required for TV shows", 400);
+      }
+      if (isNaN(season) || isNaN(episode) || season < 1 || episode < 1) {
+        return handleApiError(res, "Invalid season or episode number", 400);
+      }
+    }
+
+    // Calculate file size based on quality and content type
+    const getFileSize = (quality, type) => {
+      const baseSizes = {
+        '1080p': { min: 1200, max: 1800 },
+        '720p': { min: 600, max: 900 },
+        '480p': { min: 300, max: 500 },
+        '360p': { min: 150, max: 300 }
+      };
+      
+      // TV episodes are typically smaller than movies
+      const multiplier = type === 'tv' ? 0.7 : 1;
+      const { min, max } = baseSizes[quality];
+      return Math.floor((Math.random() * (max - min) + min) * multiplier);
+    };
+
+    const fileSize = getFileSize(quality, type);
+    
+    // Generate download info
+    const downloadInfo = {
+      success: true,
+      download_url: `/api/download/file?id=${encodeURIComponent(id)}&type=${encodeURIComponent(type || 'movie')}&quality=${encodeURIComponent(quality)}${season ? `&season=${encodeURIComponent(season)}` : ''}${episode ? `&episode=${encodeURIComponent(episode)}` : ''}`,
+      file_size: fileSize,
+      file_size_formatted: `${(fileSize / 1024).toFixed(2)} GB`,
+      title: title || 'Video',
+      quality,
+      type: type || 'movie'
+    };
+
+    // Add TV show specific info if applicable
+    if (type === 'tv') {
+      downloadInfo.season = parseInt(season);
+      downloadInfo.episode = parseInt(episode);
+    }
+
+    res.json(downloadInfo);
+  } catch (error) {
+    console.error(`Download error:`, error);
+    return handleApiError(res, "An error occurred preparing the download", 500);
+  }
+});
+
+// Simulated file download endpoint
+app.get('/api/download/file', async (req, res) => {
+  try {
+    const { id, type, quality, title, season, episode } = req.query;
+    
+    // Validate required parameters
+    if (!id || !quality) {
+      return handleApiError(res, "Missing required parameters", 400);
+    }
+
+    // Validate quality
+    const validQualities = ['1080p', '720p', '480p', '360p'];
+    if (!validQualities.includes(quality)) {
+      return handleApiError(res, "Invalid quality value", 400);
+    }
+
+    // Sanitize filename components
+    const sanitizeFilename = (str) => {
+      return str
+        ? str.replace(/[^a-z0-9-_]/gi, '_')
+            .replace(/_+/g, '_')
+            .substring(0, 100)
+        : 'video';
+    };
+
+    const sanitizedTitle = sanitizeFilename(title);
+    
+    // Get video URL based on type and quality
+    let videoUrl;
+    if (type === 'tv') {
+      if (!season || !episode || isNaN(season) || isNaN(episode)) {
+        return handleApiError(res, "Invalid season or episode parameters", 400);
+      }
+      videoUrl = `${VIDSRC_EMBED_BASE}/tv/${encodeURIComponent(id)}/${season}-${episode}`;
+    } else {
+      videoUrl = `${VIDSRC_EMBED_BASE}/movie/${encodeURIComponent(id)}`;
+    }
+
+    try {
+      // Fetch video metadata with timeout
+      const response = await axios.head(videoUrl, { timeout: 5000 });
+      const fileSize = parseInt(response.headers['content-length']) || 0;
+
+      if (fileSize === 0) {
+        return handleApiError(res, "Video content not available", 404);
+      }
+
+      // Get the range header from the request
+      const range = req.headers.range;
+
+      // Generate filename
+      const filename = type === 'tv'
+        ? `${sanitizedTitle}_S${String(season).padStart(2, '0')}E${String(episode).padStart(2, '0')}_${quality}`
+        : `${sanitizedTitle}_${quality}`;
+
+      if (range) {
+        // Parse the range header
+        const parts = range.replace(/bytes=/, "").split("-");
+        const start = parseInt(parts[0], 10);
+        const end = parts[1] ? parseInt(parts[1], 10) : fileSize - 1;
+        
+        // Validate range
+        if (isNaN(start) || isNaN(end) || start >= fileSize || end >= fileSize || start > end) {
+          return handleApiError(res, "Invalid range request", 416);
+        }
+
+        const chunksize = (end - start) + 1;
+
+        // Set streaming headers
+        res.writeHead(206, {
+          'Content-Range': `bytes ${start}-${end}/${fileSize}`,
+          'Accept-Ranges': 'bytes',
+          'Content-Length': chunksize,
+          'Content-Type': 'video/mp4',
+          'Content-Disposition': `attachment; filename="${filename}.mp4"`,
+          'Cache-Control': 'no-cache'
+        });
+
+        // Create read stream with range and timeout
+        const videoStream = await axios({
+          method: 'get',
+          url: videoUrl,
+          responseType: 'stream',
+          timeout: 30000,
+          headers: {
+            Range: `bytes=${start}-${end}`
+          }
+        });
+
+        // Handle stream errors
+        videoStream.data.on('error', (err) => {
+          console.error('Stream error:', err);
+          if (!res.headersSent) {
+            return handleApiError(res, "Stream error occurred", 500);
+          }
+        });
+
+        // Pipe the video stream to response
+        videoStream.data.pipe(res);
+      } else {
+        // Set headers for full file download
+        res.writeHead(200, {
+          'Content-Length': fileSize,
+          'Content-Type': 'video/mp4',
+          'Content-Disposition': `attachment; filename="${filename}.mp4"`,
+          'Cache-Control': 'no-cache'
+        });
+
+        // Stream the full video with timeout
+        const videoStream = await axios({
+          method: 'get',
+          url: videoUrl,
+          responseType: 'stream',
+          timeout: 30000
+        });
+
+        // Handle stream errors
+        videoStream.data.on('error', (err) => {
+          console.error('Stream error:', err);
+          if (!res.headersSent) {
+            return handleApiError(res, "Stream error occurred", 500);
+          }
+        });
+
+        // Pipe the video stream to response
+        videoStream.data.pipe(res);
+      }
+    } catch (streamError) {
+      console.error('Streaming error:', streamError);
+      if (streamError.code === 'ECONNABORTED') {
+        return handleApiError(res, "Connection timeout while fetching video", 504);
+      }
+      return handleApiError(res, "Failed to stream video content", 500);
+    }
+  } catch (error) {
+    console.error(`File download error:`, error);
+    return handleApiError(res, "An error occurred during file download", 500);
+  }
+});
+
 // Start the server
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
