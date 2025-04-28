@@ -154,6 +154,32 @@ const fetchFromTMDB = async (endpoint, params = {}) => {
   }
 };
 
+// Fetch trailers for a movie or TV show
+const fetchTrailers = async (id, type = 'movie') => {
+  try {
+    const data = await fetchFromTMDB(`/${type}/${id}/videos`);
+    if (data.results && data.results.length > 0) {
+      // Filter for YouTube trailers and sort by newest first
+      return data.results
+        .filter(video => video.site === 'YouTube' && 
+                        (video.type === 'Trailer' || video.type === 'Teaser'))
+        .sort((a, b) => new Date(b.published_at) - new Date(a.published_at))
+        .map(video => ({
+          id: video.key,
+          name: video.name,
+          type: video.type,
+          site: video.site,
+          url: `https://www.youtube.com/embed/${video.key}`,
+          thumbnail: `https://img.youtube.com/vi/${video.key}/maxresdefault.jpg`
+        }));
+    }
+    return [];
+  } catch (error) {
+    console.error(`Error fetching trailers: ${error.message}`);
+    return [];
+  }
+};
+
 // Fetch trending items for homepage sliders
 const fetchTrending = async (mediaType = 'all', timeWindow = 'week', page = 1) => {
   try {
@@ -374,8 +400,23 @@ app.get('/top', async (req, res) => {
   }
 });
 
-app.get('/search', (req, res) => {
-  res.render('search');
+app.get('/search', async (req, res) => {
+  try {
+    // Fetch popular TV shows for the search page
+    const data = await fetchFromTMDB('/tv/popular', { page: 1 });
+    
+    const popularShows = data.results ? 
+      data.results.slice(0, 4).map(show => ({
+        id: show.id,
+        title: show.name,
+        poster: show.poster_path ? `https://image.tmdb.org/t/p/w500${show.poster_path}` : null
+      })) : [];
+    
+    res.render('search', { popularShows });
+  } catch (error) {
+    console.error(`Search page error: ${error.message}`);
+    res.render('search', { popularShows: [] });
+  }
 });
 
 app.get('/results', async (req, res) => {
@@ -413,15 +454,16 @@ app.get('/view/movie/:id', async (req, res) => {
   try {
     const tmdbId = req.params.id;
     
-    // Get movie details
-    const movieData = await fetchFromTMDB(`/movie/${tmdbId}`);
+    // Get movie details, trailers, and similar movies in parallel
+    const [movieData, externalIds, similarData, trailers] = await Promise.all([
+      fetchFromTMDB(`/movie/${tmdbId}`),
+      fetchFromTMDB(`/movie/${tmdbId}/external_ids`),
+      fetchFromTMDB(`/movie/${tmdbId}/similar`),
+      fetchTrailers(tmdbId, 'movie')
+    ]);
     
-    // Get external IDs (IMDB ID)
-    const externalIds = await fetchFromTMDB(`/movie/${tmdbId}/external_ids`);
     const imdbId = externalIds.imdb_id;
     
-    // Get similar movies
-    const similarData = await fetchFromTMDB(`/movie/${tmdbId}/similar`);
     const similarMovies = similarData.results.slice(0, 12).map(m => ({
       id: m.id,
       title: m.title,
@@ -444,7 +486,8 @@ app.get('/view/movie/:id', async (req, res) => {
       year: movieData.release_date ? `(${movieData.release_date.split('-')[0]})` : '',
       tagline: movieData.tagline,
       embedUrl: embedUrl,
-      similarMovies: similarMovies
+      similarMovies: similarMovies,
+      trailers: trailers
     };
     
     res.render('movie', { movie });
@@ -644,37 +687,45 @@ app.get('/view/tv/:id', async (req, res) => {
   try {
     const tmdbId = req.params.id;
     
-    // Get TV show details
-    const tvData = await fetchFromTMDB(`/tv/${tmdbId}`);
+    // Get TV show details, trailers, and similar shows in parallel
+    const [showData, externalIds, similarData, trailers] = await Promise.all([
+      fetchFromTMDB(`/tv/${tmdbId}`),
+      fetchFromTMDB(`/tv/${tmdbId}/external_ids`),
+      fetchFromTMDB(`/tv/${tmdbId}/similar`),
+      fetchTrailers(tmdbId, 'tv')
+    ]);
     
-    // Get external IDs (IMDB ID)
-    const externalIds = await fetchFromTMDB(`/tv/${tmdbId}/external_ids`);
     const imdbId = externalIds.imdb_id;
     
-    // Get similar TV shows
-    const similarData = await fetchFromTMDB(`/tv/${tmdbId}/similar`);
     const similarShows = similarData.results.slice(0, 12).map(s => ({
       id: s.id,
       title: s.name,
       poster: s.poster_path ? `https://image.tmdb.org/t/p/w300${s.poster_path}` : null
     }));
     
-    // Generate embed URL
-    const embedUrl = `${VIDSRC_EMBED_BASE}/tv/${tmdbId}`;
+    // Get seasons data
+    const seasons = showData.seasons.map(season => ({
+      season_number: season.season_number,
+      episode_count: season.episode_count,
+      name: season.name,
+      overview: season.overview,
+      poster: season.poster_path ? `https://image.tmdb.org/t/p/w300${season.poster_path}` : null
+    }));
     
     const show = {
       tmdbId,
       imdbId,
-      title: tvData.name,
-      overview: tvData.overview,
-      runtime: tvData.episode_run_time && tvData.episode_run_time.length > 0 ? `${tvData.episode_run_time[0]} min.` : 'N/A',
-      rating: `${tvData.vote_average}/10`,
-      poster: tvData.poster_path ? `https://image.tmdb.org/t/p/w500${tvData.poster_path}` : null,
-      background: tvData.backdrop_path ? `https://image.tmdb.org/t/p/original${tvData.backdrop_path}` : null,
-      year: tvData.first_air_date ? `(${tvData.first_air_date.split('-')[0]})` : '',
-      seasons: tvData.seasons || [],
-      embedUrl: embedUrl,
-      similarShows: similarShows
+      title: showData.name,
+      overview: showData.overview,
+      status: showData.status,
+      rating: `${showData.vote_average}/10`,
+      poster: showData.poster_path ? `https://image.tmdb.org/t/p/w500${showData.poster_path}` : null,
+      background: showData.backdrop_path ? `https://image.tmdb.org/t/p/original${showData.backdrop_path}` : null,
+      year: showData.first_air_date ? `(${showData.first_air_date.split('-')[0]})` : '',
+      tagline: showData.tagline,
+      seasons: seasons,
+      similarShows: similarShows,
+      trailers: trailers
     };
     
     res.render('tv', { show });

@@ -132,6 +132,38 @@
             </div>
         </div>
         
+        <!-- Trailers Section -->
+        <% if (show.trailers && show.trailers.length > 0) { %>
+            <div class="mb-8">
+                <h2 class="text-2xl font-bold mb-6"><i class="fas fa-film mr-2"></i>Trailers & Videos</h2>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <% show.trailers.forEach(trailer => { %>
+                        <div class="bg-gray-800 rounded-lg overflow-hidden shadow-lg group">
+                            <a href="<%= trailer.url %>" target="_blank" class="block">
+                                <div class="relative aspect-video">
+                                    <img 
+                                        src="<%= trailer.thumbnail %>" 
+                                        alt="<%= trailer.name %>" 
+                                        class="w-full h-full object-cover"
+                                        onerror="this.onerror=null; this.src='https://via.placeholder.com/640x360?text=No+Thumbnail';"
+                                    >
+                                    <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+                                        <div class="bg-green-600/80 rounded-full p-4 transform group-hover:scale-110 transition-transform">
+                                            <i class="fas fa-play text-xl"></i>
+                                        </div>
+                                    </div>
+                                    <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black to-transparent py-2 px-3">
+                                        <h3 class="text-sm font-bold line-clamp-2"><%= trailer.name %></h3>
+                                        <span class="text-xs text-gray-300"><%= trailer.type %></span>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+                    <% }); %>
+                </div>
+            </div>
+        <% } %>
+        
         <!-- Seasons Section -->
         <div class="mb-12">
             <h2 class="text-2xl font-bold mb-6"><i class="fas fa-list mr-2"></i> Seasons</h2>
