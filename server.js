@@ -12,9 +12,31 @@ const useragent = require('express-useragent');
 const os = require('os');
 const NetworkSpeed = require('network-speed');
 const testNetworkSpeed = new NetworkSpeed();
+const WebSocket = require('ws');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+
+// Create HTTP server
+const server = require('http').createServer(app);
+
+// Create WebSocket server
+const wss = new WebSocket.Server({ server });
+
+// WebSocket connection handling
+wss.on('connection', function connection(ws) {
+    // Send initial user count
+    ws.send(JSON.stringify({ type: 'userCount', count: activeUsers }));
+});
+
+// Function to broadcast user count to all connected clients
+function broadcastUserCount() {
+    wss.clients.forEach(function each(client) {
+        if (client.readyState === WebSocket.OPEN) {
+            client.send(JSON.stringify({ type: 'userCount', count: activeUsers }));
+        }
+    });
+}
 
 // Configuration
 const TMDB_API_KEY = process.env.TMDB_API_KEY;
@@ -27,6 +49,9 @@ const SITE_AUTHOR_URL = process.env.SITE_AUTHOR_URL || 'https://github.com/BotCo
 
 // Session storage for tracking user information
 const userSessions = new Map();
+
+// Add active users tracking
+let activeUsers = 0;
 
 // Simple in-memory storage for watchlist (in a real app, this would be a database)
 const watchlistStorage = {
@@ -188,55 +213,72 @@ app.use(useragent.express());
 
 // Middleware to track user session time and get network speed
 app.use(async (req, res, next) => {
-  // Generate a simple session ID (in production, use a proper session management system)
-  const sessionId = req.ip + '-' + req.headers['user-agent'];
-  
-  if (!userSessions.has(sessionId)) {
-    userSessions.set(sessionId, {
-      startTime: Date.now(),
-      networkSpeed: 'Checking...'
-    });
+    const sessionId = req.ip + '-' + req.headers['user-agent'];
     
-    // Get network speed (run this only once per session)
-    try {
-      // Use a smaller file size and timeout for faster response
-      const baseUrl = 'https://raw.githubusercontent.com/librespeed/speedtest-go/master/web/assets/garbage.php';
-      const options = {
-        hostname: 'raw.githubusercontent.com',
-        port: 443,
-        path: '/librespeed/speedtest-go/master/web/assets/garbage.php',
-        method: 'GET',
-      };
-      
-      const speed = await testNetworkSpeed.checkDownloadSpeed(baseUrl, 1000);
-      userSessions.get(sessionId).networkSpeed = speed && speed.mbps ? `${(speed.mbps).toFixed(2)} Mbps` : 'Testing...';
-    } catch (error) {
-      console.error('Network speed test error:', error);
-      userSessions.get(sessionId).networkSpeed = 'Unable to determine';
+    if (!userSessions.has(sessionId)) {
+        activeUsers++;
+        broadcastUserCount(); // Broadcast when user count changes
+        userSessions.set(sessionId, {
+            startTime: Date.now(),
+            networkSpeed: 'Checking...'
+        });
+        
+        // Get network speed (run this only once per session)
+        try {
+            const baseUrl = 'https://raw.githubusercontent.com/librespeed/speedtest-go/master/web/assets/garbage.php';
+            const speed = await testNetworkSpeed.checkDownloadSpeed(baseUrl, 1000);
+            const speedMbps = typeof speed === 'object' && speed.mbps ? 
+                            parseFloat(speed.mbps).toFixed(2) : 
+                            'Unknown';
+            userSessions.get(sessionId).networkSpeed = `${speedMbps} Mbps`;
+        } catch (error) {
+            console.error('Network speed test error:', error);
+            userSessions.get(sessionId).networkSpeed = 'Unable to determine';
+        }
     }
-  }
-  
-  // Calculate time spent
-  const session = userSessions.get(sessionId);
-  const timeSpent = Math.floor((Date.now() - session.startTime) / 1000); // in seconds
-  
-  // Fix: Rename the OS property to systemInfo to avoid conflict
-  res.locals.userInfo = {
-    systemInfo: {
-      platform: os.platform(),
-      release: os.release(),
-      type: os.type()
-    },
-    browser: req.useragent.browser,
-    version: req.useragent.version,
-    userOs: req.useragent.os,
-    platform: req.useragent.platform,
-    timeSpent: timeSpent,
-    networkSpeed: session.networkSpeed
-  };
-  
-  next();
+    
+    // Calculate time spent
+    const session = userSessions.get(sessionId);
+    const timeSpent = Math.floor((Date.now() - session.startTime) / 1000); // in seconds
+    
+    // Add active users count to locals
+    res.locals.activeUsers = activeUsers;
+    
+    // Fix: Rename the OS property to systemInfo to avoid conflict
+    res.locals.userInfo = {
+        systemInfo: {
+            platform: os.platform(),
+            release: os.release(),
+            type: os.type()
+        },
+        browser: req.useragent.browser,
+        version: req.useragent.version,
+        userOs: req.useragent.os,
+        platform: req.useragent.platform,
+        timeSpent: timeSpent,
+        networkSpeed: session.networkSpeed
+    };
+    
+    next();
 });
+
+// Update the cleanup interval to broadcast user count when it changes
+setInterval(() => {
+    const now = Date.now();
+    let userCountChanged = false;
+    
+    for (const [sessionId, session] of userSessions.entries()) {
+        if (now - session.startTime > 30 * 60 * 1000) {
+            userSessions.delete(sessionId);
+            activeUsers = Math.max(0, activeUsers - 1);
+            userCountChanged = true;
+        }
+    }
+    
+    if (userCountChanged) {
+        broadcastUserCount();
+    }
+}, 5 * 60 * 1000);
 
 // Helper functions
 const fetchFromTMDB = async (endpoint, params = {}) => {
@@ -1299,6 +1341,6 @@ app.use((req, res) => {
 });
 
 // Start the server
-app.listen(PORT, () => {
+server.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });

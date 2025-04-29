@@ -151,8 +151,8 @@
                 </div>
                 
                 <!-- Search Bar -->
-                <div class="hidden md:block flex-grow max-w-md mx-6">
-                    <div class="relative">
+                <div class="hidden md:flex items-center flex-grow max-w-md mx-6">
+                    <div class="relative flex-grow">
                         <input 
                             type="text" 
                             id="navbar-search" 
@@ -163,9 +163,14 @@
                             <i class="fas fa-search text-gray-400"></i>
                         </div>
                         <!-- Search Results Dropdown (hidden by default) -->
-                        <div id="search-results" class="absolute mt-2 w-full bg-gray-800 border border-gray-700 rounded-lg shadow-xl overflow-hidden hidden z-50 max-h-96 overflow-y-auto">
+                        <div id="search-results" class="absolute mt-2 w-full bg-gray-800 border border-gray-700 rounded-lg shadow-xl hidden z-50 max-h-96 overflow-y-auto">
                             <!-- Results will be populated by JavaScript -->
                         </div>
+                    </div>
+                    <!-- Active Users Counter -->
+                    <div class="ml-4 flex items-center bg-gray-700 px-4 py-2 rounded-full">
+                        <i class="fas fa-users text-green-500 mr-2"></i>
+                        <span class="text-sm font-medium" id="active-users-count"><%= activeUsers %> online</span>
                     </div>
                 </div>
                 
@@ -560,6 +565,26 @@
                 }
             }
         }
+        
+        // Setup WebSocket connection for real-time user count updates
+        const ws = new WebSocket(`ws://${window.location.host}`);
+        const activeUsersCount = document.getElementById('active-users-count');
+        
+        ws.onmessage = function(event) {
+            const data = JSON.parse(event.data);
+            if (data.type === 'userCount') {
+                // Animate the counter update
+                activeUsersCount.classList.add('animate__animated', 'animate__pulse');
+                activeUsersCount.textContent = `${data.count} online`;
+                setTimeout(() => {
+                    activeUsersCount.classList.remove('animate__animated', 'animate__pulse');
+                }, 1000);
+            }
+        };
+        
+        ws.onerror = function(error) {
+            console.error('WebSocket error:', error);
+        };
     </script>
 </body>
 </html> 
