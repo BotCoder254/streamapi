@@ -146,6 +146,43 @@ app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 app.set('layout', 'layout');
 
+// Ad blocker middleware
+app.use((req, res, next) => {
+  // Block common ad domains and tracking scripts
+  const blockedDomains = [
+    'doubleclick.net',
+    'google-analytics.com',
+    'adnxs.com',
+    'advertising.com',
+    'fastclick.net',
+    'quantserve.com',
+    'scorecardresearch.com',
+    'zedo.com',
+    'adbrite.com',
+    'adbureau.net',
+    'admob.com',
+    'bannersxchange.com',
+    'buysellads.com',
+    'dtscout.com',
+    'popads.net'
+  ];
+
+  const referer = req.get('Referer') || '';
+  const isAdRequest = blockedDomains.some(domain => referer.includes(domain));
+
+  if (isAdRequest) {
+    return res.status(403).end();
+  }
+
+  // Add security headers
+  res.setHeader('X-Frame-Options', 'SAMEORIGIN');
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+  res.setHeader('Content-Security-Policy', "frame-ancestors 'self'");
+  
+  next();
+});
+
 // Middleware to track user information
 app.use(useragent.express());
 
@@ -601,6 +638,17 @@ app.get('/api/player', async (req, res) => {
     if (queryString) {
       embedUrl += `?${queryString}`;
     }
+
+    // Set CSP headers to prevent unwanted redirects and popups
+    res.setHeader('Content-Security-Policy', `
+      default-src 'self' ${VIDSRC_EMBED_BASE};
+      frame-src 'self' ${VIDSRC_EMBED_BASE} https://www.youtube.com;
+      script-src 'self' 'unsafe-inline' 'unsafe-eval';
+      style-src 'self' 'unsafe-inline';
+      img-src 'self' data: https: http:;
+      media-src 'self' blob: ${VIDSRC_EMBED_BASE};
+      connect-src 'self' ${VIDSRC_EMBED_BASE};
+    `.replace(/\s+/g, ' ').trim());
     
     // Pass additional context to the player template
     res.render('player', { 
@@ -611,7 +659,9 @@ app.get('/api/player', async (req, res) => {
       imdbId,
       season,
       episode,
-      posterPath
+      posterPath,
+      isMobile: req.useragent.isMobile,
+      isTablet: req.useragent.isTablet
     });
   } catch (error) {
     console.error(`Player error: ${error.message}`);
