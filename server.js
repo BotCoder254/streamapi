@@ -39,8 +39,8 @@ function broadcastUserCount() {
 }
 
 // Configuration
-const TMDB_API_KEY = process.env.TMDB_API_KEY;
-const VIDSRC_EMBED_BASE = 'https://vidsrc.xyz/embed';
+const TMDB_API_KEY = process.env.TMDB_API_KEY || 'fdbc5d0ea9e499aaeba73d29c21726be'; //Dont mess with this 
+const VIDSRC_EMBED_BASE = 'https://vidsrc.xyz/embed'; //Dont mess with this 
 
 // Site Configuration
 const SITE_URL = process.env.SITE_URL || 'http://localhost:3000';
