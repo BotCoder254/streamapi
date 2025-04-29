@@ -109,6 +109,45 @@
                     <a href="/top" class="nav-link hover:text-green-400"><i class="fas fa-star mr-1"></i> Top Rated</a>
                     <a href="/watchlist" class="nav-link hover:text-green-400"><i class="fas fa-bookmark mr-1"></i> Watchlist</a>
                     <a href="/contact" class="nav-link hover:text-green-400"><i class="fas fa-envelope mr-1"></i> Contact</a>
+                    
+                    <!-- User Info Dropdown -->
+                    <div class="relative group">
+                        <button class="nav-link hover:text-green-400 flex items-center">
+                            <i class="fas fa-info-circle mr-1"></i> Info
+                            <i class="fas fa-chevron-down ml-1 text-xs"></i>
+                        </button>
+                        <div class="absolute right-0 mt-2 w-64 bg-gray-800 border border-gray-700 rounded-lg shadow-xl hidden group-hover:block text-sm">
+                            <div class="p-4 space-y-2">
+                                <div class="flex items-center justify-between">
+                                    <span class="text-gray-400">OS:</span>
+                                    <span class="text-green-400"><%= userInfo.systemInfo.platform %> <%= userInfo.systemInfo.release %></span>
+                                </div>
+                                <div class="flex items-center justify-between">
+                                    <span class="text-gray-400">Browser:</span>
+                                    <span class="text-green-400"><%= userInfo.browser %> <%= userInfo.version %></span>
+                                </div>
+                                <div class="flex items-center justify-between">
+                                    <span class="text-gray-400">System:</span>
+                                    <span class="text-green-400"><%= userInfo.userOs %></span>
+                                </div>
+                                <div class="flex items-center justify-between">
+                                    <span class="text-gray-400">Time Spent:</span>
+                                    <span class="text-green-400">
+                                        <% 
+                                        const hours = Math.floor(userInfo.timeSpent / 3600);
+                                        const minutes = Math.floor((userInfo.timeSpent % 3600) / 60);
+                                        const seconds = userInfo.timeSpent % 60;
+                                        %>
+                                        <%= hours %>h <%= minutes %>m <%= seconds %>s
+                                    </span>
+                                </div>
+                                <div class="flex items-center justify-between">
+                                    <span class="text-gray-400">Network Speed:</span>
+                                    <span class="text-green-400"><%= userInfo.networkSpeed %></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
                 
                 <!-- Search Bar -->
@@ -177,6 +216,40 @@
                     <a href="/contact" class="block px-3 py-2 rounded-md hover:bg-gray-700 hover:text-green-400 transition-colors">
                         <i class="fas fa-envelope mr-1"></i> Contact
                     </a>
+                    
+                    <!-- Mobile User Info -->
+                    <div class="mt-4 px-3 py-3 bg-gray-700 rounded-lg">
+                        <h4 class="text-sm font-semibold text-green-400 mb-2">System Information</h4>
+                        <div class="space-y-2 text-sm">
+                            <div class="flex justify-between">
+                                <span class="text-gray-400">OS:</span>
+                                <span><%= userInfo.systemInfo.platform %> <%= userInfo.systemInfo.release %></span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-400">Browser:</span>
+                                <span><%= userInfo.browser %> <%= userInfo.version %></span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-400">System:</span>
+                                <span><%= userInfo.userOs %></span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-400">Time Spent:</span>
+                                <span>
+                                    <% 
+                                    const mHours = Math.floor(userInfo.timeSpent / 3600);
+                                    const mMinutes = Math.floor((userInfo.timeSpent % 3600) / 60);
+                                    const mSeconds = userInfo.timeSpent % 60;
+                                    %>
+                                    <%= mHours %>h <%= mMinutes %>m <%= mSeconds %>s
+                                </span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-400">Network Speed:</span>
+                                <span><%= userInfo.networkSpeed %></span>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
