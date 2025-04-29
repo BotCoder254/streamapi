@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Welcome to StreamAPI Newsletter</title>
+    <title>Welcome to StreamAPI Newsletter - API Access Granted</title>
     <style>
         /* Email-specific styles */
         body {
@@ -98,6 +98,42 @@
             overflow: hidden;
             text-overflow: ellipsis;
         }
+        .api-access-box {
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid #10b981;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        
+        .api-key-box {
+            background: #2d3748;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 10px 0;
+            word-break: break-all;
+            font-family: monospace;
+        }
+        
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin: 20px 0;
+        }
+        
+        .feature-item {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+        }
+        
+        .feature-item i {
+            color: #10b981;
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
     </style>
 </head>
 <body>
@@ -109,51 +145,66 @@
         </div>
         
         <div class="email-body">
-            <h1>Welcome to StreamAPI Newsletter!</h1>
+            <h1>Welcome to StreamAPI!</h1>
             
             <p>Hello there,</p>
             
-            <p>Thank you for subscribing to the StreamAPI newsletter! You'll now receive the latest updates on movies, TV shows, and other exciting content delivered straight to your inbox.</p>
+            <p>Thank you for subscribing to the StreamAPI newsletter! You now have access to our comprehensive API endpoints and will receive the latest updates on movies, TV shows, and platform features.</p>
+            
+            <div class="api-access-box">
+                <h3 style="color: #10b981; margin-bottom: 15px;">🎉 API Access Granted</h3>
+                <p>You can now access all API endpoints using our base URL:</p>
+                <div class="api-key-box">
+                    https://streamapi-x4gu.onrender.com/api
+                </div>
+                <p style="margin-top: 15px; font-size: 14px;">
+                    <i class="fas fa-info-circle" style="color: #10b981;"></i> 
+                    View the complete API documentation at 
+                    <a href="https://streamapi-x4gu.onrender.com/api" style="color: #10b981;">our API Reference</a>
+                </p>
+            </div>
+
+            <div class="feature-grid">
+                <div class="feature-item">
+                    <i class="fas fa-film"></i>
+                    <h4>Movie Data</h4>
+                    <p>Access detailed movie information</p>
+                </div>
+                <div class="feature-item">
+                    <i class="fas fa-tv"></i>
+                    <h4>TV Shows</h4>
+                    <p>Comprehensive TV show database</p>
+                </div>
+                <div class="feature-item">
+                    <i class="fas fa-stream"></i>
+                    <h4>Streaming</h4>
+                    <p>Get streaming URLs and metadata</p>
+                </div>
+                <div class="feature-item">
+                    <i class="fas fa-search"></i>
+                    <h4>Search</h4>
+                    <p>Powerful search capabilities</p>
+                </div>
+            </div>
             
             <div class="content-section">
-                <h3><span style="color: #10b981;">&#9733;</span> What to expect from our newsletter:</h3>
-                <ul>
-                    <li>Weekly updates on new movie and TV show releases</li>
-                    <li>Personalized recommendations based on popular trends</li>
-                    <li>Exclusive insights and behind-the-scenes content</li>
-                    <li>Special announcements and platform updates</li>
+                <h3><span style="color: #10b981;">&#9733;</span> Available Endpoints</h3>
+                <ul style="margin-top: 10px;">
+                    <li>🔍 <strong>/search</strong> - Search movies and TV shows</li>
+                    <li>🎬 <strong>/stream/:type/:id</strong> - Get streaming URLs</li>
+                    <li>📈 <strong>/trending</strong> - Get trending content</li>
+                    <li>📋 <strong>/watchlist</strong> - Manage watchlist items</li>
                 </ul>
             </div>
             
             <div class="content-section">
-                <h3><span style="color: #10b981;">&#9733;</span> Trending This Week</h3>
-                <div class="movie-grid">
-                    <% if (locals.trendingMovies && trendingMovies.length > 0) { %>
-                        <% trendingMovies.forEach(movie => { %>
-                            <div class="movie-item">
-                                <% if (movie.poster) { %>
-                                    <img src="<%= movie.poster %>" alt="<%= movie.title %>" style="width: 150px; height: 225px; object-fit: cover;">
-                                <% } else { %>
-                                    <img src="https://via.placeholder.com/150x225/2d3748/10b981?text=No+Image" alt="<%= movie.title %>" style="width: 150px; height: 225px;">
-                                <% } %>
-                                <div class="movie-title"><%= movie.title %></div>
-                            </div>
-                        <% }); %>
-                    <% } else { %>
-                        <div class="movie-item">
-                            <img src="https://via.placeholder.com/150x225/2d3748/10b981?text=Movie+1" alt="Movie">
-                            <div class="movie-title">Action Movie Title</div>
-                        </div>
-                        <div class="movie-item">
-                            <img src="https://via.placeholder.com/150x225/2d3748/10b981?text=Movie+2" alt="Movie">
-                            <div class="movie-title">Comedy Film Title</div>
-                        </div>
-                        <div class="movie-item">
-                            <img src="https://via.placeholder.com/150x225/2d3748/10b981?text=Movie+3" alt="Movie">
-                            <div class="movie-title">Drama Movie Title</div>
-                        </div>
-                    <% } %>
-                </div>
+                <h3><span style="color: #10b981;">&#9733;</span> What's Next?</h3>
+                <ul style="margin-top: 10px;">
+                    <li>📚 Review our <a href="https://streamapi-m8o1-802nxfyk2-botcoder254s-projects.vercel.app/api" style="color: #10b981;">API documentation</a></li>
+                    <li>🔧 Test the endpoints using Postman or cURL</li>
+                    <li>💻 Integrate the API into your application</li>
+                    <li>📱 Try our responsive video player</li>
+                </ul>
             </div>
             
             <div style="text-align: center;">
