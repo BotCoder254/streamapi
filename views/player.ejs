@@ -10,6 +10,8 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Animation library -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    <!-- Video.js CSS -->
+    <link href="https://vjs.zencdn.net/8.10.0/video-js.css" rel="stylesheet" />
     <style>
         body {
             margin: 0;
@@ -34,6 +36,55 @@
             border: none;
         }
         
+        /* Quick Actions Menu */
+        .quick-actions {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            display: none;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 20px;
+            z-index: 1000;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            min-width: 300px;
+        }
+        
+        .quick-action-btn {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            color: white;
+            padding: 15px;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+            aspect-ratio: 1;
+        }
+        
+        .quick-action-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: scale(1.05);
+        }
+        
+        .quick-action-btn i {
+            font-size: 24px;
+            margin-bottom: 8px;
+        }
+        
+        .quick-action-btn span {
+            font-size: 12px;
+            text-align: center;
+        }
+        
+        /* Player Controls */
         .player-controls {
             position: absolute;
             bottom: 20px;
@@ -50,9 +101,9 @@
             pointer-events: all;
             backdrop-filter: blur(5px);
             -webkit-backdrop-filter: blur(5px);
+            touch-action: none;
         }
         
-        #player-container:hover .player-controls,
         .player-controls:hover {
             opacity: 1;
         }
@@ -73,6 +124,8 @@
             justify-content: center;
             border-radius: 50%;
             background: rgba(255, 255, 255, 0.1);
+            touch-action: none;
+            -webkit-tap-highlight-color: transparent;
         }
         
         .control-button:hover {
@@ -104,12 +157,19 @@
                 bottom: 40px;
                 opacity: 1;
                 padding: 15px 25px;
+                background: rgba(0, 0, 0, 0.85);
             }
             
             .control-button {
                 width: 48px;
                 height: 48px;
                 font-size: 28px;
+            }
+
+            .vjs-big-play-button {
+                width: 60px !important;
+                height: 60px !important;
+                line-height: 60px !important;
             }
         }
         
@@ -252,9 +312,96 @@
             z-index: 10;
             opacity: 0.7;
         }
+        
+        /* Video.js Custom Styles */
+        .video-js {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+        
+        .vjs-control-bar {
+            background: rgba(0, 0, 0, 0.7) !important;
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+            z-index: 3;
+        }
+        
+        .vjs-big-play-button {
+            background: rgba(0, 0, 0, 0.6) !important;
+            border-radius: 50% !important;
+            border: 2px solid white !important;
+            width: 80px !important;
+            height: 80px !important;
+            line-height: 80px !important;
+            z-index: 2;
+        }
+
+        .vjs-fullscreen-control {
+            order: 10;
+        }
+
+        /* Mobile Optimizations */
+        @media (max-width: 768px) {
+            .quick-actions {
+                min-width: 280px;
+                padding: 15px;
+                gap: 10px;
+            }
+            
+            .quick-action-btn {
+                padding: 12px;
+            }
+            
+            .quick-action-btn i {
+                font-size: 20px;
+            }
+            
+            .player-controls {
+                bottom: 40px;
+                opacity: 1;
+                padding: 15px 25px;
+                background: rgba(0, 0, 0, 0.85);
+            }
+            
+            .control-button {
+                width: 48px;
+                height: 48px;
+                font-size: 28px;
+            }
+
+            .vjs-big-play-button {
+                width: 60px !important;
+                height: 60px !important;
+                line-height: 60px !important;
+            }
+        }
+
+        /* Fix for iOS touch events */
+        @supports (-webkit-touch-callout: none) {
+            .player-controls,
+            .control-button,
+            .quick-action-btn {
+                cursor: default;
+                -webkit-touch-callout: none;
+                -webkit-user-select: none;
+                -webkit-tap-highlight-color: transparent;
+            }
+        }
     </style>
 </head>
 <body>
+    <!-- Mobile Device Note -->
+    <div class="device-note fixed top-0 left-0 right-0 bg-black bg-opacity-90 text-white p-4 z-50 text-center text-sm md:hidden animate__animated animate__fadeIn">
+        <i class="fas fa-info-circle text-green-500 mr-2"></i>
+        <span>Double tap the player to access fullscreen and quick controls</span>
+        <button class="close-note absolute right-2 top-1/2 transform -translate-y-1/2 p-2 text-gray-400 hover:text-white">
+            <i class="fas fa-times"></i>
+        </button>
+    </div>
+    
     <!-- Improved Loading Indicator -->
     <div class="loading animate__animated animate__fadeIn" id="loading">
         <div class="spinner-container">
@@ -266,14 +413,48 @@
     </div>
     
     <div id="player-container">
-        <iframe 
-            id="player-iframe"
-            src="<%= embedUrl %>"
-            allowfullscreen
-            allow="encrypted-media"
-            sandbox="allow-same-origin allow-scripts allow-forms allow-presentation"
-            style="pointer-events: none;"
-        ></iframe>
+        <!-- Video.js Player -->
+        <video 
+            id="video-player" 
+            class="video-js vjs-default-skin vjs-big-play-centered"
+            controls
+            preload="auto"
+            data-setup='{"fluid": true}'
+        >
+            <source src="<%= embedUrl %>" type="application/x-mpegURL">
+            <p class="vjs-no-js">
+                To view this video please enable JavaScript, and consider upgrading to a
+                web browser that supports HTML5 video
+            </p>
+        </video>
+        
+        <!-- Quick Actions Menu -->
+        <div class="quick-actions" id="quick-actions">
+            <button class="quick-action-btn" id="quality-btn">
+                <i class="fas fa-cog"></i>
+                <span>Quality</span>
+            </button>
+            <button class="quick-action-btn" id="speed-btn">
+                <i class="fas fa-tachometer-alt"></i>
+                <span>Speed</span>
+            </button>
+            <button class="quick-action-btn" id="audio-btn">
+                <i class="fas fa-volume-up"></i>
+                <span>Audio</span>
+            </button>
+            <button class="quick-action-btn" id="subtitle-btn">
+                <i class="fas fa-closed-captioning"></i>
+                <span>Subtitles</span>
+            </button>
+            <button class="quick-action-btn" id="pip-btn">
+                <i class="fas fa-external-link-alt"></i>
+                <span>PiP Mode</span>
+            </button>
+            <button class="quick-action-btn" id="expand-btn">
+                <i class="fas fa-expand"></i>
+                <span>Expand</span>
+            </button>
+        </div>
         
         <div class="mobile-touch-overlay"></div>
         
@@ -326,6 +507,8 @@
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
+    <!-- Video.js Script -->
+    <script src="https://vjs.zencdn.net/8.10.0/video.min.js"></script>
     <!-- Custom player script -->
     <script src="/js/player.js"></script>
     
@@ -465,6 +648,27 @@
             
             window.addEventListener('resize', fixViewportHeight);
             fixViewportHeight();
+            
+            // Add note dismissal functionality
+            const deviceNote = document.querySelector('.device-note');
+            const closeNote = document.querySelector('.close-note');
+            
+            if (closeNote && deviceNote) {
+                closeNote.addEventListener('click', () => {
+                    deviceNote.classList.add('animate__fadeOut');
+                    setTimeout(() => {
+                        deviceNote.style.display = 'none';
+                    }, 500);
+                    
+                    // Store the preference
+                    localStorage.setItem('hidePlayerNote', 'true');
+                });
+                
+                // Check if note was previously dismissed
+                if (localStorage.getItem('hidePlayerNote') === 'true') {
+                    deviceNote.style.display = 'none';
+                }
+            }
         });
     </script>
 </body>
