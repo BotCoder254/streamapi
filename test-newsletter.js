@@ -6,8 +6,8 @@ const path = require('path');
 require('dotenv').config();
 
 // TMDB API Key
-const TMDB_API_KEY = process.env.TMDB_API_KEY;
-const SITE_URL = process.env.SITE_URL || 'http://localhost:3000';
+const TMDB_API_KEY = process.env.TMDB_API_KEY || 'fdbc5d0ea9e499aaeba73d29c21726be';
+const SITE_URL = process.env.SITE_URL || 'https://streamapi-x4gu.onrender.com';
 
 // Helper function to fetch trending movies from TMDB
 async function fetchTrending(mediaType = 'movie', timeWindow = 'week', page = 1) {
@@ -46,8 +46,8 @@ async function testNewsletterEmail() {
     port: process.env.EMAIL_PORT || 587,
     secure: false,
     auth: {
-      user: process.env.EMAIL_USER,
-      pass: process.env.EMAIL_PASSWORD
+      user: process.env.EMAIL_USER || 'teumteum776@gmail.com',
+      pass: process.env.EMAIL_PASSWORD || 'pihl zudv xrwi racy'
     },
     tls: {
       rejectUnauthorized: false
