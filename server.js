@@ -8,6 +8,11 @@ const expressLayouts = require('express-ejs-layouts');
 const nodemailer = require('nodemailer');
 const ejs = require('ejs');
 const fs = require('fs');
+const useragent = require('express-useragent');
+const os = require('os');
+const NetworkSpeed = require('network-speed');
+const testNetworkSpeed = new NetworkSpeed();
+
 const app = express();
 const PORT = process.env.PORT || 3000;
 
@@ -19,6 +24,9 @@ const VIDSRC_EMBED_BASE = 'https://vidsrc.xyz/embed';
 const SITE_URL = process.env.SITE_URL || 'http://localhost:3000';
 const SITE_AUTHOR = process.env.SITE_AUTHOR || '@BotCoder254';
 const SITE_AUTHOR_URL = process.env.SITE_AUTHOR_URL || 'https://github.com/BotCoder254';
+
+// Session storage for tracking user information
+const userSessions = new Map();
 
 // Simple in-memory storage for watchlist (in a real app, this would be a database)
 const watchlistStorage = {
@@ -137,6 +145,61 @@ app.use(expressLayouts);
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 app.set('layout', 'layout');
+
+// Middleware to track user information
+app.use(useragent.express());
+
+// Middleware to track user session time and get network speed
+app.use(async (req, res, next) => {
+  // Generate a simple session ID (in production, use a proper session management system)
+  const sessionId = req.ip + '-' + req.headers['user-agent'];
+  
+  if (!userSessions.has(sessionId)) {
+    userSessions.set(sessionId, {
+      startTime: Date.now(),
+      networkSpeed: 'Checking...'
+    });
+    
+    // Get network speed (run this only once per session)
+    try {
+      // Use a smaller file size and timeout for faster response
+      const baseUrl = 'https://raw.githubusercontent.com/librespeed/speedtest-go/master/web/assets/garbage.php';
+      const options = {
+        hostname: 'raw.githubusercontent.com',
+        port: 443,
+        path: '/librespeed/speedtest-go/master/web/assets/garbage.php',
+        method: 'GET',
+      };
+      
+      const speed = await testNetworkSpeed.checkDownloadSpeed(baseUrl, 1000);
+      userSessions.get(sessionId).networkSpeed = speed && speed.mbps ? `${(speed.mbps).toFixed(2)} Mbps` : 'Testing...';
+    } catch (error) {
+      console.error('Network speed test error:', error);
+      userSessions.get(sessionId).networkSpeed = 'Unable to determine';
+    }
+  }
+  
+  // Calculate time spent
+  const session = userSessions.get(sessionId);
+  const timeSpent = Math.floor((Date.now() - session.startTime) / 1000); // in seconds
+  
+  // Fix: Rename the OS property to systemInfo to avoid conflict
+  res.locals.userInfo = {
+    systemInfo: {
+      platform: os.platform(),
+      release: os.release(),
+      type: os.type()
+    },
+    browser: req.useragent.browser,
+    version: req.useragent.version,
+    userOs: req.useragent.os,
+    platform: req.useragent.platform,
+    timeSpent: timeSpent,
+    networkSpeed: session.networkSpeed
+  };
+  
+  next();
+});
 
 // Helper functions
 const fetchFromTMDB = async (endpoint, params = {}) => {
