@@ -64,6 +64,15 @@
                         </a>
                         
                         <button 
+                            class="watch-party-btn px-6 py-3 bg-purple-600 hover:bg-purple-500 rounded-lg transition flex items-center shadow-lg hover:shadow-xl"
+                            data-id="<%= movie.tmdbId %>"
+                            data-type="movie"
+                            data-title="<%= movie.title %>"
+                        >
+                            <i class="fas fa-users mr-2"></i> Watch Party
+                        </button>
+                        
+                        <button 
                             class="watchlist-toggle px-6 py-3 bg-gray-700 hover:bg-gray-600 rounded-lg transition flex items-center shadow-lg hover:shadow-xl"
                             data-id="<%= movie.tmdbId %>"
                             data-type="movie"
@@ -224,6 +233,58 @@
     <% } %>
 </div>
 
+<!-- Watch Party Configuration Modal -->
+<div id="watchPartyModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center">
+    <div class="bg-gray-900 rounded-lg p-6 max-w-md w-full mx-4 animate__animated animate__fadeInUp">
+        <div class="flex justify-between items-center mb-4">
+            <h3 class="text-xl font-bold text-white">Create Watch Party</h3>
+            <button class="text-gray-400 hover:text-white" onclick="closeWatchPartyModal()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        
+        <div class="space-y-4">
+            <div>
+                <label class="block text-gray-300 mb-2">Maximum Members</label>
+                <select id="maxMembers" class="w-full bg-gray-800 text-white rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500">
+                    <option value="2">2 people</option>
+                    <option value="5">5 people</option>
+                    <option value="10" selected>10 people</option>
+                    <option value="20">20 people</option>
+                </select>
+            </div>
+            
+            <div>
+                <label class="block text-gray-300 mb-2">Privacy</label>
+                <div class="flex space-x-4">
+                    <label class="flex items-center">
+                        <input type="radio" name="privacy" value="public" checked class="text-purple-500">
+                        <span class="ml-2 text-white">Public</span>
+                    </label>
+                    <label class="flex items-center">
+                        <input type="radio" name="privacy" value="private" class="text-purple-500">
+                        <span class="ml-2 text-white">Private</span>
+                    </label>
+                </div>
+            </div>
+            
+            <div id="passwordField" class="hidden">
+                <label class="block text-gray-300 mb-2">Password</label>
+                <input type="password" id="partyPassword" class="w-full bg-gray-800 text-white rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500" placeholder="Enter party password">
+            </div>
+            
+            <div class="mt-6 flex justify-end space-x-3">
+                <button onclick="closeWatchPartyModal()" class="px-4 py-2 bg-gray-700 text-white rounded hover:bg-gray-600 transition">
+                    Cancel
+                </button>
+                <button onclick="createWatchParty()" class="px-4 py-2 bg-purple-600 text-white rounded hover:bg-purple-500 transition">
+                    Create Party
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- JavaScript for Player -->
 <script>
     document.addEventListener('DOMContentLoaded', function() {
@@ -261,7 +322,7 @@
                 playerTitle.textContent = movieTitle;
                 
                 // Open dedicated player link
-                openDedicatedPlayer.href = `/api/player?id=<%= movie.tmdbId %>&title=${encodeURIComponent(movieTitle)}`;
+                openDedicatedPlayer.href = `/api/player?id=<%= movie.tmdbId %>&title=${encodeURIComponent(movieTitle)}&poster=${encodeURIComponent('<%= movie.poster %>')}`;
                 
                 // Show the player container
                 playerContainer.classList.remove('hidden');
@@ -336,8 +397,86 @@
                 }
             });
         }
+        
+        // Watch Party Button Handler
+        const watchPartyBtn = document.querySelector('.watch-party-btn');
+        if (watchPartyBtn) {
+            watchPartyBtn.addEventListener('click', function() {
+                openWatchPartyModal();
+            });
+        }
     });
 </script>
 
 <!-- Include Watchlist JS -->
-<script src="/js/watchlist.js"></script> 
+<script src="/js/watchlist.js"></script>
+
+<!-- Add this script section at the bottom of the file -->
+<script>
+    // Watch Party Modal Functions
+    function openWatchPartyModal() {
+        document.getElementById('watchPartyModal').classList.remove('hidden');
+    }
+    
+    function closeWatchPartyModal() {
+        document.getElementById('watchPartyModal').classList.add('hidden');
+    }
+    
+    // Toggle password field based on privacy selection
+    document.querySelectorAll('input[name="privacy"]').forEach(radio => {
+        radio.addEventListener('change', function() {
+            const passwordField = document.getElementById('passwordField');
+            passwordField.classList.toggle('hidden', this.value === 'public');
+        });
+    });
+    
+    // Create Watch Party
+    async function createWatchParty() {
+        const maxMembers = document.getElementById('maxMembers').value;
+        const isPrivate = document.querySelector('input[name="privacy"]:checked').value === 'private';
+        const password = isPrivate ? document.getElementById('partyPassword').value : null;
+        
+        if (isPrivate && !password) {
+            alert('Please enter a password for private watch party.');
+            return;
+        }
+        
+        const userId = localStorage.getItem('userId') || generateUserId();
+        const button = document.querySelector('.watch-party-btn');
+        
+        try {
+            const response = await fetch('/api/watch-party/create', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    hostId: userId,
+                    mediaId: button.dataset.id,
+                    mediaType: button.dataset.type,
+                    title: button.dataset.title,
+                    config: {
+                        maxMembers: parseInt(maxMembers),
+                        isPrivate,
+                        password
+                    }
+                })
+            });
+            
+            const data = await response.json();
+            if (data.success) {
+                // Redirect to the player with party ID
+                window.location.href = `/api/player?id=${button.dataset.id}&title=${encodeURIComponent(button.dataset.title)}&party=${data.party.id}`;
+            }
+        } catch (error) {
+            console.error('Error creating watch party:', error);
+            alert('Failed to create watch party. Please try again.');
+        }
+    }
+    
+    function generateUserId() {
+        const userId = 'user_' + Math.random().toString(36).substr(2, 9);
+        localStorage.setItem('userId', userId);
+        return userId;
+    }
+</script> 
