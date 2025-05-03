@@ -63,35 +63,40 @@
                             <i class="fas fa-play mr-2 group-hover:animate-ping"></i> Watch Now
                         </a>
                         
-                        <button 
-                            class="watch-party-btn px-6 py-3 bg-purple-600 hover:bg-purple-500 rounded-lg transition flex items-center shadow-lg hover:shadow-xl"
-                            data-id="<%= movie.tmdbId %>"
-                            data-type="movie"
-                            data-title="<%= movie.title %>"
-                        >
-                            <i class="fas fa-users mr-2"></i> Watch Party
-                        </button>
-                        
-                        <button 
-                            class="watchlist-toggle px-6 py-3 bg-gray-700 hover:bg-gray-600 rounded-lg transition flex items-center shadow-lg hover:shadow-xl"
-                            data-id="<%= movie.tmdbId %>"
-                            data-type="movie"
-                            data-title="<%= movie.title %>"
-                            data-poster="<%= movie.poster %>"
-                            data-year="<%= movie.year %>"
-                        >
-                            <i class="fas fa-bookmark mr-2"></i> Add to Watchlist
-                        </button>
-                        
-                        <button class="favorite-btn px-6 py-3 bg-gray-700 hover:bg-gray-600 rounded-lg transition flex items-center shadow-lg hover:shadow-xl">
-                            <i class="far fa-heart mr-2"></i> Add to Favorites
-                        </button>
+                        <% if (locals.user) { %>
+                            <button 
+                                class="watch-party-btn px-6 py-3 bg-purple-600 hover:bg-purple-500 rounded-lg transition flex items-center shadow-lg hover:shadow-xl"
+                                data-id="<%= movie.tmdbId %>"
+                                data-type="movie"
+                                data-title="<%= movie.title %>"
+                            >
+                                <i class="fas fa-users mr-2"></i> Watch Party
+                            </button>
+                            
+                            <button 
+                                class="watchlist-toggle px-6 py-3 bg-gray-700 hover:bg-gray-600 rounded-lg transition flex items-center shadow-lg hover:shadow-xl"
+                                data-id="<%= movie.tmdbId %>"
+                                data-type="movie"
+                                data-title="<%= movie.title %>"
+                                data-poster="<%= movie.poster %>"
+                                data-year="<%= movie.year %>"
+                            >
+                                <i class="fas fa-bookmark mr-2"></i> Add to Watchlist
+                            </button>
+                            
+                            <button class="favorite-btn px-6 py-3 bg-gray-700 hover:bg-gray-600 rounded-lg transition flex items-center shadow-lg hover:shadow-xl">
+                                <i class="far fa-heart mr-2"></i> Add to Favorites
+                            </button>
 
-                        <!-- Add this right after the movie details buttons -->
-                        <button class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded-lg transition flex items-center space-x-2 ml-2" id="summary-btn">
-                            <i class="fas fa-robot"></i>
-                            <span>AI Summary</span>
-                        </button>
+                            <button class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded-lg transition flex items-center space-x-2 ml-2" id="summary-btn">
+                                <i class="fas fa-robot"></i>
+                                <span>AI Summary</span>
+                            </button>
+                        <% } else { %>
+                            <a href="/auth/login" class="px-6 py-3 bg-gray-700 hover:bg-gray-600 rounded-lg transition flex items-center shadow-lg hover:shadow-xl">
+                                <i class="fas fa-sign-in-alt mr-2"></i> Sign in to access more features
+                            </a>
+                        <% } %>
                     </div>
                 </div>
             </div>

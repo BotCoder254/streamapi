@@ -14,12 +14,51 @@ const NetworkSpeed = require('network-speed');
 const testNetworkSpeed = new NetworkSpeed();
 const WebSocket = require('ws');
 const { GoogleGenerativeAI } = require("@google/generative-ai");
+const admin = require('firebase-admin');
+const cookieParser = require('cookie-parser');
+
+// Import auth routes and middleware
+const { router: authRouter, isAuthenticated } = require('./routes/auth');
+const profileRouter = require('./routes/profile');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
 // Create HTTP server
 const server = require('http').createServer(app);
+
+// Middleware
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(cors());
+app.use(useragent.express());
+app.use(express.static('public'));
+app.use(cookieParser());
+
+// View engine setup
+app.use(expressLayouts);
+app.set('view engine', 'ejs');
+app.set('layout', 'layout');
+
+// Make user data available in all views
+app.use(async (req, res, next) => {
+    try {
+        const token = req.cookies.token;
+        if (token) {
+            const decodedToken = await admin.auth().verifyIdToken(token);
+            const userRecord = await admin.auth().getUser(decodedToken.uid);
+            res.locals.user = userRecord;
+        }
+    } catch (error) {
+        res.clearCookie('token');
+        res.locals.user = null;
+    }
+    next();
+});
+
+// Mount auth routes
+app.use('/auth', authRouter);
+app.use('/profile', isAuthenticated, profileRouter);
 
 // Create WebSocket server
 const wss = new WebSocket.Server({ server });
@@ -310,56 +349,6 @@ const sendEmail = async (options) => {
   }
 };
 
-// Middleware
-app.use(cors());
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-app.use(express.static(path.join(__dirname, 'public')));
-app.use(expressLayouts);
-app.set('view engine', 'ejs');
-app.set('views', path.join(__dirname, 'views'));
-app.set('layout', 'layout');
-
-// Ad blocker middleware
-app.use((req, res, next) => {
-  // Block common ad domains and tracking scripts
-  const blockedDomains = [
-    'doubleclick.net',
-    'google-analytics.com',
-    'adnxs.com',
-    'advertising.com',
-    'fastclick.net',
-    'quantserve.com',
-    'scorecardresearch.com',
-    'zedo.com',
-    'adbrite.com',
-    'adbureau.net',
-    'admob.com',
-    'bannersxchange.com',
-    'buysellads.com',
-    'dtscout.com',
-    'popads.net'
-  ];
-
-  const referer = req.get('Referer') || '';
-  const isAdRequest = blockedDomains.some(domain => referer.includes(domain));
-
-  if (isAdRequest) {
-    return res.status(403).end();
-  }
-
-  // Add security headers
-  res.setHeader('X-Frame-Options', 'SAMEORIGIN');
-  res.setHeader('X-Content-Type-Options', 'nosniff');
-  res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
-  res.setHeader('Content-Security-Policy', "frame-ancestors 'self'");
-  
-  next();
-});
-
-// Middleware to track user information
-app.use(useragent.express());
-
 // Middleware to track user session time and get network speed
 app.use(async (req, res, next) => {
     const sessionId = req.ip + '-' + req.headers['user-agent'];
@@ -475,9 +464,20 @@ const fetchTrailers = async (id, type = 'movie') => {
 const fetchTrending = async (mediaType = 'all', timeWindow = 'week', page = 1) => {
   try {
     const data = await fetchFromTMDB(`/trending/${mediaType}/${timeWindow}`, { page });
-    return data.results || [];
+    if (!data || !data.results) {
+      console.error('Invalid trending data format received');
+      return [];
+    }
+    return data.results.map(item => ({
+      id: item.id,
+      title: item.title || item.name,
+      poster_path: item.poster_path,
+      backdrop_path: item.backdrop_path,
+      media_type: item.media_type || mediaType
+    }));
   } catch (error) {
     console.error(`Error fetching trending ${mediaType}: ${error.message}`);
+    // Return empty array as fallback
     return [];
   }
 };
@@ -1162,32 +1162,25 @@ app.get('/api/trending', async (req, res) => {
     
     const trendingData = await fetchTrending(mediaType, timeWindow, page);
     
-    if (!trendingData || !trendingData.results) {
+    // Since fetchTrending now returns an array directly
+    if (!Array.isArray(trendingData)) {
       return handleApiError(res, "Failed to retrieve trending content", 500);
     }
     
-    const formattedResults = trendingData.results.map(item => {
-      const isMovie = item.media_type === 'movie' || mediaType === 'movie';
-      return {
-        id: item.id,
-        title: isMovie ? item.title : item.name,
-        media_type: item.media_type || mediaType,
-        overview: item.overview,
-        poster: item.poster_path ? `https://image.tmdb.org/t/p/w500${item.poster_path}` : null,
-        backdrop: item.backdrop_path ? `https://image.tmdb.org/t/p/original${item.backdrop_path}` : null,
-        release_date: isMovie ? item.release_date : item.first_air_date,
-        vote_average: item.vote_average
-      };
-    });
+    const formattedResults = trendingData.map(item => ({
+      id: item.id,
+      title: item.title,
+      media_type: item.media_type,
+      poster_path: item.poster_path,
+      backdrop_path: item.backdrop_path
+    }));
     
     res.json({
       success: true,
-      results: formattedResults,
-      page: trendingData.page,
-      total_pages: trendingData.total_pages,
-      total_results: trendingData.total_results
+      results: formattedResults
     });
   } catch (error) {
+    console.error('Trending API error:', error);
     handleApiError(res, "Failed to retrieve trending content", 500);
   }
 });
@@ -1982,6 +1975,11 @@ app.get('/api/movie/summary/:id', async (req, res) => {
     });
   }
 });
+
+// Protected routes
+app.use('/profile', isAuthenticated, profileRouter);
+app.use('/api/watch-party', isAuthenticated);
+app.use('/api/watchlist', isAuthenticated);
 
 // Start the server
 server.listen(PORT, () => {

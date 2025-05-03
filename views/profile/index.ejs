@@ -1,0 +1,123 @@
+<%- include('../partials/header') %>
+
+<div class="container mx-auto px-4 py-8">
+    <div class="max-w-4xl mx-auto bg-gray-800 rounded-lg shadow-lg overflow-hidden">
+        <div class="relative h-48 bg-gradient-to-r from-blue-500 to-purple-600">
+            <div class="absolute -bottom-16 left-8">
+                <div class="relative">
+                    <img src="<%= user.photoURL || 'https://avatar.iran.liara.run/public' %>" 
+                         alt="Profile" 
+                         class="w-32 h-32 rounded-full border-4 border-gray-800 object-cover">
+                    <label for="profile" class="absolute bottom-0 right-0 bg-gray-800 rounded-full p-2 cursor-pointer hover:bg-gray-700">
+                        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                        </svg>
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <div class="pt-20 px-8 pb-8">
+            <% if (locals.error) { %>
+                <div class="mb-4 p-4 bg-red-500 text-white rounded-lg">
+                    <%= error %>
+                </div>
+            <% } %>
+            
+            <% if (locals.success) { %>
+                <div class="mb-4 p-4 bg-green-500 text-white rounded-lg">
+                    <%= success %>
+                </div>
+            <% } %>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <!-- Profile Information -->
+                <div class="bg-gray-700 p-6 rounded-lg">
+                    <h2 class="text-2xl font-bold text-white mb-6">Profile Information</h2>
+                    <form action="/profile/update" method="POST" enctype="multipart/form-data">
+                        <input type="file" id="profile" name="profile" class="hidden" accept="image/*">
+                        
+                        <div class="mb-4">
+                            <label class="block text-gray-300 text-sm font-bold mb-2" for="displayName">
+                                Display Name
+                            </label>
+                            <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                                   id="displayName"
+                                   name="displayName"
+                                   type="text"
+                                   value="<%= user.displayName %>"
+                                   required>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="block text-gray-300 text-sm font-bold mb-2">
+                                Email
+                            </label>
+                            <p class="text-gray-400"><%= user.email %></p>
+                        </div>
+
+                        <button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline w-full">
+                            Update Profile
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Change Password -->
+                <div class="bg-gray-700 p-6 rounded-lg">
+                    <h2 class="text-2xl font-bold text-white mb-6">Change Password</h2>
+                    <form action="/profile/change-password" method="POST">
+                        <div class="mb-4">
+                            <label class="block text-gray-300 text-sm font-bold mb-2" for="newPassword">
+                                New Password
+                            </label>
+                            <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                                   id="newPassword"
+                                   name="newPassword"
+                                   type="password"
+                                   required>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="block text-gray-300 text-sm font-bold mb-2" for="confirmPassword">
+                                Confirm New Password
+                            </label>
+                            <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                                   id="confirmPassword"
+                                   type="password"
+                                   required>
+                        </div>
+
+                        <button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline w-full">
+                            Change Password
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.getElementById('profile').addEventListener('change', function(e) {
+    if (e.target.files && e.target.files[0]) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            document.querySelector('img[alt="Profile"]').src = e.target.result;
+        };
+        reader.readAsDataURL(e.target.files[0]);
+    }
+});
+
+document.querySelector('form[action="/profile/change-password"]').addEventListener('submit', function(e) {
+    const newPassword = document.getElementById('newPassword').value;
+    const confirmPassword = document.getElementById('confirmPassword').value;
+    
+    if (newPassword !== confirmPassword) {
+        e.preventDefault();
+        alert('Passwords do not match!');
+    }
+});
+</script>
+
+<%- include('../partials/footer') %> 
