@@ -1340,6 +1340,97 @@ app.use((req, res) => {
   res.status(404).render('error', { msg: 'Page Not Found', code: 404 });
 });
 
+// Continue Watching storage
+const continueWatchingStorage = {
+  items: new Map(),
+  
+  updateProgress(userId, mediaId, mediaType, progress) {
+    const key = `${userId}_${mediaId}`;
+    this.items.set(key, {
+      userId,
+      mediaId,
+      mediaType,
+      progress,
+      lastWatched: new Date().toISOString(),
+      title: progress.title,
+      poster_path: progress.poster_path
+    });
+  },
+  
+  getProgress(userId, mediaId) {
+    const key = `${userId}_${mediaId}`;
+    return this.items.get(key);
+  },
+  
+  getUserProgress(userId, limit = 20) {
+    const userItems = Array.from(this.items.values())
+      .filter(item => item.userId === userId)
+      .sort((a, b) => new Date(b.lastWatched) - new Date(a.lastWatched))
+      .slice(0, limit);
+    
+    return userItems;
+  },
+  
+  removeProgress(userId, mediaId) {
+    const key = `${userId}_${mediaId}`;
+    return this.items.delete(key);
+  }
+};
+
+// Add continue watching endpoints
+app.post('/api/continue-watching/progress', async (req, res) => {
+  try {
+    const { userId, mediaId, mediaType, progress } = req.body;
+    if (!userId || !mediaId || !mediaType || !progress) {
+      return res.status(400).json({ error: 'Missing required fields' });
+    }
+    
+    continueWatchingStorage.updateProgress(userId, mediaId, mediaType, progress);
+    res.json({ success: true });
+  } catch (error) {
+    handleError(res, 'Error updating watch progress');
+  }
+});
+
+app.get('/api/continue-watching/:userId', async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const { limit } = req.query;
+    
+    const progress = continueWatchingStorage.getUserProgress(userId, limit ? parseInt(limit) : 20);
+    
+    // Fetch updated details for each item from TMDB
+    const updatedProgress = await Promise.all(progress.map(async (item) => {
+      try {
+        const endpoint = `/${item.mediaType}/${item.mediaId}`;
+        const details = await fetchFromTMDB(endpoint);
+        return {
+          ...item,
+          title: details.title || details.name,
+          poster_path: details.poster_path,
+          overview: details.overview
+        };
+      } catch (error) {
+        return item;
+      }
+    }));
+    
+    res.json(updatedProgress);
+  } catch (error) {
+    handleError(res, 'Error fetching continue watching list');
+  }
+});
+
+app.delete('/api/continue-watching/:userId/:mediaId', async (req, res) => {
+  try {
+    const { userId, mediaId } = req.params;
+    const removed = continueWatchingStorage.removeProgress(userId, mediaId);
+    res.json({ success: removed });
+  } catch (error) {
+    handleError(res, 'Error removing from continue watching');
+  }
+});
+
 // Start the server
 server.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);

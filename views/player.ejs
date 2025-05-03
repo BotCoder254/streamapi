@@ -670,6 +670,73 @@
                 }
             }
         });
+        
+        // Progress tracking functionality
+        let lastProgressUpdate = 0;
+        const PROGRESS_UPDATE_INTERVAL = 5000; // Update every 5 seconds
+        
+        function generateUserId() {
+            let userId = localStorage.getItem('userId');
+            if (!userId) {
+                userId = 'user_' + Math.random().toString(36).substr(2, 9);
+                localStorage.setItem('userId', userId);
+            }
+            return userId;
+        }
+        
+        function updateWatchProgress(currentTime, duration) {
+            const now = Date.now();
+            if (now - lastProgressUpdate < PROGRESS_UPDATE_INTERVAL) return;
+            
+            const progress = {
+                currentTime,
+                duration,
+                percentage: (currentTime / duration) * 100,
+                title: '<%= title %>',
+                poster_path: '<%= poster %>',
+                timestamp: new Date().toISOString()
+            };
+            
+            const userId = generateUserId();
+            
+            fetch('/api/continue-watching/progress', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    userId,
+                    mediaId: '<%= id %>',
+                    mediaType: '<%= type %>',
+                    progress
+                })
+            }).catch(console.error);
+            
+            lastProgressUpdate = now;
+        }
+        
+        // Add event listener for video time updates
+        document.addEventListener('DOMContentLoaded', function() {
+            const videoElement = document.querySelector('video');
+            if (videoElement) {
+                videoElement.addEventListener('timeupdate', function() {
+                    updateWatchProgress(this.currentTime, this.duration);
+                });
+            }
+            
+            // Load saved progress if available
+            const userId = generateUserId();
+            fetch(`/api/continue-watching/${userId}/<%= id %>`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data && data.progress && data.progress.currentTime) {
+                        if (videoElement) {
+                            videoElement.currentTime = data.progress.currentTime;
+                        }
+                    }
+                })
+                .catch(console.error);
+        });
     </script>
 </body>
 </html> 

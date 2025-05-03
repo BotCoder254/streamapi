@@ -58,7 +58,31 @@
         </div>
     </div>
     
-   
+    <!-- Continue Watching Section -->
+    <div class="mb-12 continue-watching-section" style="display: none;">
+        <div class="flex justify-between items-center mb-6">
+            <h2 class="text-2xl font-bold">
+                <i class="fas fa-history mr-2 text-purple-400"></i>
+                Continue Watching
+            </h2>
+            <button class="text-purple-400 hover:text-purple-300 transition flex items-center" id="clear-continue-watching">
+                Clear All <i class="fas fa-times ml-1 text-sm"></i>
+            </button>
+        </div>
+        
+        <div class="content-slider relative group">
+            <div class="content-wrapper flex space-x-4 overflow-x-auto pb-4 snap-x scrollbar-hide" id="continue-watching-wrapper">
+                <!-- Continue watching items will be dynamically inserted here -->
+            </div>
+            
+            <button class="slider-prev absolute top-1/2 left-0 -translate-y-1/2 w-10 h-10 bg-black/50 hover:bg-black/70 text-white rounded-full flex items-center justify-center z-10 opacity-0 group-hover:opacity-100 transition-opacity">
+                <i class="fas fa-chevron-left"></i>
+            </button>
+            <button class="slider-next absolute top-1/2 right-0 -translate-y-1/2 w-10 h-10 bg-black/50 hover:bg-black/70 text-white rounded-full flex items-center justify-center z-10 opacity-0 group-hover:opacity-100 transition-opacity">
+                <i class="fas fa-chevron-right"></i>
+            </button>
+        </div>
+    </div>
     
     <!-- Popular TV Shows Slider Section -->
     <div class="mb-12">
@@ -449,6 +473,75 @@
         
         // Initialize hero slider
         heroBannerSetup();
+        
+        // Continue Watching functionality
+        function loadContinueWatching() {
+            const userId = localStorage.getItem('userId');
+            if (!userId) return;
+            
+            fetch(`/api/continue-watching/${userId}`)
+                .then(response => response.json())
+                .then(items => {
+                    if (items && items.length > 0) {
+                        const wrapper = document.getElementById('continue-watching-wrapper');
+                        wrapper.innerHTML = items.map(item => `
+                            <div class="movie-card flex-shrink-0 w-[180px] md:w-[200px] snap-start bg-gray-800 rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 group/card">
+                                <a href="/view/${item.mediaType}/${item.mediaId}">
+                                    <div class="relative pb-[150%]">
+                                        ${item.progress.poster_path ? `
+                                            <img src="${item.progress.poster_path}" alt="${item.progress.title}" class="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover/card:scale-110" onerror="this.onerror=null; this.src='https://via.placeholder.com/300x450?text=No+Poster'; this.classList.add('object-contain');">
+                                            <div class="absolute inset-0 bg-gradient-to-b from-black/10 via-transparent to-black/80"></div>
+                                            <div class="absolute inset-0 bg-black/60 opacity-0 group-hover/card:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+                                                <div class="play-icon bg-purple-600/90 text-white rounded-full w-12 h-12 flex items-center justify-center transform scale-0 group-hover/card:scale-100 transition-transform duration-300 animate-pulse">
+                                                    <i class="fas fa-play animate-bounce"></i>
+                                                </div>
+                                                <div class="absolute bottom-0 left-0 right-0 p-3 transform translate-y-4 group-hover/card:translate-y-0 transition-transform duration-300">
+                                                    <h3 class="text-sm font-bold line-clamp-2 mb-1">${item.progress.title}</h3>
+                                                    <div class="flex items-center text-xs text-gray-300 space-x-2">
+                                                        <span><i class="fas fa-history mr-1 text-purple-400"></i> ${Math.round(item.progress.percentage)}%</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        ` : `
+                                            <div class="absolute inset-0 w-full h-full bg-gray-700 flex items-center justify-center">
+                                                <i class="fas fa-film text-3xl text-gray-600"></i>
+                                            </div>
+                                        `}
+                                        <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black to-transparent py-2 px-3 group-hover/card:opacity-0 transition-opacity duration-300">
+                                            <h3 class="text-sm font-bold line-clamp-2">${item.progress.title}</h3>
+                                            <div class="w-full bg-gray-700 rounded-full h-1 mt-2">
+                                                <div class="bg-purple-500 h-1 rounded-full" style="width: ${item.progress.percentage}%"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </a>
+                            </div>
+                        `).join('');
+                        
+                        document.querySelector('.continue-watching-section').style.display = 'block';
+                    }
+                })
+                .catch(console.error);
+        }
+        
+        // Clear continue watching list
+        document.getElementById('clear-continue-watching')?.addEventListener('click', function() {
+            const userId = localStorage.getItem('userId');
+            if (!userId) return;
+            
+            if (confirm('Are you sure you want to clear your continue watching list?')) {
+                fetch(`/api/continue-watching/${userId}`, {
+                    method: 'DELETE'
+                })
+                .then(() => {
+                    document.querySelector('.continue-watching-section').style.display = 'none';
+                })
+                .catch(console.error);
+            }
+        });
+        
+        // Load continue watching on page load
+        document.addEventListener('DOMContentLoaded', loadContinueWatching);
     });
 </script>
 
