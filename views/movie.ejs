@@ -86,6 +86,12 @@
                         <button class="favorite-btn px-6 py-3 bg-gray-700 hover:bg-gray-600 rounded-lg transition flex items-center shadow-lg hover:shadow-xl">
                             <i class="far fa-heart mr-2"></i> Add to Favorites
                         </button>
+
+                        <!-- Add this right after the movie details buttons -->
+                        <button class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded-lg transition flex items-center space-x-2 ml-2" id="summary-btn">
+                            <i class="fas fa-robot"></i>
+                            <span>AI Summary</span>
+                        </button>
                     </div>
                 </div>
             </div>
@@ -285,6 +291,26 @@
     </div>
 </div>
 
+<!-- AI Summary Modal -->
+<div id="summary-modal" class="fixed inset-0 z-50 hidden">
+    <div class="absolute inset-0 bg-black/70 backdrop-blur-sm"></div>
+    <div class="relative min-h-screen flex items-center justify-center p-4">
+        <div class="bg-gray-900 rounded-xl w-full max-w-2xl p-6 shadow-2xl transform transition-all">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-xl font-bold">AI-Generated Summary</h3>
+                <button id="close-summary-modal" class="text-gray-400 hover:text-white">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div id="summary-content" class="prose prose-invert max-w-none">
+                <div class="flex justify-center items-center py-8">
+                    <div class="animate-spin rounded-full h-12 w-12 border-4 border-green-500 border-t-transparent"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- JavaScript for Player -->
 <script>
     document.addEventListener('DOMContentLoaded', function() {
@@ -299,6 +325,104 @@
         const openDedicatedPlayer = document.getElementById('open-dedicated-player');
         const playBtn = document.querySelector('.play-btn');
         
+        // Add summary modal elements
+        const summaryBtn = document.getElementById('summary-btn');
+        const summaryModal = document.getElementById('summary-modal');
+        const closeSummaryModal = document.getElementById('close-summary-modal');
+        const summaryContent = document.getElementById('summary-content');
+
+        // Function to show loading state
+        function showLoading() {
+            if (summaryContent) {
+                summaryContent.innerHTML = `
+                    <div class="flex justify-center items-center py-8">
+                        <div class="animate-spin rounded-full h-12 w-12 border-4 border-green-500 border-t-transparent"></div>
+                    </div>
+                `;
+            }
+        }
+        
+        // Function to show error state
+        function showError(message) {
+            if (summaryContent) {
+                summaryContent.innerHTML = `
+                    <div class="text-center py-8">
+                        <i class="fas fa-exclamation-circle text-red-500 text-4xl mb-4"></i>
+                        <p class="text-red-400">${message}</p>
+                        <button id="retry-summary" class="mt-4 px-4 py-2 bg-green-600 hover:bg-green-500 rounded-lg transition">
+                            <i class="fas fa-redo mr-2"></i>Try Again
+                        </button>
+                    </div>
+                `;
+                
+                // Add retry handler
+                document.getElementById('retry-summary')?.addEventListener('click', fetchSummary);
+            }
+        }
+        
+        // Function to show success state
+        function showSummary(summary) {
+            if (summaryContent) {
+                summaryContent.innerHTML = `
+                    <div class="space-y-4">
+                        <p class="text-gray-300 leading-relaxed">${summary}</p>
+                    </div>
+                `;
+            }
+        }
+        
+        // Function to fetch summary
+        async function fetchSummary() {
+            showLoading();
+            
+            try {
+                const movieId = '<%= movie.tmdbId %>';
+                const response = await fetch(`/api/movie/summary/${movieId}`);
+                const data = await response.json();
+                
+                if (!response.ok) throw new Error(data.error || 'Failed to generate summary');
+                if (!data.success) throw new Error(data.error || 'Failed to generate summary');
+                
+                showSummary(data.summary);
+            } catch (error) {
+                console.error('Summary error:', error);
+                showError(error.message || 'Failed to generate summary. Please try again later.');
+            }
+        }
+
+        // Summary button click handler
+        if (summaryBtn && summaryModal) {
+            summaryBtn.addEventListener('click', () => {
+                console.log('Summary button clicked');
+                summaryModal.classList.remove('hidden');
+                fetchSummary();
+            });
+        }
+
+        // Close summary modal handler
+        if (closeSummaryModal && summaryModal) {
+            closeSummaryModal.addEventListener('click', () => {
+                console.log('Closing summary modal');
+                summaryModal.classList.add('hidden');
+            });
+
+            // Close modal when clicking outside
+            summaryModal.addEventListener('click', (e) => {
+                if (e.target === summaryModal) {
+                    console.log('Closing summary modal (outside click)');
+                    summaryModal.classList.add('hidden');
+                }
+            });
+        }
+
+        // Close modal with Escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && summaryModal && !summaryModal.classList.contains('hidden')) {
+                console.log('Closing summary modal (Escape key)');
+                summaryModal.classList.add('hidden');
+            }
+        });
+
         // Play button functionality
         if (playBtn) {
             playBtn.addEventListener('mouseenter', function() {
@@ -479,4 +603,20 @@
         localStorage.setItem('userId', userId);
         return userId;
     }
-</script> 
+</script>
+
+<!-- Add these styles to maintain consistency -->
+<style>
+    #summary-modal {
+        backdrop-filter: blur(5px);
+    }
+    
+    .animate__animated {
+        animation-duration: 0.3s;
+    }
+    
+    @keyframes modalFade {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+</style> 

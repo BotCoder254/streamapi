@@ -13,6 +13,7 @@ const os = require('os');
 const NetworkSpeed = require('network-speed');
 const testNetworkSpeed = new NetworkSpeed();
 const WebSocket = require('ws');
+const { GoogleGenerativeAI } = require("@google/generative-ai");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -36,7 +37,20 @@ wss.on('connection', (ws) => {
     
     ws.on('message', (message) => {
         try {
-            const data = JSON.parse(message);
+            // Handle both string and Buffer messages
+            const messageStr = message instanceof Buffer ? message.toString() : message;
+            let data;
+            
+            try {
+                data = JSON.parse(messageStr);
+            } catch (parseError) {
+                console.error('WebSocket message parse error:', parseError);
+                ws.send(JSON.stringify({
+                    type: 'error',
+                    error: 'Invalid message format'
+                }));
+                return;
+            }
             
             switch (data.type) {
                 case 'joinParty': {
@@ -1570,7 +1584,7 @@ app.delete('/api/continue-watching/:userId/:mediaId', async (req, res) => {
 });
 
 // Watch Party storage
-const watchPartyStorage = {
+let watchPartyStorage = {
   parties: new Map(),
   activeParties: new Map(), // Track active parties per media
   
@@ -1616,6 +1630,10 @@ const watchPartyStorage = {
       }
     }
     return count;
+  },
+  
+  getPartiesByMediaId(mediaId) {
+    return Array.from(this.parties.values()).filter(party => party.mediaId === mediaId);
   },
   
   joinParty(partyId, userId, password = null) {
@@ -1846,6 +1864,123 @@ app.get('/api/watch-party/active/:mediaId', (req, res) => {
     const { mediaId } = req.params;
     const count = watchPartyStorage.getActivePartiesCount(mediaId);
     res.json({ count });
+});
+
+// Initialize Gemini API with configuration
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || 'AIzaSyBcZ3uTmksb7lTy24OnaAKKI93Lemai-HM');
+
+// Safety settings for content generation
+const safetySettings = [
+  {
+    category: "HARM_CATEGORY_HARASSMENT",
+    threshold: "BLOCK_MEDIUM_AND_ABOVE",
+  },
+  {
+    category: "HARM_CATEGORY_HATE_SPEECH",
+    threshold: "BLOCK_MEDIUM_AND_ABOVE",
+  },
+  {
+    category: "HARM_CATEGORY_SEXUALLY_EXPLICIT",
+    threshold: "BLOCK_MEDIUM_AND_ABOVE",
+  },
+  {
+    category: "HARM_CATEGORY_DANGEROUS_CONTENT",
+    threshold: "BLOCK_MEDIUM_AND_ABOVE",
+  },
+];
+
+// Movie summary endpoint using Gemini API
+app.get('/api/movie/summary/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    // Fetch movie details from TMDB
+    const movieData = await fetchFromTMDB(`/movie/${id}`);
+    
+    if (!movieData) {
+      return res.status(404).json({
+        success: false,
+        error: 'Movie not found'
+      });
+    }
+    
+    // Create context for the AI
+    const context = `
+      Movie Title: ${movieData.title}
+      Release Year: ${movieData.release_date ? movieData.release_date.split('-')[0] : 'N/A'}
+      Overview: ${movieData.overview}
+      Genres: ${movieData.genres ? movieData.genres.map(g => g.name).join(', ') : 'N/A'}
+      Runtime: ${movieData.runtime} minutes
+    `;
+    
+    try {
+      // Get the Gemini model
+      const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+      
+      const prompt = `Please provide a comprehensive but concise summary of this movie, highlighting key plot points and themes. Also include a brief recommendation for what type of audience might enjoy it. Here's the movie information: ${context}`;
+      
+      // Generate content with safety settings and configuration
+      const result = await model.generateContent({
+        contents: [{ role: 'user', parts: [{ text: prompt }]}],
+        generationConfig: {
+          temperature: 0.7,
+          topK: 40,
+          topP: 0.95,
+          maxOutputTokens: 2048,
+        },
+        safetySettings,
+      });
+      
+      const response = await result.response;
+      let summary = response.text();
+      
+      if (!summary || summary.trim().length === 0) {
+        throw new Error('Empty summary generated');
+      }
+      
+      // Sanitize the summary: remove special characters and escape quotes
+      const sanitizedSummary = summary
+        .replace(/[\u0000-\u001F\u007F-\u009F]/g, '')
+        .replace(/\\/g, '\\\\')
+        .replace(/"/g, '\\"')
+        .replace(/\n/g, ' ')
+        .trim();
+      
+      // Set proper Content-Type header and return valid JSON
+      res.setHeader('Content-Type', 'application/json');
+      res.setHeader('Cache-Control', 'no-cache');
+      return res.status(200).json({
+        success: true,
+        summary: sanitizedSummary
+      });
+      
+    } catch (aiError) {
+      console.error('AI generation error:', aiError.message);
+      
+      // Fallback to movie overview if AI generation fails
+      const fallbackSummary = movieData.overview
+        ? movieData.overview.replace(/[\u0000-\u001F\u007F-\u009F]/g, '').replace(/"/g, '\\"').trim()
+        : 'Summary not available.';
+      
+      res.setHeader('Content-Type', 'application/json');
+      res.setHeader('Cache-Control', 'no-cache');
+      return res.status(200).json({
+        success: true,
+        summary: fallbackSummary,
+        fallback: true
+      });
+    }
+  } catch (error) {
+    console.error('Summary generation error:', error.message);
+    
+    // Set proper Content-Type header
+    res.setHeader('Content-Type', 'application/json');
+    res.setHeader('Cache-Control', 'no-cache');
+    return res.status(500).json({
+      success: false,
+      error: 'Failed to generate summary. Please try again later.'
+    });
+  }
 });
 
 // Start the server

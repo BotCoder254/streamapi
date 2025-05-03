@@ -18,6 +18,7 @@
   "license": "ISC",
   "description": "A streaming API service that fetches movie and TV show data from TMDB and VidSrc",
   "dependencies": {
+    "@google/generative-ai": "^0.2.1",
     "axios": "^0.27.2",
     "cors": "^2.8.5",
     "dotenv": "^16.5.0",
