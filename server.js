@@ -24,9 +24,144 @@ const server = require('http').createServer(app);
 const wss = new WebSocket.Server({ server });
 
 // WebSocket connection handling
-wss.on('connection', function connection(ws) {
+wss.on('connection', (ws) => {
+    ws.isAlive = true;
+    
+    ws.on('pong', () => {
+        ws.isAlive = true;
+    });
+    
     // Send initial user count
     ws.send(JSON.stringify({ type: 'userCount', count: activeUsers }));
+    
+    ws.on('message', (message) => {
+        try {
+            const data = JSON.parse(message);
+            
+            switch (data.type) {
+                case 'joinParty': {
+                    const { partyId, userId, password } = data;
+                    const success = watchPartyStorage.joinParty(partyId, userId, password);
+                    
+                    if (success) {
+                        const party = watchPartyStorage.getParty(partyId);
+                        if (!party) {
+                            ws.send(JSON.stringify({
+                                type: 'error',
+                                error: 'Party not found'
+                            }));
+                            return;
+                        }
+                        
+                        ws.partyId = partyId;
+                        ws.userId = userId;
+                        
+                        // Notify all members about the new join
+                        wss.clients.forEach((client) => {
+                            if (client.partyId === partyId && client.readyState === WebSocket.OPEN) {
+                                client.send(JSON.stringify({
+                                    type: 'partyUpdate',
+                                    party: {
+                                        ...party,
+                                        members: Array.from(party.members),
+                                        config: {
+                                            ...party.config,
+                                            password: undefined
+                                        }
+                                    }
+                                }));
+                            }
+                        });
+                    } else {
+                        ws.send(JSON.stringify({
+                            type: 'error',
+                            error: 'Failed to join party. Invalid password or party is full.'
+                        }));
+                    }
+                    break;
+                }
+                case 'playbackUpdate': {
+                    const { partyId, userId, currentTime, isPlaying } = data;
+                    const party = watchPartyStorage.getParty(partyId);
+                    
+                    if (party && party.hostId === userId) {
+                        watchPartyStorage.updatePartyState(partyId, { currentTime, isPlaying });
+                        
+                        // Broadcast to all party members except sender
+                        wss.clients.forEach((client) => {
+                            if (client !== ws && client.partyId === partyId && client.readyState === WebSocket.OPEN) {
+                                client.send(JSON.stringify({
+                                    type: 'playbackUpdate',
+                                    currentTime,
+                                    isPlaying
+                                }));
+                            }
+                        });
+                    }
+                    break;
+                }
+                case 'partyChat': {
+                    const { partyId, userId, text } = data;
+                    const party = watchPartyStorage.getParty(partyId);
+                    
+                    if (party && party.members.has(userId)) {
+                        // Broadcast chat message to all party members
+                        wss.clients.forEach((client) => {
+                            if (client.partyId === partyId && client.readyState === WebSocket.OPEN) {
+                                client.send(JSON.stringify({
+                                    type: 'partyChat',
+                                    userId,
+                                    text,
+                                    timestamp: new Date().toISOString()
+                                }));
+                            }
+                        });
+                    }
+                    break;
+                }
+            }
+        } catch (error) {
+            console.error('WebSocket message error:', error);
+            ws.send(JSON.stringify({
+                type: 'error',
+                error: 'Invalid message format'
+            }));
+        }
+    });
+    
+    ws.on('close', () => {
+        if (ws.partyId && ws.userId) {
+            const party = watchPartyStorage.getParty(ws.partyId);
+            if (party) {
+                party.members.delete(ws.userId);
+                
+                // If party is empty, remove it
+                if (party.members.size === 0) {
+                    watchPartyStorage.parties.delete(ws.partyId);
+                    if (watchPartyStorage.activeParties.has(party.mediaId)) {
+                        watchPartyStorage.activeParties.get(party.mediaId).delete(ws.partyId);
+                    }
+                } else {
+                    // Notify remaining members
+                    wss.clients.forEach((client) => {
+                        if (client.partyId === ws.partyId && client.readyState === WebSocket.OPEN) {
+                            client.send(JSON.stringify({
+                                type: 'partyUpdate',
+                                party: {
+                                    ...party,
+                                    members: Array.from(party.members),
+                                    config: {
+                                        ...party.config,
+                                        password: undefined
+                                    }
+                                }
+                            }));
+                        }
+                    });
+                }
+            }
+        }
+    });
 });
 
 // Function to broadcast user count to all connected clients
@@ -702,8 +837,11 @@ app.get('/api/player', async (req, res) => {
       season,
       episode,
       posterPath,
+      poster: posterPath,
       isMobile: req.useragent.isMobile,
-      isTablet: req.useragent.isTablet
+      isTablet: req.useragent.isTablet,
+      id: tmdbId || imdbId,
+      type: mediaType
     });
   } catch (error) {
     console.error(`Player error: ${error.message}`);
@@ -1429,6 +1567,285 @@ app.delete('/api/continue-watching/:userId/:mediaId', async (req, res) => {
   } catch (error) {
     handleError(res, 'Error removing from continue watching');
   }
+});
+
+// Watch Party storage
+const watchPartyStorage = {
+  parties: new Map(),
+  activeParties: new Map(), // Track active parties per media
+  
+  createParty(hostId, mediaId, mediaType, title, config = {}) {
+    const partyId = `party_${Math.random().toString(36).substr(2, 9)}`;
+    const party = {
+      id: partyId,
+      hostId,
+      mediaId,
+      mediaType,
+      title,
+      members: new Set([hostId]),
+      currentTime: 0,
+      isPlaying: false,
+      createdAt: new Date().toISOString(),
+      config: {
+        maxMembers: config.maxMembers || 10,
+        isPrivate: config.isPrivate || false,
+        password: config.password || null
+      }
+    };
+    
+    this.parties.set(partyId, party);
+    
+    // Track active parties for this media
+    if (!this.activeParties.has(mediaId)) {
+      this.activeParties.set(mediaId, new Set());
+    }
+    this.activeParties.get(mediaId).add(partyId);
+    
+    return party;
+  },
+  
+  getParty(partyId) {
+    return this.parties.get(partyId);
+  },
+  
+  getActivePartiesCount(mediaId) {
+    let count = 0;
+    for (const [partyId, party] of this.parties.entries()) {
+      if (party.mediaId === mediaId && party.members.size > 0) {
+        count++;
+      }
+    }
+    return count;
+  },
+  
+  joinParty(partyId, userId, password = null) {
+    const party = this.parties.get(partyId);
+    if (!party) return false;
+    
+    // Check party constraints
+    if (party.config.isPrivate && party.config.password !== password) {
+      return false;
+    }
+    
+    if (party.members.size >= party.config.maxMembers) {
+      return false;
+    }
+    
+    party.members.add(userId);
+    return true;
+  },
+  
+  leaveParty(partyId, userId) {
+    const party = this.parties.get(partyId);
+    if (party) {
+      party.members.delete(userId);
+      // Delete party if no members left
+      if (party.members.size === 0) {
+        this.parties.delete(partyId);
+        // Remove from active parties tracking
+        if (this.activeParties.has(party.mediaId)) {
+          this.activeParties.get(party.mediaId).delete(partyId);
+          if (this.activeParties.get(party.mediaId).size === 0) {
+            this.activeParties.delete(party.mediaId);
+          }
+        }
+      }
+      // Transfer host if host leaves and others remain
+      else if (party.hostId === userId && party.members.size > 0) {
+        party.hostId = Array.from(party.members)[0];
+      }
+      return true;
+    }
+    return false;
+  },
+  
+  updatePartyState(partyId, state) {
+    const party = this.parties.get(partyId);
+    if (party) {
+      Object.assign(party, state);
+      return true;
+    }
+    return false;
+  }
+};
+
+// WebSocket message types
+const WS_TYPES = {
+  USER_COUNT: 'userCount',
+  PARTY_UPDATE: 'partyUpdate',
+  PLAYBACK_UPDATE: 'playbackUpdate',
+  PARTY_CHAT: 'partyChat',
+  PARTY_ERROR: 'partyError'
+};
+
+// WebSocket handlers
+function handleJoinParty(ws, message) {
+  const { partyId, userId } = message;
+  const party = watchPartyStorage.getParty(partyId);
+  
+  if (!party) {
+    ws.send(JSON.stringify({
+      type: WS_TYPES.PARTY_ERROR,
+      error: 'Party not found'
+    }));
+    return;
+  }
+  
+  watchPartyStorage.joinParty(partyId, userId);
+  ws.partyId = partyId;
+  ws.userId = userId;
+  
+  // Send current party state to new member
+  ws.send(JSON.stringify({
+    type: WS_TYPES.PARTY_UPDATE,
+    party: {
+      ...party,
+      members: Array.from(party.members)
+    }
+  }));
+  
+  // Notify all party members
+  broadcastToParty(partyId, {
+    type: WS_TYPES.PARTY_UPDATE,
+    party: {
+      ...party,
+      members: Array.from(party.members)
+    }
+  });
+}
+
+function handleLeaveParty(ws, message) {
+  const { partyId, userId } = message;
+  const success = watchPartyStorage.leaveParty(partyId, userId);
+  
+  if (success) {
+    const party = watchPartyStorage.getParty(partyId);
+    if (party) {
+      broadcastToParty(partyId, {
+        type: WS_TYPES.PARTY_UPDATE,
+        party: {
+          ...party,
+          members: Array.from(party.members)
+        }
+      });
+    }
+  }
+  
+  delete ws.partyId;
+  delete ws.userId;
+}
+
+function handlePlaybackUpdate(ws, message) {
+  const { partyId, userId, currentTime, isPlaying } = message;
+  const party = watchPartyStorage.getParty(partyId);
+  
+  if (!party) return;
+  
+  // Only host can control playback
+  if (party.hostId === userId) {
+    watchPartyStorage.updatePartyState(partyId, { currentTime, isPlaying });
+    broadcastToParty(partyId, {
+      type: WS_TYPES.PLAYBACK_UPDATE,
+      currentTime,
+      isPlaying
+    });
+  }
+}
+
+function handlePartyChat(ws, message) {
+  const { partyId, userId, text } = message;
+  const party = watchPartyStorage.getParty(partyId);
+  
+  if (!party) return;
+  
+  broadcastToParty(partyId, {
+    type: WS_TYPES.PARTY_CHAT,
+    userId,
+    text,
+    timestamp: new Date().toISOString()
+  });
+}
+
+function broadcastToParty(partyId, message) {
+  wss.clients.forEach(client => {
+    if (client.partyId === partyId && client.readyState === WebSocket.OPEN) {
+      client.send(JSON.stringify(message));
+    }
+  });
+}
+
+// Keep alive ping
+const interval = setInterval(function ping() {
+  wss.clients.forEach(function each(ws) {
+    if (ws.isAlive === false) return ws.terminate();
+    
+    ws.isAlive = false;
+    ws.ping();
+  });
+}, 30000);
+
+// Watch Party API endpoints
+app.post('/api/watch-party/create', async (req, res) => {
+    try {
+        const { hostId, mediaId, mediaType, title, config } = req.body;
+        
+        if (!hostId || !mediaId || !mediaType || !title) {
+            return res.status(400).json({ 
+                success: false, 
+                error: 'Missing required fields' 
+            });
+        }
+        
+        // Create party with configuration
+        const party = watchPartyStorage.createParty(hostId, mediaId, mediaType, title, config);
+        
+        if (!party) {
+            return res.status(500).json({ 
+                success: false, 
+                error: 'Failed to create watch party' 
+            });
+        }
+        
+        // Return sanitized party object (without password)
+        const sanitizedParty = {
+            ...party,
+            members: Array.from(party.members),
+            config: {
+                ...party.config,
+                password: undefined // Don't send password back to client
+            }
+        };
+        
+        res.json({ success: true, party: sanitizedParty });
+    } catch (error) {
+        console.error('Error creating watch party:', error);
+        res.status(500).json({ 
+            success: false, 
+            error: 'Failed to create watch party' 
+        });
+    }
+});
+
+app.get('/api/watch-party/:partyId', async (req, res) => {
+  try {
+    const { partyId } = req.params;
+    const party = watchPartyStorage.getParty(partyId);
+    
+    if (!party) {
+      return res.status(404).json({ error: 'Party not found' });
+    }
+    
+    res.json({ success: true, party: { ...party, members: Array.from(party.members) } });
+  } catch (error) {
+    handleError(res, 'Error fetching watch party');
+  }
+});
+
+// Add this with the other watch party endpoints
+app.get('/api/watch-party/active/:mediaId', (req, res) => {
+    const { mediaId } = req.params;
+    const count = watchPartyStorage.getActivePartiesCount(mediaId);
+    res.json({ count });
 });
 
 // Start the server
