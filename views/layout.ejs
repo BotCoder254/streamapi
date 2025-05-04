@@ -92,6 +92,23 @@
     </style>
 </head>
 <body class="bg-gray-900 text-white min-h-screen">
+    <!-- Flash Messages -->
+    <% if (locals.success && locals.success.length > 0) { %>
+        <div class="bg-green-500 text-white px-4 py-3 shadow-md rounded-md mx-auto max-w-4xl mt-4 animate__animated animate__fadeIn">
+            <div class="flex items-center">
+                <i class="fas fa-check-circle mr-2"></i>
+                <p><%= success %></p>
+            </div>
+        </div>
+    <% } %>
+    <% if (locals.error && locals.error.length > 0) { %>
+        <div class="bg-red-500 text-white px-4 py-3 shadow-md rounded-md mx-auto max-w-4xl mt-4 animate__animated animate__fadeIn">
+            <div class="flex items-center">
+                <i class="fas fa-exclamation-circle mr-2"></i>
+                <p><%= error %></p>
+            </div>
+        </div>
+    <% } %>
     <!-- Navigation -->
     <nav class="bg-gray-800 py-4 sticky top-0 z-50">
         <div class="container mx-auto px-4">
@@ -186,6 +203,9 @@
                         <a href="/watchlist" class="p-2 rounded-lg bg-gray-700 hover:bg-gray-600 transition mr-2">
                             <i class="fas fa-bookmark"></i>
                         </a>
+                        <a href="/auth/logout" class="px-4 py-2 bg-red-600 hover:bg-red-500 rounded-lg transition mr-2 flex items-center">
+                            <i class="fas fa-sign-out-alt mr-2"></i> Logout
+                        </a>
                     <% } else { %>
                         <a href="/auth/login" class="px-4 py-2 bg-green-600 hover:bg-green-500 rounded-lg transition mr-2 flex items-center">
                             <i class="fas fa-sign-in-alt mr-2"></i> Login
@@ -232,10 +252,17 @@
                         <a href="/watchlist" class="block px-3 py-2 rounded-md hover:bg-gray-700 hover:text-green-400 transition-colors">
                             <i class="fas fa-bookmark mr-1"></i> Watchlist
                         </a>
+                        <a href="/auth/logout" class="block px-3 py-2 rounded-md hover:bg-red-600 hover:bg-red-700 text-white transition-colors">
+                            <i class="fas fa-sign-out-alt mr-1"></i> Logout
+                        </a>
+                    <% } else { %>
+                        <a href="/auth/login" class="block px-3 py-2 rounded-md hover:bg-green-600 hover:bg-green-700 text-white transition-colors">
+                            <i class="fas fa-sign-in-alt mr-1"></i> Login
+                        </a>
+                        <a href="/auth/register" class="block px-3 py-2 rounded-md hover:bg-gray-700 text-white transition-colors">
+                            <i class="fas fa-user-plus mr-1"></i> Sign Up
+                        </a>
                     <% } %>
-                    <a href="/contact" class="block px-3 py-2 rounded-md hover:bg-gray-700 hover:text-green-400 transition-colors">
-                        <i class="fas fa-envelope mr-1"></i> Contact
-                    </a>
                     
                     <!-- Mobile User Info -->
                     <% if (locals.user) { %>

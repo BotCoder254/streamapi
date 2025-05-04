@@ -14,8 +14,12 @@ const NetworkSpeed = require('network-speed');
 const testNetworkSpeed = new NetworkSpeed();
 const WebSocket = require('ws');
 const { GoogleGenerativeAI } = require("@google/generative-ai");
-const admin = require('firebase-admin');
+const session = require('express-session');
+const MongoStore = require('connect-mongo');
+const { connectDB } = require('./config/mongodb');
+const { passport, SESSION_OPTIONS } = require('./config/passport');
 const cookieParser = require('cookie-parser');
+const flash = require('express-flash');
 
 // Import auth routes and middleware
 const { router: authRouter, isAuthenticated } = require('./routes/auth');
@@ -27,38 +31,96 @@ const PORT = process.env.PORT || 3000;
 // Create HTTP server
 const server = require('http').createServer(app);
 
+// View engine setup
+app.use(expressLayouts);
+app.set('view engine', 'ejs');
+app.set('layout', 'layout');
+app.set('views', path.join(__dirname, 'views'));
+app.set('layout extractScripts', true);
+app.set('layout extractStyles', true);
+
 // Middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cors());
 app.use(useragent.express());
-app.use(express.static('public'));
+app.use(express.static(path.join(__dirname, 'public')));
 app.use(cookieParser());
 
-// View engine setup
-app.use(expressLayouts);
-app.set('view engine', 'ejs');
-app.set('layout', 'layout');
+// Initialize MongoDB connection
+connectDB().then(() => {
+    console.log('MongoDB connected successfully');
+    
+    // Session middleware with MongoDB store
+    app.use(session({
+        ...SESSION_OPTIONS,
+        store: MongoStore.create({
+            client: require('./config/mongodb').getDB().client,
+            dbName: 'streamapi',
+            collectionName: 'sessions',
+            ttl: 24 * 60 * 60 // 1 day
+        })
+    }));
+    
+    // Initialize Passport and Flash
+    app.use(flash());
+    app.use(passport.initialize());
+    app.use(passport.session());
+    
+    // Make user data and flash messages available in all views
+    app.use((req, res, next) => {
+        res.locals.user = req.user || null;
+        res.locals.success = req.flash('success');
+        res.locals.error = req.flash('error');
+        next();
+    });
 
-// Make user data available in all views
-app.use(async (req, res, next) => {
-    try {
-        const token = req.cookies.token;
-        if (token) {
-            const decodedToken = await admin.auth().verifyIdToken(token);
-            const userRecord = await admin.auth().getUser(decodedToken.uid);
-            res.locals.user = userRecord;
-        }
-    } catch (error) {
-        res.clearCookie('token');
-        res.locals.user = null;
-    }
-    next();
+    // Mount auth routes first
+    app.use('/auth', authRouter);
+    app.use('/profile', isAuthenticated, profileRouter);
+
+    // Protected API routes
+    app.use('/api/watch-party', isAuthenticated);
+    app.use('/api/watchlist', isAuthenticated);
+
+    // Mount other routes
+    app.get('/', async (req, res) => {
+        res.render('home', { layout: 'layout' });
+    });
+
+    // Redirect root auth routes to /auth routes
+    app.get('/login', (req, res) => res.redirect('/auth/login'));
+    app.get('/register', (req, res) => res.redirect('/auth/register'));
+    app.get('/forgot-password', (req, res) => res.redirect('/auth/forgot-password'));
+    app.get('/reset-password', (req, res) => res.redirect('/auth/reset-password'));
+
+    // Custom 404 handler - must be last
+    app.use((req, res) => {
+        res.status(404).render('error', { 
+            msg: 'Page Not Found', 
+            code: 404,
+            layout: 'layout'
+        });
+    });
+
+    // Error handling middleware
+    app.use((err, req, res, next) => {
+        console.error(err.stack);
+        res.status(err.status || 500).render('error', {
+            msg: err.message || 'Internal Server Error',
+            code: err.status || 500,
+            layout: 'layout'
+        });
+    });
+    
+    // Start the server only after MongoDB is connected
+    server.listen(PORT, () => {
+        console.log(`Server running on port ${PORT}`);
+    });
+}).catch(err => {
+    console.error('MongoDB connection error:', err);
+    process.exit(1);
 });
-
-// Mount auth routes
-app.use('/auth', authRouter);
-app.use('/profile', isAuthenticated, profileRouter);
 
 // Create WebSocket server
 const wss = new WebSocket.Server({ server });
@@ -1974,14 +2036,4 @@ app.get('/api/movie/summary/:id', async (req, res) => {
       error: 'Failed to generate summary. Please try again later.'
     });
   }
-});
-
-// Protected routes
-app.use('/profile', isAuthenticated, profileRouter);
-app.use('/api/watch-party', isAuthenticated);
-app.use('/api/watchlist', isAuthenticated);
-
-// Start the server
-server.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
 });

@@ -9,11 +9,14 @@ A streaming API service that fetches movie and TV show data from TMDB and VidSrc
 - Search for specific movies and TV shows
 - Create and manage your watchlist
 - View detailed information about movies and TV shows
+- User authentication and profile management
 - Responsive, modern UI built with Tailwind CSS
 
 ## Tech Stack
 
 - **Backend**: Node.js, Express
+- **Database**: MongoDB
+- **Authentication**: Passport.js
 - **Frontend**: EJS templating engine, Tailwind CSS
 - **APIs**: TMDB API for movie/TV data
 - **Email**: Nodemailer for newsletter and contact functionality
@@ -29,6 +32,8 @@ This application can be deployed using multiple services. Here are instructions 
 3. Create a new project and import your repository
 4. Add the following environment variables:
    - `TMDB_API_KEY` - Your TMDB API key
+   - `MONGODB_URI` - Your MongoDB connection string
+   - `SESSION_SECRET` - Secret key for session management
    - `EMAIL_HOST` - SMTP server host
    - `EMAIL_PORT` - SMTP server port
    - `EMAIL_USER` - Email username/address
@@ -62,6 +67,8 @@ docker build -t streamapi .
 ```bash
 docker run -p 3000:3000 \
   -e TMDB_API_KEY=your_tmdb_api_key \
+  -e MONGODB_URI=your_mongodb_uri \
+  -e SESSION_SECRET=your_session_secret \
   -e EMAIL_HOST=your_email_host \
   -e EMAIL_PORT=your_email_port \
   -e EMAIL_USER=your_email_user \
@@ -100,6 +107,8 @@ npm install
 ```
 PORT=3000
 TMDB_API_KEY=your_tmdb_api_key
+MONGODB_URI=your_mongodb_uri
+SESSION_SECRET=your_session_secret
 EMAIL_HOST=smtp.gmail.com
 EMAIL_PORT=587
 EMAIL_USER=your_email@gmail.com
