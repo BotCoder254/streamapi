@@ -4,7 +4,7 @@
         <div class="flex justify-between items-center mb-4">
             <h3 class="text-xl font-bold text-white flex items-center">
                 <i class="fas fa-bullhorn text-yellow-500 mr-2"></i>
-                Important Announcement
+                Important Updates
             </h3>
             <button class="text-gray-400 hover:text-white transition-colors p-2 rounded-lg hover:bg-gray-800/50" onclick="closeAnnouncementModal()">
                 <i class="fas fa-times"></i>
@@ -12,6 +12,25 @@
         </div>
         
         <div class="space-y-4 text-gray-300">
+            <!-- New Torrent Update Section -->
+            <div class="bg-gray-800/50 rounded-lg p-4 border-l-4 border-green-500">
+                <p class="mb-3">
+                    <i class="fas fa-sync text-green-500 mr-2"></i>
+                    <strong>Torrent System Update:</strong> We've improved our torrent functionality!
+                </p>
+                <ul class="text-sm text-gray-400 space-y-2 ml-6">
+                    <li><i class="fas fa-check text-green-500 mr-2"></i>Enhanced download stability To be fixed soon</li>
+                    <li><i class="fas fa-check text-green-500 mr-2"></i>Improved magnet link handling To be fixed soon</li>
+                    <li><i class="fas fa-check text-green-500 mr-2"></i>Better progress tracking To be fixed soon</li>
+                </ul>
+                <div class="mt-3">
+                    <a href="/torrent/search" class="text-green-400 hover:text-green-300 transition text-sm flex items-center">
+                        <i class="fas fa-magnet mr-2"></i>
+                        Try the improved torrent search
+                    </a>
+                </div>
+            </div>
+
             <div class="bg-gray-800/50 rounded-lg p-4">
                 <p class="mb-3">
                     <i class="fas fa-shield-alt text-green-500 mr-2"></i>
@@ -37,7 +56,7 @@
             <div class="bg-gray-800/50 rounded-lg p-4">
                 <p class="mb-2">
                     <i class="fas fa-code-branch text-purple-500 mr-2"></i>
-                    <strong>Version:</strong> <span class="text-green-400">1.0.0</span>
+                    <strong>Version:</strong> <span class="text-green-400">1.1.0</span>
                 </p>
                 <p class="text-sm text-gray-400">More exciting updates coming soon! Stay tuned.</p>
             </div>
@@ -87,10 +106,10 @@ function showAnnouncementModal() {
     const modal = document.getElementById('announcementModal');
     modal.classList.remove('hidden');
     
-    // Auto-hide after 10 seconds
+    // Auto-hide after 15 seconds (increased from 10 to give more time to read)
     setTimeout(() => {
         closeAnnouncementModal();
-    }, 10000);
+    }, 15000);
 }
 
 function closeAnnouncementModal() {

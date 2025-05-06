@@ -13,6 +13,7 @@ const os = require('os');
 const NetworkSpeed = require('network-speed');
 const testNetworkSpeed = new NetworkSpeed();
 const WebSocket = require('ws');
+const WebTorrent = require('webtorrent');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -172,6 +173,9 @@ function broadcastUserCount() {
         }
     });
 }
+
+// Import routes
+const torrentRoutes = require('./routes/torrent');
 
 // Configuration
 const TMDB_API_KEY = process.env.TMDB_API_KEY || 'fdbc5d0ea9e499aaeba73d29c21726be'; //Dont mess with this 
@@ -345,6 +349,32 @@ app.use((req, res, next) => {
 
 // Middleware to track user information
 app.use(useragent.express());
+
+// Middleware to ensure template variables are available
+app.use((req, res, next) => {
+    // Set default userInfo
+    res.locals.userInfo = {
+        systemInfo: {
+            platform: os.platform(),
+            release: os.release(),
+            type: os.type()
+        },
+        browser: req.useragent.browser || 'Unknown',
+        version: req.useragent.version || 'Unknown',
+        userOs: req.useragent.os || 'Unknown',
+        platform: req.useragent.platform || 'Unknown',
+        timeSpent: 0,
+        networkSpeed: 'Checking...'
+    };
+    
+    // Make activeUsers available to all templates
+    res.locals.activeUsers = activeUsers;
+    
+    next();
+});
+
+// Routes
+app.use('/torrent', torrentRoutes);
 
 // Middleware to track user session time and get network speed
 app.use(async (req, res, next) => {
@@ -1957,6 +1987,34 @@ app.get('/api/watch-party/active/:mediaId', (req, res) => {
     const { mediaId } = req.params;
     const count = watchPartyStorage.getActivePartiesCount(mediaId);
     res.json({ count });
+});
+
+// Routes
+app.use('/torrent', torrentRoutes);
+
+// Add torrent download route
+app.post('/api/torrent/download', (req, res) => {
+    const { magnetURI } = req.body;
+    
+    if (!magnetURI) {
+        return res.status(400).json({ error: 'Magnet URI is required' });
+    }
+
+    torrentClient.add(magnetURI, torrent => {
+        const files = torrent.files.map(file => ({
+            name: file.name,
+            length: file.length,
+            path: file.path
+        }));
+
+        res.json({ 
+            infoHash: torrent.infoHash,
+            files: files
+        });
+
+        // Clean up after sending response
+        torrent.destroy();
+    });
 });
 
 // Start the server

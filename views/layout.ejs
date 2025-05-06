@@ -108,6 +108,7 @@
                     <a href="/latest" class="nav-link hover:text-green-400"><i class="fas fa-clock mr-1"></i> Latest</a>
                     <a href="/top" class="nav-link hover:text-green-400"><i class="fas fa-star mr-1"></i> Top Rated</a>
                     <a href="/watchlist" class="nav-link hover:text-green-400"><i class="fas fa-bookmark mr-1"></i> Watchlist</a>
+                    <!-- <a href="/torrent/search" class="nav-link hover:text-green-400"><i class="fas fa-magnet mr-1"></i> Torrents</a> -->
                     <a href="/contact" class="nav-link hover:text-green-400"><i class="fas fa-envelope mr-1"></i> Contact</a>
                     
                     <!-- User Info Dropdown -->
@@ -201,25 +202,32 @@
                         <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                             <i class="fas fa-search text-gray-400"></i>
                         </div>
+                        <!-- Mobile Search Results Dropdown (hidden by default) -->
+                        <div id="mobile-search-results" class="absolute mt-2 w-full bg-gray-800 border border-gray-700 rounded-lg shadow-xl hidden z-50 max-h-96 overflow-y-auto">
+                            <!-- Results will be populated by JavaScript -->
+                        </div>
                     </div>
                     
-                    <a href="/browse" class="block px-3 py-2 rounded-md hover:bg-gray-700 hover:text-green-400 transition-colors">
-                        <i class="fas fa-film mr-1"></i> Movies
+                    <a href="/browse" class="block px-3 py-2 rounded-lg hover:bg-gray-700 transition">
+                        <i class="fas fa-film mr-2"></i> Movies
                     </a>
-                    <a href="/browse/tv" class="block px-3 py-2 rounded-md hover:bg-gray-700 hover:text-green-400 transition-colors">
-                        <i class="fas fa-tv mr-1"></i> TV Shows
+                    <a href="/browse/tv" class="block px-3 py-2 rounded-lg hover:bg-gray-700 transition">
+                        <i class="fas fa-tv mr-2"></i> TV Shows
                     </a>
-                    <a href="/latest" class="block px-3 py-2 rounded-md hover:bg-gray-700 hover:text-green-400 transition-colors">
-                        <i class="fas fa-clock mr-1"></i> Latest
+                    <a href="/latest" class="block px-3 py-2 rounded-lg hover:bg-gray-700 transition">
+                        <i class="fas fa-clock mr-2"></i> Latest
                     </a>
-                    <a href="/top" class="block px-3 py-2 rounded-md hover:bg-gray-700 hover:text-green-400 transition-colors">
-                        <i class="fas fa-star mr-1"></i> Top Rated
+                    <a href="/top" class="block px-3 py-2 rounded-lg hover:bg-gray-700 transition">
+                        <i class="fas fa-star mr-2"></i> Top Rated
                     </a>
-                    <a href="/watchlist" class="block px-3 py-2 rounded-md hover:bg-gray-700 hover:text-green-400 transition-colors">
-                        <i class="fas fa-bookmark mr-1"></i> Watchlist
+                    <a href="/watchlist" class="block px-3 py-2 rounded-lg hover:bg-gray-700 transition">
+                        <i class="fas fa-bookmark mr-2"></i> Watchlist
                     </a>
-                    <a href="/contact" class="block px-3 py-2 rounded-md hover:bg-gray-700 hover:text-green-400 transition-colors">
-                        <i class="fas fa-envelope mr-1"></i> Contact
+                    <a href="/torrent/search" class="block px-3 py-2 rounded-lg hover:bg-gray-700 transition">
+                        <i class="fas fa-magnet mr-2"></i> Torrents
+                    </a>
+                    <a href="/contact" class="block px-3 py-2 rounded-lg hover:bg-gray-700 transition">
+                        <i class="fas fa-envelope mr-2"></i> Contact
                     </a>
                     
                     <!-- Mobile User Info -->
@@ -293,6 +301,7 @@
                         <li><a href="/latest" class="hover:text-green-400 transition"><i class="fas fa-chevron-right text-xs mr-2"></i>Latest Releases</a></li>
                         <li><a href="/top" class="hover:text-green-400 transition"><i class="fas fa-chevron-right text-xs mr-2"></i>Top Rated</a></li>
                         <li><a href="/watchlist" class="hover:text-green-400 transition"><i class="fas fa-chevron-right text-xs mr-2"></i>My Watchlist</a></li>
+                        <li><a href="/torrent/search" class="hover:text-green-400 transition"><i class="fas fa-magnet text-xs mr-2"></i>Torrent Search</a></li>
                     </ul>
                 </div>
                 
