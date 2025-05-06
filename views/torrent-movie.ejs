@@ -70,29 +70,61 @@
                         
                         <!-- Download Options -->
                         <% if (movie.torrents && movie.torrents.length > 0) { %>
-                            <div class="mb-8">
-                                <h2 class="text-xl font-bold mb-4">Download Options</h2>
-                                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                                    <% movie.torrents.forEach(torrent => { %>
-                                        <div class="bg-gray-800 rounded-lg p-4 hover:bg-gray-700 transition group">
-                                            <div class="flex items-center justify-between mb-3">
-                                                <span class="font-bold"><%= torrent.quality %></span>
-                                                <span class="text-sm text-gray-400"><%= torrent.size %></span>
-                                            </div>
-                                            <div class="flex items-center justify-between text-sm">
-                                                <div class="flex items-center text-gray-400">
-                                                    <i class="fas fa-users mr-1"></i>
-                                                    <span><%= torrent.seeds %> seeds</span>
+                            <div class="download-section mb-8">
+                                <h2 class="text-2xl font-bold mb-6"><i class="fas fa-download mr-2"></i>Download Options</h2>
+                                <div class="grid gap-4">
+                                    <% movie.torrents.forEach((torrent, index) => { %>
+                                        <div class="bg-gray-800 rounded-lg p-4 flex flex-col md:flex-row items-center justify-between gap-4" data-delay="<%= index * 100 %>">
+                                            <div class="flex-1">
+                                                <div class="flex items-center gap-3 mb-2">
+                                                    <span class="bg-green-600 text-sm px-2 py-1 rounded"><%= torrent.quality %></span>
+                                                    <span class="text-gray-400"><%= torrent.size %></span>
+                                                    <div class="flex items-center gap-2 text-sm">
+                                                        <span class="text-green-400" title="Seeds"><i class="fas fa-arrow-up"></i> <%= torrent.seeds %></span>
+                                                        <span class="text-red-400" title="Peers"><i class="fas fa-arrow-down"></i> <%= torrent.peers %></span>
+                                                    </div>
                                                 </div>
-                                                <a href="<%= torrent.url %>" 
-                                                   class="flex items-center text-green-500 hover:text-green-400 transition">
-                                                    <i class="fas fa-download mr-1"></i>
+                                                
+                                                <!-- Progress bar (hidden by default) -->
+                                                <div class="progress-bar hidden w-full bg-gray-700 rounded-full h-2 mb-2">
+                                                    <div class="progress bg-green-500 h-full rounded-full transition-all duration-300" style="width: 0%"></div>
+                                                </div>
+                                                <div class="download-status hidden text-sm text-gray-400"></div>
+                                            </div>
+                                            
+                                            <div class="flex items-center gap-3">
+                                                <button class="download-btn bg-green-600 hover:bg-green-500 text-white px-6 py-2 rounded-lg transition flex items-center gap-2"
+                                                        data-magnet="<%= torrent.magnet %>"
+                                                        data-quality="<%= torrent.quality %>"
+                                                        data-size="<%= torrent.size %>">
+                                                    <i class="fas fa-download"></i>
                                                     <span>Download</span>
-                                                </a>
+                                                </button>
+                                                
+                                                <div class="relative">
+                                                    <button class="more-options-btn bg-gray-700 hover:bg-gray-600 text-white w-10 h-10 rounded-lg transition flex items-center justify-center">
+                                                        <i class="fas fa-ellipsis-v"></i>
+                                                    </button>
+                                                    <div class="options-menu hidden absolute right-0 mt-2 w-48 bg-gray-800 rounded-lg shadow-xl z-10">
+                                                        <button class="copy-magnet w-full text-left px-4 py-2 hover:bg-gray-700 transition flex items-center gap-2" data-magnet="<%= torrent.magnet %>">
+                                                            <i class="fas fa-magnet"></i>
+                                                            <span>Copy Magnet Link</span>
+                                                        </button>
+                                                        <a href="<%= torrent.magnet %>" class="block px-4 py-2 hover:bg-gray-700 transition flex items-center gap-2">
+                                                            <i class="fas fa-external-link-alt"></i>
+                                                            <span>Open Magnet Link</span>
+                                                        </a>
+                                                    </div>
+                                                </div>
                                             </div>
                                         </div>
                                     <% }); %>
                                 </div>
+                            </div>
+                        <% } else { %>
+                            <div class="col-span-full text-center py-8">
+                                <i class="fas fa-exclamation-circle text-4xl text-gray-600 mb-3"></i>
+                                <p class="text-gray-400">No download options available for this movie.</p>
                             </div>
                         <% } %>
                     </div>
@@ -196,18 +228,242 @@
 </div>
 
 <!-- WebTorrent Client Script -->
-<script src="https://cdn.jsdelivr.net/npm/webtorrent@latest/webtorrent.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/webtorrent@1.9.7/webtorrent.min.js"></script>
 
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Initialize WebTorrent Client
-    const client = new WebTorrent();
+document.addEventListener('DOMContentLoaded', () => {
+    const activeDownloads = new Map();
+    const client = new WebTorrent({
+        tracker: {
+            announce: [
+                'wss://tracker.openwebtorrent.com',
+                'wss://tracker.btorrent.xyz',
+                'wss://tracker.fastcast.nz',
+                'wss://tr.bangumi.moe:6969'
+            ]
+        }
+    });
     
-    // Handle screenshot clicks (lightbox view can be implemented here)
-    document.querySelectorAll('.screenshots img').forEach(img => {
-        img.addEventListener('click', function() {
-            // Implement lightbox view
+    // Format bytes to human readable size
+    function formatBytes(bytes) {
+        if (bytes === 0) return '0 B';
+        const k = 1024;
+        const sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return `${(bytes / Math.pow(k, i)).toFixed(1)} ${sizes[i]}`;
+    }
+    
+    // Download button click handler
+    document.querySelectorAll('.download-btn').forEach(btn => {
+        btn.addEventListener('click', async function() {
+            const magnetURI = this.dataset.magnet;
+            const quality = this.dataset.quality;
+            const size = this.dataset.size;
+            
+            // Prevent duplicate downloads
+            if (activeDownloads.has(magnetURI)) {
+                showToast('Download already in progress');
+                return;
+            }
+            
+            // Get parent container and progress elements
+            const container = this.closest('.bg-gray-800');
+            const progressBar = container.querySelector('.progress-bar');
+            const progressElement = container.querySelector('.progress');
+            const statusElement = container.querySelector('.download-status');
+            
+            // Show progress elements
+            progressBar.classList.remove('hidden');
+            statusElement.classList.remove('hidden');
+            
+            // Update button state
+            this.disabled = true;
+            this.innerHTML = '<i class="fas fa-spinner fa-spin"></i><span>Starting...</span>';
+            
+            try {
+                // Start server-side download
+                const response = await fetch('/torrent/download', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ magnetURI })
+                });
+                
+                if (!response.ok) throw new Error('Download failed to start');
+                
+                const data = await response.json();
+                if (data.error) throw new Error(data.error);
+                
+                activeDownloads.set(magnetURI, data.infoHash);
+                
+                // Start client-side torrent
+                client.add(magnetURI, torrent => {
+                    // Update progress
+                    torrent.on('download', bytes => {
+                        const progress = Math.round(torrent.progress * 100);
+                        const speed = formatBytes(torrent.downloadSpeed) + '/s';
+                        
+                        progressElement.style.width = `${progress}%`;
+                        statusElement.textContent = `${progress}% - ${speed}`;
+                    });
+                    
+                    // Handle completion
+                    torrent.on('done', () => {
+                        progressElement.style.width = '100%';
+                        statusElement.textContent = 'Download complete!';
+                        showToast('Download complete!');
+                        
+                        // Clean up
+                        setTimeout(() => {
+                            torrent.destroy();
+                            activeDownloads.delete(magnetURI);
+                            progressBar.classList.add('hidden');
+                            statusElement.classList.add('hidden');
+                            this.disabled = false;
+                            this.innerHTML = '<i class="fas fa-download"></i><span>Download</span>';
+                        }, 3000);
+                    });
+                    
+                    // Handle errors
+                    torrent.on('error', err => {
+                        console.error('Torrent error:', err);
+                        showToast('Download error occurred');
+                        
+                        // Reset UI
+                        activeDownloads.delete(magnetURI);
+                        progressBar.classList.add('hidden');
+                        statusElement.classList.add('hidden');
+                        this.disabled = false;
+                        this.innerHTML = '<i class="fas fa-download"></i><span>Download</span>';
+                    });
+                });
+                
+                // Update UI to show download started
+                this.innerHTML = '<i class="fas fa-spinner fa-spin"></i><span>Downloading...</span>';
+                showToast('Download started');
+                
+            } catch (error) {
+                console.error('Download error:', error);
+                showToast('Failed to start download');
+                
+                // Reset button
+                this.disabled = false;
+                this.innerHTML = '<i class="fas fa-download"></i><span>Download</span>';
+                
+                // Hide progress elements
+                progressBar.classList.add('hidden');
+                statusElement.classList.add('hidden');
+                
+                // Clean up
+                activeDownloads.delete(magnetURI);
+            }
         });
     });
+    
+    // More options button handlers
+    document.querySelectorAll('.more-options-btn').forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            e.stopPropagation(); // Prevent click from closing menu immediately
+            const menu = this.nextElementSibling;
+            // Close all other menus first
+            document.querySelectorAll('.options-menu').forEach(m => {
+                if (m !== menu) m.classList.add('hidden');
+            });
+            menu.classList.toggle('hidden');
+        });
+    });
+    
+    // Copy magnet link handler
+    document.querySelectorAll('.copy-magnet').forEach(btn => {
+        btn.addEventListener('click', async function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            const magnetURI = this.dataset.magnet;
+            
+            try {
+                await navigator.clipboard.writeText(magnetURI);
+                showToast('Magnet link copied to clipboard');
+            } catch (err) {
+                // Fallback for browsers that don't support clipboard API
+                const textArea = document.createElement('textarea');
+                textArea.value = magnetURI;
+                document.body.appendChild(textArea);
+                textArea.select();
+                try {
+                    document.execCommand('copy');
+                    showToast('Magnet link copied to clipboard');
+                } catch (err) {
+                    showToast('Failed to copy magnet link');
+                }
+                document.body.removeChild(textArea);
+            }
+            
+            // Hide the options menu
+            this.closest('.options-menu').classList.add('hidden');
+        });
+    });
+    
+    // Handle magnet link clicks
+    document.querySelectorAll('a[href^="magnet:"]').forEach(link => {
+        link.addEventListener('click', function(e) {
+            e.preventDefault();
+            const magnetURI = this.href;
+            
+            // Try to open with a torrent client
+            const success = window.open(magnetURI);
+            
+            if (!success) {
+                // If opening failed, copy to clipboard instead
+                navigator.clipboard.writeText(magnetURI)
+                    .then(() => showToast('Magnet link copied to clipboard (no torrent client found)'))
+                    .catch(() => {
+                        // Fallback copy method
+                        const textArea = document.createElement('textarea');
+                        textArea.value = magnetURI;
+                        document.body.appendChild(textArea);
+                        textArea.select();
+                        try {
+                            document.execCommand('copy');
+                            showToast('Magnet link copied to clipboard (no torrent client found)');
+                        } catch (err) {
+                            showToast('Failed to copy magnet link');
+                        }
+                        document.body.removeChild(textArea);
+                    });
+            }
+            
+            // Hide the options menu
+            this.closest('.options-menu').classList.add('hidden');
+        });
+    });
+    
+    // Close options menu when clicking outside
+    document.addEventListener('click', function(e) {
+        if (!e.target.closest('.more-options-btn') && !e.target.closest('.options-menu')) {
+            document.querySelectorAll('.options-menu').forEach(menu => {
+                menu.classList.add('hidden');
+            });
+        }
+    });
+    
+    // Toast notification function
+    function showToast(message) {
+        const toast = document.getElementById('toast');
+        const toastMessage = toast.querySelector('.toast-message');
+        
+        toastMessage.textContent = message;
+        toast.classList.remove('translate-y-full', 'opacity-0');
+        
+        setTimeout(() => {
+            toast.classList.add('translate-y-full', 'opacity-0');
+        }, 3000);
+    }
 });
-</script> 
+</script>
+
+<!-- Toast Notification -->
+<div id="toast" class="fixed bottom-4 right-4 bg-gray-800 text-white px-4 py-2 rounded-lg shadow-lg transform translate-y-full opacity-0 transition-all duration-300 flex items-center gap-2">
+    <i class="fas fa-check text-green-400"></i>
+    <span class="toast-message"></span>
+</div> 

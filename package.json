@@ -28,6 +28,7 @@
     "network-speed": "^2.1.1",
     "nodemailer": "^6.9.7",
     "serverless-http": "^3.2.0",
+    "webtorrent": "^1.9.7",
     "ws": "^8.18.1"
   },
   "devDependencies": {

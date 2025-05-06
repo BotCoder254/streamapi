@@ -13,6 +13,7 @@ const os = require('os');
 const NetworkSpeed = require('network-speed');
 const testNetworkSpeed = new NetworkSpeed();
 const WebSocket = require('ws');
+const WebTorrent = require('webtorrent');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -1990,6 +1991,31 @@ app.get('/api/watch-party/active/:mediaId', (req, res) => {
 
 // Routes
 app.use('/torrent', torrentRoutes);
+
+// Add torrent download route
+app.post('/api/torrent/download', (req, res) => {
+    const { magnetURI } = req.body;
+    
+    if (!magnetURI) {
+        return res.status(400).json({ error: 'Magnet URI is required' });
+    }
+
+    torrentClient.add(magnetURI, torrent => {
+        const files = torrent.files.map(file => ({
+            name: file.name,
+            length: file.length,
+            path: file.path
+        }));
+
+        res.json({ 
+            infoHash: torrent.infoHash,
+            files: files
+        });
+
+        // Clean up after sending response
+        torrent.destroy();
+    });
+});
 
 // Start the server
 server.listen(PORT, () => {

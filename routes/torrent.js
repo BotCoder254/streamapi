@@ -1,6 +1,27 @@
 const express = require('express');
 const router = express.Router();
 const axios = require('axios');
+const WebTorrent = require('webtorrent');
+const path = require('path');
+const fs = require('fs');
+
+// Initialize WebTorrent client with default configurations
+const client = new WebTorrent({
+    maxConns: 55,        // Max number of connections per torrent
+    nodeId: String(Math.random()).slice(2),
+    tracker: {
+        announce: [
+            'wss://tracker.openwebtorrent.com',
+            'wss://tracker.btorrent.xyz'
+        ]
+    }
+});
+
+// Create downloads directory if it doesn't exist
+const downloadsPath = path.join(__dirname, '../downloads');
+if (!fs.existsSync(downloadsPath)) {
+    fs.mkdirSync(downloadsPath, { recursive: true });
+}
 
 // YTS API base URL
 const YTS_API_BASE = 'https://yts.mx/api/v2';
@@ -82,6 +103,86 @@ router.get('/movie/:id', async (req, res) => {
             movie: null,
             error: 'Failed to fetch movie details. Please try again.'
         });
+    }
+});
+
+// Update download route
+router.post('/download', (req, res) => {
+    const { magnetURI } = req.body;
+    
+    if (!magnetURI) {
+        return res.status(400).json({ error: 'Magnet URI is required' });
+    }
+
+    // Check if torrent is already being downloaded
+    const existingTorrent = client.get(magnetURI);
+    if (existingTorrent) {
+        return res.json({
+            infoHash: existingTorrent.infoHash,
+            name: existingTorrent.name,
+            files: existingTorrent.files.map(file => ({
+                name: file.name,
+                length: file.length,
+                path: file.path
+            }))
+        });
+    }
+
+    try {
+        const torrent = client.add(magnetURI, { 
+            path: downloadsPath,
+            announce: [
+                'wss://tracker.openwebtorrent.com',
+                'wss://tracker.btorrent.xyz'
+            ]
+        });
+
+        // Set up event handlers before sending response
+        torrent.on('error', (err) => {
+            console.error('Torrent error:', err);
+        });
+
+        torrent.on('warning', (err) => {
+            console.warn('Torrent warning:', err);
+        });
+
+        torrent.on('ready', () => {
+            console.log('Torrent ready:', torrent.infoHash);
+        });
+
+        torrent.on('download', (bytes) => {
+            console.log('Progress:', Math.round(torrent.progress * 100) + '%');
+            console.log('Download speed:', Math.round(torrent.downloadSpeed / 1024 / 1024 * 100) / 100 + ' MB/s');
+        });
+
+        torrent.on('done', () => {
+            console.log('Torrent download finished');
+            torrent.files.forEach(file => {
+                const filePath = path.join(downloadsPath, file.path);
+                console.log('File downloaded:', filePath);
+            });
+        });
+
+        // Send initial response
+        res.json({
+            infoHash: torrent.infoHash || '',
+            name: torrent.name || 'Initializing...',
+            files: []
+        });
+
+        // Clean up after 1 hour or when download is complete
+        const cleanup = () => {
+            if (client.get(torrent.infoHash)) {
+                torrent.destroy({ destroyStore: false });
+            }
+        };
+
+        setTimeout(cleanup, 3600000); // 1 hour
+        torrent.on('done', cleanup);
+
+    } catch (error) {
+        console.error('Error adding torrent:', error);
+        res.status(500).json({ error: 'Failed to start download' });
     }
 });
 
