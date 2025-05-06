@@ -1,0 +1,164 @@
+<!-- Torrent Search Results -->
+<div class="py-8 animate__animated animate__fadeIn">
+    <div class="container mx-auto px-4">
+        <!-- Search Form -->
+        <form action="/torrent/results" method="GET" class="max-w-3xl mx-auto mb-12">
+            <div class="relative">
+                <input 
+                    type="text" 
+                    name="q" 
+                    value="<%= query %>"
+                    placeholder="Search for movies..." 
+                    class="w-full bg-gray-800 border-2 border-gray-700 rounded-full py-4 px-6 text-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition"
+                    autocomplete="off"
+                    required
+                >
+                <button type="submit" class="absolute right-2 top-2 bottom-2 bg-green-600 hover:bg-green-700 rounded-full w-12 flex items-center justify-center transition">
+                    <i class="fas fa-search text-xl"></i>
+                </button>
+            </div>
+            
+            <!-- Advanced Search Options -->
+            <div class="mt-4 grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div>
+                    <label class="block text-sm text-gray-400 mb-1">Quality</label>
+                    <select name="quality" class="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-green-500">
+                        <option value="">All</option>
+                        <option value="720p" <%= quality === '720p' ? 'selected' : '' %>>720p</option>
+                        <option value="1080p" <%= quality === '1080p' ? 'selected' : '' %>>1080p</option>
+                        <option value="2160p" <%= quality === '2160p' ? 'selected' : '' %>>4K</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm text-gray-400 mb-1">Genre</label>
+                    <select name="genre" class="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-green-500">
+                        <option value="">All</option>
+                        <option value="action" <%= genre === 'action' ? 'selected' : '' %>>Action</option>
+                        <option value="comedy" <%= genre === 'comedy' ? 'selected' : '' %>>Comedy</option>
+                        <option value="drama" <%= genre === 'drama' ? 'selected' : '' %>>Drama</option>
+                        <option value="horror" <%= genre === 'horror' ? 'selected' : '' %>>Horror</option>
+                        <option value="thriller" <%= genre === 'thriller' ? 'selected' : '' %>>Thriller</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm text-gray-400 mb-1">Rating</label>
+                    <select name="rating" class="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-green-500">
+                        <option value="">All</option>
+                        <option value="7" <%= rating === '7' ? 'selected' : '' %>>7+ Stars</option>
+                        <option value="8" <%= rating === '8' ? 'selected' : '' %>>8+ Stars</option>
+                        <option value="9" <%= rating === '9' ? 'selected' : '' %>>9+ Stars</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm text-gray-400 mb-1">Sort By</label>
+                    <select name="sort" class="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-green-500">
+                        <option value="date_added" <%= sort === 'date_added' ? 'selected' : '' %>>Latest</option>
+                        <option value="rating" <%= sort === 'rating' ? 'selected' : '' %>>Rating</option>
+                        <option value="download_count" <%= sort === 'download_count' ? 'selected' : '' %>>Popular</option>
+                        <option value="like_count" <%= sort === 'like_count' ? 'selected' : '' %>>Liked</option>
+                    </select>
+                </div>
+            </div>
+        </form>
+
+        <!-- Results Header -->
+        <div class="mb-8">
+            <% if (query) { %>
+                <h2 class="text-2xl font-bold mb-2">Search Results for "<%= query %>"</h2>
+                <% if (movies && movies.length > 0) { %>
+                    <p class="text-gray-400">Found <%= totalResults %> movies</p>
+                <% } %>
+            <% } else if (genre) { %>
+                <h2 class="text-2xl font-bold mb-2"><%= genre.charAt(0).toUpperCase() + genre.slice(1) %> Movies</h2>
+            <% } else { %>
+                <h2 class="text-2xl font-bold mb-2">Browse Movies</h2>
+            <% } %>
+        </div>
+
+        <!-- Results Grid -->
+        <% if (movies && movies.length > 0) { %>
+            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4 mb-8">
+                <% movies.forEach((movie, index) => { %>
+                    <div class="movie-card bg-gray-800 rounded-lg overflow-hidden shadow-lg animate__animated animate__fadeIn hover:shadow-xl transition-all duration-300 group">
+                        <a href="/torrent/movie/<%= movie.id %>">
+                            <div class="relative pb-[150%]">
+                                <img 
+                                    src="<%= movie.medium_cover_image %>" 
+                                    alt="<%= movie.title %>" 
+                                    class="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                                    onerror="this.onerror=null; this.src='https://via.placeholder.com/300x450?text=No+Poster'; this.classList.add('object-contain');"
+                                >
+                                <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+                                    <span class="text-white px-3 py-1 rounded-full font-bold bg-green-600/80 transform scale-0 group-hover:scale-100 transition-transform duration-300">View Details</span>
+                                </div>
+                                <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black to-transparent py-2 px-3">
+                                    <h3 class="text-sm font-bold line-clamp-2"><%= movie.title %> (<%= movie.year %>)</h3>
+                                    <div class="flex items-center text-xs text-gray-300 mt-1">
+                                        <i class="fas fa-star text-yellow-500 mr-1"></i>
+                                        <span><%= movie.rating %>/10</span>
+                                        <% if (movie.torrents && movie.torrents[0]) { %>
+                                            <span class="mx-2">•</span>
+                                            <span><%= movie.torrents[0].quality %></span>
+                                        <% } %>
+                                    </div>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                <% }); %>
+            </div>
+
+            <!-- Pagination -->
+            <% if (totalPages > 1) { %>
+                <div class="flex justify-center items-center gap-2">
+                    <% if (currentPage > 1) { %>
+                        <a href="?<%= new URLSearchParams({...query, page: currentPage - 1}).toString() %>" 
+                           class="px-4 py-2 bg-gray-800 hover:bg-gray-700 rounded-lg transition">
+                            <i class="fas fa-chevron-left"></i>
+                        </a>
+                    <% } %>
+                    
+                    <% for(let i = Math.max(1, currentPage - 2); i <= Math.min(totalPages, currentPage + 2); i++) { %>
+                        <a href="?<%= new URLSearchParams({...query, page: i}).toString() %>" 
+                           class="px-4 py-2 rounded-lg transition <%= i === currentPage ? 'bg-green-600 hover:bg-green-700' : 'bg-gray-800 hover:bg-gray-700' %>">
+                            <%= i %>
+                        </a>
+                    <% } %>
+                    
+                    <% if (currentPage < totalPages) { %>
+                        <a href="?<%= new URLSearchParams({...query, page: currentPage + 1}).toString() %>" 
+                           class="px-4 py-2 bg-gray-800 hover:bg-gray-700 rounded-lg transition">
+                            <i class="fas fa-chevron-right"></i>
+                        </a>
+                    <% } %>
+                </div>
+            <% } %>
+        <% } else { %>
+            <div class="text-center py-16">
+                <i class="fas fa-search text-5xl text-gray-600 mb-4"></i>
+                <h3 class="text-xl font-bold mb-2">No Movies Found</h3>
+                <p class="text-gray-400 mb-6">Try adjusting your search criteria</p>
+                <a href="/torrent/search" class="inline-block px-6 py-3 bg-green-600 hover:bg-green-700 rounded-lg transition">
+                    Back to Search
+                </a>
+            </div>
+        <% } %>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Add animation to movie cards
+    document.querySelectorAll('.movie-card').forEach((card, index) => {
+        card.style.animationDelay = `${index * 0.05}s`;
+    });
+    
+    // Handle form submission animation
+    const form = document.querySelector('form');
+    if (form) {
+        form.addEventListener('submit', function() {
+            document.querySelector('.py-8').classList.add('animate__fadeOut');
+        });
+    }
+});
+</script> 

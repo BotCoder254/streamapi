@@ -1,0 +1,58 @@
+<!-- Navigation -->
+<nav class="bg-gray-900 border-b border-gray-800">
+    <div class="container mx-auto px-4">
+        <div class="flex items-center justify-between h-16">
+            <!-- Logo -->
+            <a href="/" class="flex items-center space-x-2">
+                <i class="fas fa-play-circle text-green-500 text-2xl"></i>
+                <span class="font-bold text-xl">StreamAPI</span>
+            </a>
+            
+            <!-- Navigation Links -->
+            <div class="hidden md:flex items-center space-x-8">
+                <a href="/" class="text-gray-300 hover:text-white transition">Home</a>
+                <a href="/movies" class="text-gray-300 hover:text-white transition">Movies</a>
+                <a href="/tv" class="text-gray-300 hover:text-white transition">TV Shows</a>
+                <a href="/torrent/search" class="text-gray-300 hover:text-white transition">
+                    <i class="fas fa-magnet mr-1"></i>
+                    Torrents
+                </a>
+                <a href="/watchlist" class="text-gray-300 hover:text-white transition">
+                    <i class="fas fa-bookmark mr-1"></i>
+                    Watchlist
+                </a>
+            </div>
+            
+            <!-- Mobile Menu Button -->
+            <div class="md:hidden">
+                <button id="mobile-menu-button" class="text-gray-300 hover:text-white focus:outline-none">
+                    <i class="fas fa-bars text-xl"></i>
+                </button>
+            </div>
+        </div>
+        
+        <!-- Mobile Menu -->
+        <div id="mobile-menu" class="md:hidden hidden pb-4">
+            <div class="flex flex-col space-y-4">
+                <a href="/" class="text-gray-300 hover:text-white transition">Home</a>
+                <a href="/movies" class="text-gray-300 hover:text-white transition">Movies</a>
+                <a href="/tv" class="text-gray-300 hover:text-white transition">TV Shows</a>
+                <a href="/torrent/search" class="text-gray-300 hover:text-white transition">
+                    <i class="fas fa-magnet mr-1"></i>
+                    Torrents
+                </a>
+                <a href="/watchlist" class="text-gray-300 hover:text-white transition">
+                    <i class="fas fa-bookmark mr-1"></i>
+                    Watchlist
+                </a>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<!-- Mobile Menu Toggle Script -->
+<script>
+document.getElementById('mobile-menu-button').addEventListener('click', function() {
+    document.getElementById('mobile-menu').classList.toggle('hidden');
+});
+</script> 

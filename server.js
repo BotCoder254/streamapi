@@ -173,6 +173,9 @@ function broadcastUserCount() {
     });
 }
 
+// Import routes
+const torrentRoutes = require('./routes/torrent');
+
 // Configuration
 const TMDB_API_KEY = process.env.TMDB_API_KEY || 'fdbc5d0ea9e499aaeba73d29c21726be'; //Dont mess with this 
 const VIDSRC_EMBED_BASE = 'https://vidsrc.xyz/embed'; //Dont mess with this 
@@ -345,6 +348,32 @@ app.use((req, res, next) => {
 
 // Middleware to track user information
 app.use(useragent.express());
+
+// Middleware to ensure template variables are available
+app.use((req, res, next) => {
+    // Set default userInfo
+    res.locals.userInfo = {
+        systemInfo: {
+            platform: os.platform(),
+            release: os.release(),
+            type: os.type()
+        },
+        browser: req.useragent.browser || 'Unknown',
+        version: req.useragent.version || 'Unknown',
+        userOs: req.useragent.os || 'Unknown',
+        platform: req.useragent.platform || 'Unknown',
+        timeSpent: 0,
+        networkSpeed: 'Checking...'
+    };
+    
+    // Make activeUsers available to all templates
+    res.locals.activeUsers = activeUsers;
+    
+    next();
+});
+
+// Routes
+app.use('/torrent', torrentRoutes);
 
 // Middleware to track user session time and get network speed
 app.use(async (req, res, next) => {
@@ -1958,6 +1987,9 @@ app.get('/api/watch-party/active/:mediaId', (req, res) => {
     const count = watchPartyStorage.getActivePartiesCount(mediaId);
     res.json({ count });
 });
+
+// Routes
+app.use('/torrent', torrentRoutes);
 
 // Start the server
 server.listen(PORT, () => {
