@@ -90,6 +90,21 @@
                                                     <div class="progress bg-green-500 h-full rounded-full transition-all duration-300" style="width: 0%"></div>
                                                 </div>
                                                 <div class="download-status hidden text-sm text-gray-400"></div>
+                                                <!-- Download Controls (hidden by default) -->
+                                                <div class="download-controls hidden flex items-center gap-2 mt-2">
+                                                    <button class="pause-btn bg-yellow-600 hover:bg-yellow-500 text-white px-3 py-1 rounded text-sm transition">
+                                                        <i class="fas fa-pause"></i>
+                                                    </button>
+                                                    <button class="resume-btn hidden bg-green-600 hover:bg-green-500 text-white px-3 py-1 rounded text-sm transition">
+                                                        <i class="fas fa-play"></i>
+                                                    </button>
+                                                    <button class="stop-btn bg-red-600 hover:bg-red-500 text-white px-3 py-1 rounded text-sm transition">
+                                                        <i class="fas fa-stop"></i>
+                                                    </button>
+                                                    <button class="save-btn bg-blue-600 hover:bg-blue-500 text-white px-3 py-1 rounded text-sm transition">
+                                                        <i class="fas fa-save"></i>
+                                                    </button>
+                                                </div>
                                             </div>
                                             
                                             <div class="flex items-center gap-3">
@@ -233,14 +248,20 @@
 <script>
 document.addEventListener('DOMContentLoaded', () => {
     const activeDownloads = new Map();
+    const DEFAULT_TRACKERS = [
+        'udp://open.demonii.com:1337/announce',
+        'udp://tracker.openbittorrent.com:80',
+        'udp://tracker.coppersurfer.tk:6969',
+        'udp://glotorrents.pw:6969/announce',
+        'udp://tracker.opentrackr.org:1337/announce',
+        'udp://torrent.gresille.org:80/announce',
+        'udp://p4p.arenabg.com:1337',
+        'udp://tracker.leechers-paradise.org:6969'
+    ];
+    
     const client = new WebTorrent({
         tracker: {
-            announce: [
-                'wss://tracker.openwebtorrent.com',
-                'wss://tracker.btorrent.xyz',
-                'wss://tracker.fastcast.nz',
-                'wss://tr.bangumi.moe:6969'
-            ]
+            announce: DEFAULT_TRACKERS
         }
     });
     
@@ -253,6 +274,13 @@ document.addEventListener('DOMContentLoaded', () => {
         return `${(bytes / Math.pow(k, i)).toFixed(1)} ${sizes[i]}`;
     }
     
+    // Helper function to construct magnet URI
+    function constructMagnetURI(hash, name) {
+        const encodedName = encodeURIComponent(name);
+        const trackerString = DEFAULT_TRACKERS.map(tracker => `&tr=${encodeURIComponent(tracker)}`).join('');
+        return `magnet:?xt=urn:btih:${hash}&dn=${encodedName}${trackerString}`;
+    }
+    
     // Download button click handler
     document.querySelectorAll('.download-btn').forEach(btn => {
         btn.addEventListener('click', async function() {
@@ -260,28 +288,12 @@ document.addEventListener('DOMContentLoaded', () => {
             const quality = this.dataset.quality;
             const size = this.dataset.size;
             
-            // Prevent duplicate downloads
-            if (activeDownloads.has(magnetURI)) {
-                showToast('Download already in progress');
-                return;
-            }
-            
-            // Get parent container and progress elements
-            const container = this.closest('.bg-gray-800');
-            const progressBar = container.querySelector('.progress-bar');
-            const progressElement = container.querySelector('.progress');
-            const statusElement = container.querySelector('.download-status');
-            
-            // Show progress elements
-            progressBar.classList.remove('hidden');
-            statusElement.classList.remove('hidden');
-            
-            // Update button state
-            this.disabled = true;
-            this.innerHTML = '<i class="fas fa-spinner fa-spin"></i><span>Starting...</span>';
-            
             try {
-                // Start server-side download
+                // Update button state
+                this.disabled = true;
+                this.innerHTML = '<i class="fas fa-spinner fa-spin"></i><span>Starting...</span>';
+                
+                // Make API call to start download
                 const response = await fetch('/torrent/download', {
                     method: 'POST',
                     headers: {
@@ -289,74 +301,40 @@ document.addEventListener('DOMContentLoaded', () => {
                     },
                     body: JSON.stringify({ magnetURI })
                 });
-                
-                if (!response.ok) throw new Error('Download failed to start');
-                
+
+                if (!response.ok) {
+                    throw new Error('Download failed to start');
+                }
+
                 const data = await response.json();
-                if (data.error) throw new Error(data.error);
                 
-                activeDownloads.set(magnetURI, data.infoHash);
-                
-                // Start client-side torrent
-                client.add(magnetURI, torrent => {
-                    // Update progress
-                    torrent.on('download', bytes => {
-                        const progress = Math.round(torrent.progress * 100);
-                        const speed = formatBytes(torrent.downloadSpeed) + '/s';
-                        
-                        progressElement.style.width = `${progress}%`;
-                        statusElement.textContent = `${progress}% - ${speed}`;
+                // Create download link for each file
+                if (data.files && data.files.length > 0) {
+                    data.files.forEach(file => {
+                        const a = document.createElement('a');
+                        a.href = `/torrent/download/${data.infoHash}/${encodeURIComponent(file.path)}`;
+                        a.download = file.name;
+                        document.body.appendChild(a);
+                        a.click();
+                        document.body.removeChild(a);
                     });
                     
-                    // Handle completion
-                    torrent.on('done', () => {
-                        progressElement.style.width = '100%';
-                        statusElement.textContent = 'Download complete!';
-                        showToast('Download complete!');
-                        
-                        // Clean up
-                        setTimeout(() => {
-                            torrent.destroy();
-                            activeDownloads.delete(magnetURI);
-                            progressBar.classList.add('hidden');
-                            statusElement.classList.add('hidden');
-                            this.disabled = false;
-                            this.innerHTML = '<i class="fas fa-download"></i><span>Download</span>';
-                        }, 3000);
-                    });
-                    
-                    // Handle errors
-                    torrent.on('error', err => {
-                        console.error('Torrent error:', err);
-                        showToast('Download error occurred');
-                        
-                        // Reset UI
-                        activeDownloads.delete(magnetURI);
-                        progressBar.classList.add('hidden');
-                        statusElement.classList.add('hidden');
-                        this.disabled = false;
-                        this.innerHTML = '<i class="fas fa-download"></i><span>Download</span>';
-                    });
-                });
-                
-                // Update UI to show download started
-                this.innerHTML = '<i class="fas fa-spinner fa-spin"></i><span>Downloading...</span>';
-                showToast('Download started');
+                    showToast('Download started');
+                } else {
+                    throw new Error('No files available');
+                }
+
+                // Reset button state after short delay
+                setTimeout(() => {
+                    this.disabled = false;
+                    this.innerHTML = '<i class="fas fa-download"></i><span>Download</span>';
+                }, 2000);
                 
             } catch (error) {
                 console.error('Download error:', error);
                 showToast('Failed to start download');
-                
-                // Reset button
                 this.disabled = false;
                 this.innerHTML = '<i class="fas fa-download"></i><span>Download</span>';
-                
-                // Hide progress elements
-                progressBar.classList.add('hidden');
-                statusElement.classList.add('hidden');
-                
-                // Clean up
-                activeDownloads.delete(magnetURI);
             }
         });
     });

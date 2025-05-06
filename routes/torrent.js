@@ -11,8 +11,14 @@ const client = new WebTorrent({
     nodeId: String(Math.random()).slice(2),
     tracker: {
         announce: [
-            'wss://tracker.openwebtorrent.com',
-            'wss://tracker.btorrent.xyz'
+            'udp://open.demonii.com:1337/announce',
+            'udp://tracker.openbittorrent.com:80',
+            'udp://tracker.coppersurfer.tk:6969',
+            'udp://glotorrents.pw:6969/announce',
+            'udp://tracker.opentrackr.org:1337/announce',
+            'udp://torrent.gresille.org:80/announce',
+            'udp://p4p.arenabg.com:1337',
+            'udp://tracker.leechers-paradise.org:6969'
         ]
     }
 });
@@ -25,6 +31,25 @@ if (!fs.existsSync(downloadsPath)) {
 
 // YTS API base URL
 const YTS_API_BASE = 'https://yts.mx/api/v2';
+
+// Default trackers for magnet links
+const DEFAULT_TRACKERS = [
+    'udp://open.demonii.com:1337/announce',
+    'udp://tracker.openbittorrent.com:80',
+    'udp://tracker.coppersurfer.tk:6969',
+    'udp://glotorrents.pw:6969/announce',
+    'udp://tracker.opentrackr.org:1337/announce',
+    'udp://torrent.gresille.org:80/announce',
+    'udp://p4p.arenabg.com:1337',
+    'udp://tracker.leechers-paradise.org:6969'
+];
+
+// Helper function to construct magnet URI
+function constructMagnetURI(hash, name, trackers = DEFAULT_TRACKERS) {
+    const encodedName = encodeURIComponent(name);
+    const trackerString = trackers.map(tracker => `&tr=${encodeURIComponent(tracker)}`).join('');
+    return `magnet:?xt=urn:btih:${hash}&dn=${encodedName}${trackerString}`;
+}
 
 // Search page
 router.get('/search', (req, res) => {
@@ -50,8 +75,17 @@ router.get('/results', async (req, res) => {
         const response = await axios.get(`${YTS_API_BASE}/list_movies.json?${params}`);
         const { data } = response.data;
         
+        // Add magnet URIs to movies
+        const movies = data.movies?.map(movie => ({
+            ...movie,
+            torrents: movie.torrents?.map(torrent => ({
+                ...torrent,
+                magnet: constructMagnetURI(torrent.hash, `${movie.title} ${movie.year} ${torrent.quality}`)
+            }))
+        })) || [];
+        
         res.render('torrent-results', {
-            movies: data.movies || [],
+            movies,
             totalResults: data.movie_count || 0,
             currentPage: parseInt(page),
             totalPages: Math.ceil((data.movie_count || 0) / 20),
@@ -96,6 +130,12 @@ router.get('/movie/:id', async (req, res) => {
             throw new Error('Movie not found');
         }
         
+        // Add magnet URIs to torrents
+        movie.torrents = movie.torrents?.map(torrent => ({
+            ...torrent,
+            magnet: constructMagnetURI(torrent.hash, `${movie.title} ${movie.year} ${torrent.quality}`)
+        }));
+        
         res.render('torrent-movie', { movie });
     } catch (error) {
         console.error('Error fetching movie details:', error);
@@ -106,84 +146,89 @@ router.get('/movie/:id', async (req, res) => {
     }
 });
 
-// Update download route
-router.post('/download', (req, res) => {
+// Download route
+router.post('/download', async (req, res) => {
     const { magnetURI } = req.body;
     
     if (!magnetURI) {
         return res.status(400).json({ error: 'Magnet URI is required' });
     }
 
-    // Check if torrent is already being downloaded
-    const existingTorrent = client.get(magnetURI);
-    if (existingTorrent) {
-        return res.json({
-            infoHash: existingTorrent.infoHash,
-            name: existingTorrent.name,
-            files: existingTorrent.files.map(file => ({
-                name: file.name,
-                length: file.length,
-                path: file.path
-            }))
-        });
-    }
-
     try {
-        const torrent = client.add(magnetURI, { 
-            path: downloadsPath,
-            announce: [
-                'wss://tracker.openwebtorrent.com',
-                'wss://tracker.btorrent.xyz'
-            ]
-        });
-
-        // Set up event handlers before sending response
-        torrent.on('error', (err) => {
-            console.error('Torrent error:', err);
-        });
-
-        torrent.on('warning', (err) => {
-            console.warn('Torrent warning:', err);
-        });
-
-        torrent.on('ready', () => {
-            console.log('Torrent ready:', torrent.infoHash);
-        });
-
-        torrent.on('download', (bytes) => {
-            console.log('Progress:', Math.round(torrent.progress * 100) + '%');
-            console.log('Download speed:', Math.round(torrent.downloadSpeed / 1024 / 1024 * 100) / 100 + ' MB/s');
-        });
-
-        torrent.on('done', () => {
-            console.log('Torrent download finished');
-            torrent.files.forEach(file => {
-                const filePath = path.join(downloadsPath, file.path);
-                console.log('File downloaded:', filePath);
+        // Check if torrent is already being downloaded
+        const existingTorrent = client.get(magnetURI);
+        if (existingTorrent) {
+            return res.json({
+                infoHash: existingTorrent.infoHash,
+                files: existingTorrent.files.map(file => ({
+                    name: file.name,
+                    path: file.path,
+                    length: file.length
+                }))
             });
+        }
+
+        // Add new torrent
+        client.add(magnetURI, { announce: DEFAULT_TRACKERS }, torrent => {
+            // Send torrent info back to client
+            res.json({
+                infoHash: torrent.infoHash,
+                files: torrent.files.map(file => ({
+                    name: file.name,
+                    path: file.path,
+                    length: file.length
+                }))
+            });
+
+            // Set up cleanup after 1 hour or when download completes
+            const cleanup = () => {
+                if (torrent.destroyed) return;
+                torrent.destroy();
+            };
+
+            setTimeout(cleanup, 60 * 60 * 1000); // 1 hour timeout
+            torrent.on('done', cleanup);
         });
-
-        // Send initial response
-        res.json({
-            infoHash: torrent.infoHash || '',
-            name: torrent.name || 'Initializing...',
-            files: []
-        });
-
-        // Clean up after 1 hour or when download is complete
-        const cleanup = () => {
-            if (client.get(torrent.infoHash)) {
-                torrent.destroy({ destroyStore: false });
-            }
-        };
-
-        setTimeout(cleanup, 3600000); // 1 hour
-        torrent.on('done', cleanup);
 
     } catch (error) {
-        console.error('Error adding torrent:', error);
-        res.status(500).json({ error: 'Failed to start download' });
+        console.error('Download error:', error);
+        // Only send error response if headers haven't been sent
+        if (!res.headersSent) {
+            res.status(500).json({ error: 'Failed to start download' });
+        }
     }
+});
+
+// File download route
+router.get('/download/:infoHash/:filename', (req, res) => {
+    const { infoHash, filename } = req.params;
+    const torrent = client.get(infoHash);
+    
+    if (!torrent) {
+        return res.status(404).json({ error: 'Torrent not found' });
+    }
+
+    const file = torrent.files.find(f => f.path === decodeURIComponent(filename));
+    if (!file) {
+        return res.status(404).json({ error: 'File not found' });
+    }
+
+    // Set content headers
+    res.setHeader('Content-Type', 'application/octet-stream');
+    res.setHeader('Content-Disposition', `attachment; filename="${file.name}"`);
+    res.setHeader('Content-Length', file.length);
+
+    // Stream file to response
+    const stream = file.createReadStream();
+    stream.pipe(res);
+
+    // Handle errors
+    stream.on('error', error => {
+        console.error('Stream error:', error);
+        if (!res.headersSent) {
+            res.status(500).json({ error: 'Download failed' });
+        }
+    });
 });
 
 module.exports = router; 
