@@ -781,11 +781,11 @@ app.get('/view/movie/:id', async (req, res) => {
     // Generate embed URLs
     const embedUrl = `${VIDSRC_EMBED_BASE}/movie/${tmdbId}`;
     const imdbEmbedUrl = imdbId ? `${VIDSRC_EMBED_BASE}/movie/${imdbId}` : null;
-    const goDriveUrl = imdbId ? `/api/player?id=${tmdbId}&imdb=${imdbId}&type=movie&title=${encodeURIComponent(movieData.title)}&poster=${encodeURIComponent(movieData.poster_path ? `https://image.tmdb.org/t/p/w500${movieData.poster_path}` : '')}&omdb_id=${encodeURIComponent(omdbData.imdbID || '')}` : null;
+    const goDriveUrl = omdbData.imdbID ? `https://godriveplayer.com/player.php?imdb=${omdbData.imdbID}` : null;
     
     const movie = {
       tmdbId,
-      imdbId,
+      imdbId: omdbData.imdbID || imdbId,
       title: movieData.title,
       overview: movieData.overview,
       runtime: omdbData.Runtime || (movieData.runtime ? `${movieData.runtime} min.` : 'N/A'),
@@ -1091,11 +1091,11 @@ app.get('/view/tv/:id', async (req, res) => {
     // Generate embed URLs
     const embedUrl = `${VIDSRC_EMBED_BASE}/tv/${tmdbId}`;
     const imdbEmbedUrl = imdbId ? `${VIDSRC_EMBED_BASE}/tv/${imdbId}` : null;
-    const goDriveUrl = imdbId ? `/api/player?id=${tmdbId}&type=tv&imdb=${imdbId}&title=${encodeURIComponent(showData.name)}&poster=${encodeURIComponent(showData.poster_path ? `https://image.tmdb.org/t/p/w500${showData.poster_path}` : '')}&omdb_id=${encodeURIComponent(omdbData.imdbID || '')}` : null;
+    const goDriveUrl = omdbData.imdbID ? `https://godriveplayer.com/player.php?imdb=${omdbData.imdbID}` : null;
     
     const show = {
       tmdbId,
-      imdbId,
+      imdbId: omdbData.imdbID || imdbId,
       title: showData.name,
       overview: showData.overview,
       status: showData.status || 'N/A',
