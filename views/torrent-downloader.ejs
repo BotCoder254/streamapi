@@ -1,0 +1,241 @@
+<!-- Torrent Downloader -->
+<div class="animate__animated animate__fadeIn">
+    <div class="container mx-auto px-4 py-8">
+        <div class="max-w-3xl mx-auto">
+            <h1 class="text-3xl font-bold mb-6"><i class="fas fa-download mr-2"></i>Torrent Downloader</h1>
+            
+            <!-- Input Form -->
+            <div class="bg-gray-800 rounded-lg p-6 mb-8 shadow-lg">
+                <form id="magnetForm" class="space-y-4">
+                    <div>
+                        <label for="magnetURI" class="block text-sm font-medium text-gray-300 mb-2">Magnet Link or Hash</label>
+                        <div class="flex gap-2">
+                            <input 
+                                type="text" 
+                                id="magnetURI" 
+                                name="magnetURI" 
+                                class="flex-1 bg-gray-700 text-white rounded-lg px-4 py-2 focus:ring-2 focus:ring-green-500 focus:outline-none"
+                                placeholder="magnet:?xt=urn:btih:..."
+                                value="<%= magnet %>"
+                            >
+                            <button type="submit" class="bg-green-600 hover:bg-green-500 text-white px-6 py-2 rounded-lg transition-colors flex items-center">
+                                <i class="fas fa-download mr-2"></i>
+                                Download
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Download Progress -->
+            <div id="downloadProgress" class="bg-gray-800 rounded-lg p-6 shadow-lg hidden">
+                <div class="mb-4">
+                    <h3 class="text-xl font-bold mb-2" id="torrentName">Downloading...</h3>
+                    <div class="flex items-center gap-4 text-sm text-gray-400">
+                        <span id="torrentSize"></span>
+                        <span id="torrentPeers">0 peers</span>
+                    </div>
+                </div>
+
+                <!-- Progress Bar -->
+                <div class="relative pt-1">
+                    <div class="flex mb-2 items-center justify-between">
+                        <div>
+                            <span class="text-xs font-semibold inline-block py-1 px-2 uppercase rounded-full bg-green-900 text-green-300" id="progressText">
+                                0%
+                            </span>
+                        </div>
+                        <div class="text-right">
+                            <span class="text-xs font-semibold inline-block" id="downloadSpeed">
+                                0 B/s
+                            </span>
+                        </div>
+                    </div>
+                    <div class="flex h-2 mb-4 overflow-hidden bg-green-900 rounded">
+                        <div id="progressBar" class="flex flex-col justify-center bg-green-500 transition-all duration-300" style="width: 0%"></div>
+                    </div>
+                </div>
+
+                <!-- Files List -->
+                <div id="filesList" class="mt-6 space-y-2"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- WebTorrent Client Script -->
+<script src="https://cdn.jsdelivr.net/npm/webtorrent@1.9.7/webtorrent.min.js"></script>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const client = new WebTorrent({
+        tracker: {
+            announce: [
+                'udp://open.demonii.com:1337/announce',
+                'udp://tracker.openbittorrent.com:80',
+                'udp://tracker.coppersurfer.tk:6969',
+                'udp://glotorrents.pw:6969/announce',
+                'udp://tracker.opentrackr.org:1337/announce',
+                'udp://torrent.gresille.org:80/announce',
+                'udp://p4p.arenabg.com:1337',
+                'udp://tracker.leechers-paradise.org:6969'
+            ]
+        }
+    });
+
+    // Format bytes to human readable size
+    function formatBytes(bytes) {
+        if (bytes === 0) return '0 B';
+        const k = 1024;
+        const sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return `${(bytes / Math.pow(k, i)).toFixed(1)} ${sizes[i]}`;
+    }
+
+    const magnetForm = document.getElementById('magnetForm');
+    const downloadProgress = document.getElementById('downloadProgress');
+    const progressBar = document.getElementById('progressBar');
+    const progressText = document.getElementById('progressText');
+    const downloadSpeed = document.getElementById('downloadSpeed');
+    const torrentName = document.getElementById('torrentName');
+    const torrentSize = document.getElementById('torrentSize');
+    const torrentPeers = document.getElementById('torrentPeers');
+    const filesList = document.getElementById('filesList');
+
+    // Auto-start download if magnet link is provided in URL
+    const initialMagnet = document.getElementById('magnetURI').value;
+    if (initialMagnet) {
+        startDownload(initialMagnet);
+    }
+
+    magnetForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const magnetURI = document.getElementById('magnetURI').value.trim();
+        
+        if (!magnetURI) {
+            showToast('Please enter a magnet link or hash');
+            return;
+        }
+
+        startDownload(magnetURI);
+    });
+
+    function startDownload(magnetURI) {
+        // Show progress container
+        downloadProgress.classList.remove('hidden');
+        torrentName.textContent = 'Connecting to peers...';
+
+        // Start download
+        client.add(magnetURI, (torrent) => {
+            torrentName.textContent = torrent.name;
+            torrentSize.textContent = formatBytes(torrent.length);
+
+            // Update progress
+            const interval = setInterval(() => {
+                const progress = Math.round(torrent.progress * 100);
+                progressBar.style.width = `${progress}%`;
+                progressText.textContent = `${progress}%`;
+                downloadSpeed.textContent = `${formatBytes(torrent.downloadSpeed)}/s`;
+                torrentPeers.textContent = `${torrent.numPeers} ${torrent.numPeers === 1 ? 'peer' : 'peers'}`;
+            }, 1000);
+
+            // Handle download completion
+            torrent.on('done', () => {
+                clearInterval(interval);
+                progressBar.style.width = '100%';
+                progressText.textContent = '100%';
+                showToast('Download complete!');
+
+                // Create download links for each file
+                filesList.innerHTML = '';
+                torrent.files.forEach(file => {
+                    const fileDiv = document.createElement('div');
+                    fileDiv.className = 'bg-gray-700 rounded-lg p-4 flex items-center justify-between';
+                    
+                    file.getBlobURL((err, url) => {
+                        if (err) {
+                            console.error('Error getting blob URL:', err);
+                            return;
+                        }
+
+                        fileDiv.innerHTML = `
+                            <div class="flex-1">
+                                <p class="font-medium">${file.name}</p>
+                                <p class="text-sm text-gray-400">${formatBytes(file.length)}</p>
+                            </div>
+                            <a href="${url}" download="${file.name}" class="bg-green-600 hover:bg-green-500 text-white px-4 py-2 rounded-lg transition-colors">
+                                <i class="fas fa-download"></i>
+                            </a>
+                        `;
+                    });
+
+                    filesList.appendChild(fileDiv);
+                });
+
+                // Cleanup after delay
+                setTimeout(() => {
+                    if (!torrent.destroyed) {
+                        torrent.destroy();
+                    }
+                }, 300000); // 5 minutes
+            });
+
+            // Handle errors
+            torrent.on('error', (err) => {
+                console.error('Torrent error:', err);
+                showToast('Download failed. Please try again.');
+                clearInterval(interval);
+                if (!torrent.destroyed) {
+                    torrent.destroy();
+                }
+            });
+        });
+    }
+
+    // Cleanup on page unload
+    window.addEventListener('beforeunload', () => {
+        client.destroy();
+    });
+
+    // Toast notification function
+    function showToast(message) {
+        const toast = document.getElementById('toast');
+        if (!toast) {
+            // Create toast if it doesn't exist
+            const toastDiv = document.createElement('div');
+            toastDiv.id = 'toast';
+            toastDiv.className = 'fixed bottom-4 right-4 bg-gray-800 text-white px-4 py-2 rounded-lg shadow-lg transform translate-y-full opacity-0 transition-all duration-300 flex items-center gap-2';
+            toastDiv.innerHTML = `
+                <i class="fas fa-check text-green-400"></i>
+                <span class="toast-message">${message}</span>
+            `;
+            document.body.appendChild(toastDiv);
+            
+            setTimeout(() => {
+                toastDiv.classList.remove('translate-y-full', 'opacity-0');
+            }, 100);
+            
+            setTimeout(() => {
+                toastDiv.classList.add('translate-y-full', 'opacity-0');
+                setTimeout(() => {
+                    document.body.removeChild(toastDiv);
+                }, 300);
+            }, 3000);
+        } else {
+            const toastMessage = toast.querySelector('.toast-message');
+            toastMessage.textContent = message;
+            toast.classList.remove('translate-y-full', 'opacity-0');
+            
+            setTimeout(() => {
+                toast.classList.add('translate-y-full', 'opacity-0');
+            }, 3000);
+        }
+    }
+});
+</script>
+
+<!-- Toast Notification -->
+<div id="toast" class="fixed bottom-4 right-4 bg-gray-800 text-white px-4 py-2 rounded-lg shadow-lg transform translate-y-full opacity-0 transition-all duration-300 flex items-center gap-2">
+    <i class="fas fa-check text-green-400"></i>
+    <span class="toast-message"></span>
+</div> 

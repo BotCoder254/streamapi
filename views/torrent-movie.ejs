@@ -108,13 +108,23 @@
                                             </div>
                                             
                                             <div class="flex items-center gap-3">
-                                                <button class="download-btn bg-green-600 hover:bg-green-500 text-white px-6 py-2 rounded-lg transition flex items-center gap-2"
-                                                        data-magnet="<%= torrent.magnet %>"
-                                                        data-quality="<%= torrent.quality %>"
-                                                        data-size="<%= torrent.size %>">
-                                                    <i class="fas fa-download"></i>
-                                                    <span>Download</span>
-                                                </button>
+                                                <div class="download-button-container">
+                                                    <div class="flex items-center gap-2">
+                                                        <a href="/torrent/download?magnet=<%= encodeURIComponent(torrent.magnet) %>" class="download-btn bg-green-600 hover:bg-green-500 text-white px-4 py-2 rounded-lg transition-colors flex items-center">
+                                                            <i class="fas fa-download mr-2"></i>
+                                                            <span class="btn-text">Download</span>
+                                                        </a>
+                                                        <button class="copy-magnet-btn bg-gray-700 hover:bg-gray-600 text-white p-2 rounded-lg transition-colors" data-magnet="<%= torrent.magnet %>" title="Copy Magnet Link">
+                                                            <i class="fas fa-clipboard"></i>
+                                                        </button>
+                                                    </div>
+                                                    
+                                                    <!-- Progress Bar Container -->
+                                                    <div class="progress-container hidden bg-gray-700 rounded-full h-2 w-full mt-2">
+                                                        <div class="progress-bar bg-green-500 h-full rounded-full transition-all duration-300" style="width: 0%"></div>
+                                                    </div>
+                                                    <div class="progress-text hidden text-sm text-gray-400 mt-1"></div>
+                                                </div>
                                                 
                                                 <div class="relative">
                                                     <button class="more-options-btn bg-gray-700 hover:bg-gray-600 text-white w-10 h-10 rounded-lg transition flex items-center justify-center">
@@ -247,24 +257,12 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', () => {
+    // Initialize WebTorrent client
+    const client = new WebTorrent();
+
+    // Track active downloads by infoHash
     const activeDownloads = new Map();
-    const DEFAULT_TRACKERS = [
-        'udp://open.demonii.com:1337/announce',
-        'udp://tracker.openbittorrent.com:80',
-        'udp://tracker.coppersurfer.tk:6969',
-        'udp://glotorrents.pw:6969/announce',
-        'udp://tracker.opentrackr.org:1337/announce',
-        'udp://torrent.gresille.org:80/announce',
-        'udp://p4p.arenabg.com:1337',
-        'udp://tracker.leechers-paradise.org:6969'
-    ];
-    
-    const client = new WebTorrent({
-        tracker: {
-            announce: DEFAULT_TRACKERS
-        }
-    });
-    
+
     // Format bytes to human readable size
     function formatBytes(bytes) {
         if (bytes === 0) return '0 B';
@@ -273,72 +271,190 @@ document.addEventListener('DOMContentLoaded', () => {
         const i = Math.floor(Math.log(bytes) / Math.log(k));
         return `${(bytes / Math.pow(k, i)).toFixed(1)} ${sizes[i]}`;
     }
-    
-    // Helper function to construct magnet URI
-    function constructMagnetURI(hash, name) {
-        const encodedName = encodeURIComponent(name);
-        const trackerString = DEFAULT_TRACKERS.map(tracker => `&tr=${encodeURIComponent(tracker)}`).join('');
-        return `magnet:?xt=urn:btih:${hash}&dn=${encodedName}${trackerString}`;
-    }
-    
-    // Download button click handler
+
+    // Handle download button clicks
     document.querySelectorAll('.download-btn').forEach(btn => {
-        btn.addEventListener('click', async function() {
-            const magnetURI = this.dataset.magnet;
-            const quality = this.dataset.quality;
-            const size = this.dataset.size;
+        btn.addEventListener('click', async function(e) {
+            e.preventDefault();
+            
+            const container = this.closest('.download-button-container');
+            const progressBar = container.querySelector('.progress-bar');
+            const progressText = container.querySelector('.progress-text');
             
             try {
-                // Update button state
-                this.disabled = true;
-                this.innerHTML = '<i class="fas fa-spinner fa-spin"></i><span>Starting...</span>';
-                
-                // Make API call to start download
-                const response = await fetch('/torrent/download', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ magnetURI })
-                });
+                const magnetURI = this.dataset.magnet;
+                if (!magnetURI) throw new Error('No magnet link found');
 
-                if (!response.ok) {
-                    throw new Error('Download failed to start');
-                }
+                // Extract infoHash from magnet URI
+                const infoHash = magnetURI.match(/btih:([a-fA-F0-9]+)/i)?.[1]?.toLowerCase();
+                if (!infoHash) throw new Error('Invalid magnet URI');
 
-                const data = await response.json();
-                
-                // Create download link for each file
-                if (data.files && data.files.length > 0) {
-                    data.files.forEach(file => {
-                        const a = document.createElement('a');
-                        a.href = `/torrent/download/${data.infoHash}/${encodeURIComponent(file.path)}`;
-                        a.download = file.name;
-                        document.body.appendChild(a);
-                        a.click();
-                        document.body.removeChild(a);
+                // Check if torrent is already being downloaded
+                const existingTorrent = client.torrents.find(t => t.infoHash === infoHash);
+                if (existingTorrent) {
+                    // Resume showing progress for existing torrent
+                    this.disabled = true;
+                    progressBar.style.display = 'block';
+                    progressBar.style.width = `${(existingTorrent.progress * 100).toFixed(1)}%`;
+                    progressText.textContent = 'Download already in progress...';
+                    
+                    // Setup progress tracking for existing torrent
+                    const interval = setInterval(() => {
+                        const progress = (existingTorrent.progress * 100).toFixed(1);
+                        progressBar.style.width = `${progress}%`;
+                        progressText.textContent = `Downloading: ${progress}%`;
+                    }, 1000);
+
+                    // Handle completion for existing torrent
+                    existingTorrent.on('done', () => {
+                        clearInterval(interval);
+                        progressBar.style.width = '100%';
+                        progressText.textContent = 'Download Complete!';
+                        
+                        // Create download links
+                        existingTorrent.files.forEach(file => {
+                            file.getBlobURL((err, url) => {
+                                if (err) {
+                                    console.error('Error getting blob URL:', err);
+                                    return;
+                                }
+                                
+                                const link = document.createElement('a');
+                                link.href = url;
+                                link.download = file.name;
+                                link.style.display = 'none';
+                                document.body.appendChild(link);
+                                link.click();
+                                
+                                setTimeout(() => {
+                                    URL.revokeObjectURL(url);
+                                    document.body.removeChild(link);
+                                }, 1000);
+                            });
+                        });
+                        
+                        // Reset UI
+                        setTimeout(() => {
+                            this.disabled = false;
+                            progressBar.style.display = 'none';
+                            progressText.textContent = '';
+                        }, 3000);
                     });
                     
-                    showToast('Download started');
-                } else {
-                    throw new Error('No files available');
+                    return;
                 }
-
-                // Reset button state after short delay
-                setTimeout(() => {
-                    this.disabled = false;
-                    this.innerHTML = '<i class="fas fa-download"></i><span>Download</span>';
-                }, 2000);
+                
+                // Add new torrent if it doesn't exist
+                client.add(magnetURI, torrent => {
+                    // Store in active downloads
+                    activeDownloads.set(torrent.infoHash, torrent);
+                    
+                    // Enable button and show progress
+                    this.disabled = true;
+                    progressBar.style.display = 'block';
+                    progressBar.style.width = '0%';
+                    progressText.textContent = 'Starting...';
+                    
+                    // Update progress
+                    const interval = setInterval(() => {
+                        const progress = (torrent.progress * 100).toFixed(1);
+                        progressBar.style.width = `${progress}%`;
+                        progressText.textContent = `Downloading: ${progress}%`;
+                    }, 1000);
+                    
+                    // Handle completion
+                    torrent.on('done', () => {
+                        clearInterval(interval);
+                        progressBar.style.width = '100%';
+                        progressText.textContent = 'Download Complete!';
+                        
+                        // Create download links
+                        torrent.files.forEach(file => {
+                            file.getBlobURL((err, url) => {
+                                if (err) {
+                                    console.error('Error getting blob URL:', err);
+                                    return;
+                                }
+                                
+                                const link = document.createElement('a');
+                                link.href = url;
+                                link.download = file.name;
+                                link.style.display = 'none';
+                                document.body.appendChild(link);
+                                link.click();
+                                
+                                setTimeout(() => {
+                                    URL.revokeObjectURL(url);
+                                    document.body.removeChild(link);
+                                }, 1000);
+                            });
+                        });
+                        
+                        // Reset UI and cleanup
+                        setTimeout(() => {
+                            this.disabled = false;
+                            progressBar.style.display = 'none';
+                            progressText.textContent = '';
+                            activeDownloads.delete(torrent.infoHash);
+                            torrent.destroy();
+                        }, 3000);
+                    });
+                    
+                    // Handle errors
+                    torrent.on('error', err => {
+                        console.error('Torrent error:', err);
+                        clearInterval(interval);
+                        progressBar.style.backgroundColor = '#ef4444';
+                        progressText.textContent = 'Download failed. Please try again.';
+                        
+                        // Reset UI and cleanup
+                        setTimeout(() => {
+                            this.disabled = false;
+                            progressBar.style.display = 'none';
+                            progressText.textContent = '';
+                            progressBar.style.backgroundColor = '';
+                            activeDownloads.delete(torrent.infoHash);
+                            torrent.destroy();
+                        }, 3000);
+                    });
+                    
+                    // Handle metadata
+                    torrent.on('metadata', () => {
+                        progressText.textContent = 'Metadata received, starting download...';
+                    });
+                    
+                    // Handle wire events
+                    torrent.on('wire', () => {
+                        progressText.textContent = 'Connected to peers...';
+                    });
+                });
                 
             } catch (error) {
                 console.error('Download error:', error);
-                showToast('Failed to start download');
-                this.disabled = false;
-                this.innerHTML = '<i class="fas fa-download"></i><span>Download</span>';
+                progressBar.style.backgroundColor = '#ef4444';
+                progressText.textContent = 'Download failed. Please try again.';
+                
+                // Reset UI
+                setTimeout(() => {
+                    this.disabled = false;
+                    progressBar.style.display = 'none';
+                    progressText.textContent = '';
+                    progressBar.style.backgroundColor = '';
+                }, 3000);
             }
         });
     });
-    
+
+    // Cleanup on page unload
+    window.addEventListener('beforeunload', () => {
+        activeDownloads.forEach(torrent => {
+            if (torrent && !torrent.destroyed) {
+                torrent.destroy();
+            }
+        });
+        client.destroy();
+    });
+
     // More options button handlers
     document.querySelectorAll('.more-options-btn').forEach(btn => {
         btn.addEventListener('click', function(e) {
@@ -437,6 +553,41 @@ document.addEventListener('DOMContentLoaded', () => {
             toast.classList.add('translate-y-full', 'opacity-0');
         }, 3000);
     }
+
+    // Add click handlers for copy buttons
+    document.querySelectorAll('.copy-magnet-btn').forEach(btn => {
+        btn.addEventListener('click', async function() {
+            const magnetURI = this.dataset.magnet;
+            
+            try {
+                await navigator.clipboard.writeText(magnetURI);
+                showToast('Magnet link copied to clipboard');
+                
+                // Visual feedback
+                const icon = this.querySelector('i');
+                icon.classList.remove('fa-clipboard');
+                icon.classList.add('fa-check');
+                setTimeout(() => {
+                    icon.classList.remove('fa-check');
+                    icon.classList.add('fa-clipboard');
+                }, 2000);
+            } catch (err) {
+                console.error('Failed to copy:', err);
+                showToast('Failed to copy magnet link');
+            }
+        });
+    });
+
+    // Add click handlers for download buttons
+    document.querySelectorAll('.download-btn').forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            e.preventDefault();
+            const magnetURI = this.dataset.magnet || new URLSearchParams(this.href.split('?')[1]).get('magnet');
+            if (magnetURI) {
+                window.location.href = `/torrent/downloader?magnet=${encodeURIComponent(magnetURI)}`;
+            }
+        });
+    });
 });
 </script>
 
