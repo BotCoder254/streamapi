@@ -1,0 +1,125 @@
+<!-- Announcement Modal -->
+<div id="announcementModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center animate__animated animate__fadeIn hidden">
+    <div class="bg-gray-900 rounded-lg p-6 max-w-lg w-full mx-4 shadow-2xl animate__animated animate__fadeInUp">
+        <div class="flex justify-between items-center mb-4">
+            <h3 class="text-xl font-bold text-white flex items-center">
+                <i class="fas fa-bullhorn text-yellow-500 mr-2"></i>
+                Important Announcement
+            </h3>
+            <button class="text-gray-400 hover:text-white transition-colors p-2 rounded-lg hover:bg-gray-800/50" onclick="closeAnnouncementModal()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        
+        <div class="space-y-4 text-gray-300">
+            <div class="bg-gray-800/50 rounded-lg p-4">
+                <p class="mb-3">
+                    <i class="fas fa-shield-alt text-green-500 mr-2"></i>
+                    <strong>For the best experience:</strong> We recommend using 
+                    <a href="https://brave.com" target="_blank" class="text-blue-400 hover:text-blue-300 transition">Brave Browser</a> 
+                    or an ad blocker to enhance your viewing experience.
+                </p>
+                <p class="text-sm text-gray-400">This helps prevent unwanted ads and ensures smooth playback.</p>
+            </div>
+
+            <div class="bg-gray-800/50 rounded-lg p-4">
+                <p class="mb-3">
+                    <i class="fas fa-desktop text-blue-500 mr-2"></i>
+                    <strong>Display Recommendation:</strong> For optimal viewing experience, we recommend:
+                </p>
+                <ul class="text-sm text-gray-400 space-y-2 ml-6">
+                    <li><i class="fas fa-check text-green-500 mr-2"></i>Using a larger screen (1080p or higher)</li>
+                    <li><i class="fas fa-check text-green-500 mr-2"></i>Viewing in full-screen mode</li>
+                    <li><i class="fas fa-check text-green-500 mr-2"></i>Using a stable internet connection</li>
+                </ul>
+            </div>
+            
+            <div class="bg-gray-800/50 rounded-lg p-4">
+                <p class="mb-2">
+                    <i class="fas fa-code-branch text-purple-500 mr-2"></i>
+                    <strong>Version:</strong> <span class="text-green-400">1.0.0</span>
+                </p>
+                <p class="text-sm text-gray-400">More exciting updates coming soon! Stay tuned.</p>
+            </div>
+            
+            <div class="bg-gray-800/50 rounded-lg p-4">
+                <p class="mb-3">
+                    <i class="fas fa-hands-helping text-orange-500 mr-2"></i>
+                    <strong>Contribute & Support:</strong>
+                </p>
+                <p class="text-sm text-gray-400 mb-2">Want to contribute or report issues? Reach out through our contact page!</p>
+                <a href="/contact" class="text-blue-400 hover:text-blue-300 transition text-sm flex items-center">
+                    <i class="fas fa-envelope mr-2"></i>
+                    Contact Us for Contributions
+                </a>
+            </div>
+            
+            <div class="bg-gray-800/50 rounded-lg p-4 flex items-center justify-between">
+                <div class="flex items-center">
+                    <i class="fab fa-github text-white text-2xl mr-3"></i>
+                    <div>
+                        <p class="font-bold">Follow the Creator</p>
+                        <a href="https://github.com/BotCoder254" target="_blank" class="text-blue-400 hover:text-blue-300 transition text-sm">@BotCoder254</a>
+                    </div>
+                </div>
+                <a href="https://github.com/BotCoder254" target="_blank" class="bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded-lg transition flex items-center">
+                    <i class="fas fa-external-link-alt mr-2"></i>
+                    Visit
+                </a>
+            </div>
+            
+            <div class="flex justify-between items-center mt-6">
+                <button onclick="closeAnnouncementModal()" class="text-gray-400 hover:text-gray-300 transition flex items-center">
+                    <i class="fas fa-times mr-2"></i>
+                    Close
+                </button>
+                <button onclick="closeAnnouncementModal()" class="bg-green-600 hover:bg-green-500 text-white px-6 py-2 rounded-lg transition flex items-center">
+                    <i class="fas fa-check mr-2"></i>
+                    Got it!
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function showAnnouncementModal() {
+    const modal = document.getElementById('announcementModal');
+    modal.classList.remove('hidden');
+    
+    // Auto-hide after 10 seconds
+    setTimeout(() => {
+        closeAnnouncementModal();
+    }, 10000);
+}
+
+function closeAnnouncementModal() {
+    const modal = document.getElementById('announcementModal');
+    modal.classList.add('animate__fadeOut');
+    setTimeout(() => {
+        modal.classList.add('hidden');
+        modal.classList.remove('animate__fadeOut');
+    }, 500);
+}
+
+// Show modal when page loads
+document.addEventListener('DOMContentLoaded', () => {
+    setTimeout(() => {
+        showAnnouncementModal();
+    }, 1000);
+});
+
+// Close modal on escape key
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+        closeAnnouncementModal();
+    }
+});
+
+// Close modal when clicking outside
+document.getElementById('announcementModal').addEventListener('click', (e) => {
+    if (e.target.id === 'announcementModal') {
+        closeAnnouncementModal();
+    }
+});
+</script> 
