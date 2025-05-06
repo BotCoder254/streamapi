@@ -33,16 +33,37 @@
                 <div class="flex-1 text-center md:text-left p-4 bg-gray-900/75 rounded-lg backdrop-blur-sm">
                     <h1 class="text-3xl md:text-4xl font-bold mb-2"><%= show.title %> <span class="text-gray-400 font-normal"><%= show.year %></span></h1>
                     
+                    <% if (show.tagline) { %>
+                        <p class="text-xl text-green-400 italic mb-4"><%= show.tagline %></p>
+                    <% } %>
+                    
                     <div class="flex flex-wrap gap-4 justify-center md:justify-start mb-6">
+                        <% if (show.imdbRating) { %>
+                            <div class="flex items-center bg-gray-800/70 px-3 py-1 rounded-full">
+                                <i class="fas fa-star text-yellow-500 mr-2"></i>
+                                <span>IMDb: <%= show.imdbRating %>/10</span>
+                                <% if (show.imdbVotes) { %>
+                                    <span class="text-gray-400 text-sm ml-1">(<%= show.imdbVotes %> votes)</span>
+                                <% } %>
+                            </div>
+                        <% } %>
+                        
                         <div class="flex items-center bg-gray-800/70 px-3 py-1 rounded-full">
                             <i class="fas fa-star text-yellow-500 mr-2"></i>
-                            <span><%= show.rating %></span>
+                            <span>TMDB: <%= show.rating %></span>
                         </div>
                         
                         <div class="flex items-center bg-gray-800/70 px-3 py-1 rounded-full">
-                            <i class="fas fa-clock text-blue-400 mr-2"></i>
-                            <span><%= show.runtime %></span>
+                            <i class="fas fa-film text-blue-400 mr-2"></i>
+                            <span><%= show.status %></span>
                         </div>
+                        
+                        <% if (show.rated) { %>
+                            <div class="flex items-center bg-gray-800/70 px-3 py-1 rounded-full">
+                                <i class="fas fa-film text-purple-400 mr-2"></i>
+                                <span><%= show.rated %></span>
+                            </div>
+                        <% } %>
                         
                         <% if (show.imdbId) { %>
                             <a href="https://www.imdb.com/title/<%= show.imdbId %>" target="_blank" class="flex items-center hover:text-yellow-400 transition bg-gray-800/70 px-3 py-1 rounded-full hover:bg-gray-700/70">
@@ -52,12 +73,67 @@
                         <% } %>
                     </div>
                     
-                    <p class="text-gray-200 mb-8 text-lg leading-relaxed"><%= show.overview %></p>
+                    <% if (show.genre || show.creator || show.actors || show.runtime) { %>
+                        <div class="mb-6 text-gray-300">
+                            <% if (show.genre) { %>
+                                <p class="mb-2"><strong class="text-white">Genre:</strong> <%= show.genre %></p>
+                            <% } %>
+                            <% if (show.creator) { %>
+                                <p class="mb-2"><strong class="text-white">Creator:</strong> <%= show.creator %></p>
+                            <% } %>
+                            <% if (show.actors) { %>
+                                <p class="mb-2"><strong class="text-white">Cast:</strong> <%= show.actors %></p>
+                            <% } %>
+                            <% if (show.runtime) { %>
+                                <p class="mb-2"><strong class="text-white">Runtime:</strong> <%= show.runtime %></p>
+                            <% } %>
+                            <% if (show.language) { %>
+                                <p class="mb-2"><strong class="text-white">Language:</strong> <%= show.language %></p>
+                            <% } %>
+                            <% if (show.country) { %>
+                                <p class="mb-2"><strong class="text-white">Country:</strong> <%= show.country %></p>
+                            <% } %>
+                            <% if (show.totalSeasons) { %>
+                                <p class="mb-2"><strong class="text-white">Total Seasons:</strong> <%= show.totalSeasons %></p>
+                            <% } %>
+                        </div>
+                    <% } %>
                     
-                    <div class="flex flex-wrap gap-3 justify-center md:justify-start">
-                        <a href="<%= show.embedUrl %>" class="play-btn px-6 py-3 bg-green-600 hover:bg-green-500 rounded-lg transition-all flex items-center shadow-lg animate__animated animate__pulse animate__infinite group">
-                            <i class="fas fa-play mr-2 group-hover:animate-ping"></i> Watch Now
-                        </a>
+                    <p class="text-gray-200 mb-8 text-lg leading-relaxed"><%= show.plot %></p>
+                    
+                    <div class="flex flex-wrap gap-3 justify-center md:justify-start mb-6">
+                        <div class="relative group">
+                            <button class="play-btn px-6 py-3 bg-green-600 hover:bg-green-500 rounded-lg transition-all flex items-center shadow-lg animate__animated animate__pulse animate__infinite">
+                                <i class="fas fa-play mr-2"></i> Watch Now
+                            </button>
+                            <!-- Player Selection Dropdown -->
+                            <div class="player-select hidden absolute top-full left-0 mt-2 w-48 bg-gray-800 rounded-lg shadow-xl z-50">
+                                <div class="p-2">
+                                    <a href="<%= show.embedUrl %>" class="player-option block px-4 py-2 text-sm rounded-lg hover:bg-gray-700 transition">
+                                        <i class="fas fa-play-circle mr-2"></i> Default Player
+                                    </a>
+                                    <% if (show.imdbEmbedUrl) { %>
+                                        <a href="<%= show.imdbEmbedUrl %>" class="player-option block px-4 py-2 text-sm rounded-lg hover:bg-gray-700 transition">
+                                            <i class="fab fa-imdb mr-2"></i> IMDb Player
+                                        </a>
+                                    <% } %>
+                                    <% if (show.goDriveUrl) { %>
+                                        <a href="<%= show.goDriveUrl %>" class="player-option block px-4 py-2 text-sm rounded-lg hover:bg-gray-700 transition">
+                                            <i class="fas fa-external-link-alt mr-2"></i> GoDrive Player
+                                        </a>
+                                    <% } %>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <button 
+                            class="watch-party-btn px-6 py-3 bg-purple-600 hover:bg-purple-500 rounded-lg transition flex items-center shadow-lg hover:shadow-xl"
+                            data-id="<%= show.tmdbId %>"
+                            data-type="tv"
+                            data-title="<%= show.title %>"
+                        >
+                            <i class="fas fa-users mr-2"></i> Watch Party
+                        </button>
                         
                         <button 
                             class="watchlist-toggle px-6 py-3 bg-gray-700 hover:bg-gray-600 rounded-lg transition flex items-center shadow-lg hover:shadow-xl"
@@ -74,6 +150,61 @@
                             <i class="far fa-heart mr-2"></i> Add to Favorites
                         </button>
                     </div>
+                    
+                    <% if (show.awards || show.ratings?.length > 0 || show.website || show.dvd) { %>
+                        <div class="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <% if (show.awards) { %>
+                                <div class="bg-gray-800/50 rounded-lg p-4">
+                                    <h3 class="text-lg font-bold mb-2"><i class="fas fa-trophy text-yellow-500 mr-2"></i>Awards</h3>
+                                    <p class="text-sm text-gray-300"><%= show.awards %></p>
+                                </div>
+                            <% } %>
+                            
+                            <% if (show.ratings?.length > 0) { %>
+                                <div class="bg-gray-800/50 rounded-lg p-4">
+                                    <h3 class="text-lg font-bold mb-2"><i class="fas fa-star text-yellow-500 mr-2"></i>Ratings</h3>
+                                    <div class="space-y-2">
+                                        <% show.ratings.forEach(rating => { %>
+                                            <div class="flex justify-between items-center">
+                                                <span class="text-sm text-gray-300"><%= rating.Source %></span>
+                                                <span class="text-sm font-bold text-white"><%= rating.Value %></span>
+                                            </div>
+                                        <% }); %>
+                                        <% if (show.metascore) { %>
+                                            <div class="flex justify-between items-center">
+                                                <span class="text-sm text-gray-300">Metascore</span>
+                                                <span class="text-sm font-bold text-white"><%= show.metascore %>/100</span>
+                                            </div>
+                                        <% } %>
+                                    </div>
+                                </div>
+                            <% } %>
+                            
+                            <% if (show.website || show.dvd) { %>
+                                <div class="bg-gray-800/50 rounded-lg p-4">
+                                    <h3 class="text-lg font-bold mb-2"><i class="fas fa-info-circle text-purple-500 mr-2"></i>Additional Info</h3>
+                                    <% if (show.dvd) { %>
+                                        <p class="text-sm text-gray-300 mb-2"><strong>DVD Release:</strong> <%= show.dvd %></p>
+                                    <% } %>
+                                    <% if (show.website) { %>
+                                        <p class="text-sm text-gray-300">
+                                            <strong>Website:</strong> 
+                                            <a href="<%= show.website %>" target="_blank" class="text-blue-400 hover:text-blue-300 transition">
+                                                <%= show.website %>
+                                            </a>
+                                        </p>
+                                    <% } %>
+                                </div>
+                            <% } %>
+                            
+                            <% if (show.totalSeasons) { %>
+                                <div class="bg-gray-800/50 rounded-lg p-4">
+                                    <h3 class="text-lg font-bold mb-2"><i class="fas fa-list text-blue-500 mr-2"></i>Total Seasons</h3>
+                                    <p class="text-sm text-gray-300"><%= show.totalSeasons %> Season<%= show.totalSeasons > 1 ? 's' : '' %></p>
+                                </div>
+                            <% } %>
+                        </div>
+                    <% } %>
                 </div>
             </div>
         </div>
@@ -81,7 +212,7 @@
         <!-- Player Section -->
         <div id="player-container" class="hidden mb-8">
             <div class="bg-black rounded-xl overflow-hidden shadow-2xl relative" style="padding-top: 56.25%;">
-                <div class="show-player-container absolute inset-0 w-full h-full">
+                <div class="movie-player-container absolute inset-0 w-full h-full">
                     <!-- Loading Overlay -->
                     <div id="player-loading-overlay" class="absolute inset-0 flex flex-col items-center justify-center z-10 bg-black/90 backdrop-filter backdrop-blur-sm">
                         <div class="relative mb-6">
@@ -93,7 +224,7 @@
                     </div>
                     
                     <iframe 
-                        id="show-player" 
+                        id="movie-player" 
                         src="" 
                         frameborder="0" 
                         class="absolute inset-0 w-full h-full" 
@@ -264,7 +395,7 @@
     document.addEventListener('DOMContentLoaded', function() {
         // Get DOM elements
         const playerContainer = document.getElementById('player-container');
-        const showPlayer = document.getElementById('show-player');
+        const moviePlayer = document.getElementById('movie-player');
         const playerLoadingOverlay = document.getElementById('player-loading-overlay');
         const playerLoadingTitle = document.getElementById('player-loading-title');
         const playerTitle = document.getElementById('player-title');
@@ -272,31 +403,41 @@
         const fullscreenBtn = document.getElementById('player-fullscreen-btn');
         const openDedicatedPlayer = document.getElementById('open-dedicated-player');
         const playBtn = document.querySelector('.play-btn');
+        const playerSelect = document.querySelector('.player-select');
         
         // Play button functionality
         if (playBtn) {
-            playBtn.addEventListener('mouseenter', function() {
-                this.classList.remove('animate__pulse');
-                this.classList.add('animate__animated', 'animate__bounceIn');
-            });
-            
-            playBtn.addEventListener('mouseleave', function() {
-                this.classList.remove('animate__bounceIn');
-                this.classList.add('animate__pulse');
-            });
+            let isDropdownVisible = false;
             
             playBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                isDropdownVisible = !isDropdownVisible;
+                playerSelect.classList.toggle('hidden', !isDropdownVisible);
+            });
+            
+            // Close dropdown when clicking outside
+            document.addEventListener('click', function(e) {
+                if (!playBtn.contains(e.target) && !playerSelect.contains(e.target)) {
+                    isDropdownVisible = false;
+                    playerSelect.classList.add('hidden');
+                }
+            });
+            
+            // Handle player option clicks
+            document.querySelectorAll('.player-option').forEach(option => {
+                option.addEventListener('click', function(e) {
                 e.preventDefault();
                 const embedUrl = this.getAttribute('href');
                 const showTitle = '<%= show.title %>';
                 
                 // Set up the player
-                showPlayer.src = embedUrl;
+                    moviePlayer.src = embedUrl;
                 playerLoadingTitle.textContent = showTitle;
                 playerTitle.textContent = showTitle;
                 
                 // Open dedicated player link
-                openDedicatedPlayer.href = `/api/player?id=<%= show.tmdbId %>&type=tv&title=${encodeURIComponent(showTitle)}`;
+                    openDedicatedPlayer.href = `/api/player?id=<%= show.tmdbId %>&type=tv&title=${encodeURIComponent(showTitle)}&poster=${encodeURIComponent('<%= show.poster %>')}`;
                 
                 // Show the player container
                 playerContainer.classList.remove('hidden');
@@ -306,7 +447,7 @@
                 playerContainer.scrollIntoView({ behavior: 'smooth' });
                 
                 // Handle loading state
-                showPlayer.addEventListener('load', function() {
+                    moviePlayer.addEventListener('load', function() {
                     setTimeout(() => {
                         playerLoadingOverlay.classList.add('animate__animated', 'animate__fadeOut');
                         setTimeout(() => {
@@ -314,6 +455,24 @@
                         }, 500);
                     }, 1500);
                 });
+                    
+                    // Hide dropdown after selection
+                    isDropdownVisible = false;
+                    playerSelect.classList.add('hidden');
+                });
+            });
+            
+            // Animation handling
+            playBtn.addEventListener('mouseenter', function() {
+                this.classList.remove('animate__pulse');
+                this.classList.add('animate__animated', 'animate__bounceIn');
+            });
+            
+            playBtn.addEventListener('mouseleave', function() {
+                if (!isDropdownVisible) {
+                    this.classList.remove('animate__bounceIn');
+                    this.classList.add('animate__pulse');
+                }
             });
         }
         
@@ -326,7 +485,7 @@
                 
                 // Update player source to YouTube embed
                 const embedUrl = `https://www.youtube.com/embed/${videoId}?autoplay=1&rel=0`;
-                showPlayer.src = embedUrl;
+                moviePlayer.src = embedUrl;
                 
                 // Update loading overlay
                 playerLoadingTitle.textContent = videoTitle;
@@ -352,7 +511,7 @@
         // Close player functionality
         if (closePlayer) {
             closePlayer.addEventListener('click', function() {
-                showPlayer.src = '';
+                moviePlayer.src = '';
                 playerContainer.classList.add('hidden');
                 playerLoadingOverlay.style.display = 'flex';
                 playerLoadingOverlay.classList.remove('animate__fadeOut');
@@ -362,12 +521,12 @@
         // Fullscreen functionality
         if (fullscreenBtn) {
             fullscreenBtn.addEventListener('click', function() {
-                if (showPlayer.requestFullscreen) {
-                    showPlayer.requestFullscreen();
-                } else if (showPlayer.webkitRequestFullscreen) {
-                    showPlayer.webkitRequestFullscreen();
-                } else if (showPlayer.msRequestFullscreen) {
-                    showPlayer.msRequestFullscreen();
+                if (moviePlayer.requestFullscreen) {
+                    moviePlayer.requestFullscreen();
+                } else if (moviePlayer.webkitRequestFullscreen) {
+                    moviePlayer.webkitRequestFullscreen();
+                } else if (moviePlayer.msRequestFullscreen) {
+                    moviePlayer.msRequestFullscreen();
                 }
             });
         }
@@ -411,3 +570,6 @@
 
 <!-- Include Watchlist JS -->
 <script src="/js/watchlist.js"></script> 
+
+<!-- Include movie.js -->
+<script src="/js/movie.js"></script> 
