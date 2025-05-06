@@ -727,6 +727,10 @@ app.get('/results', async (req, res) => {
   }
 });
 
+const OMDB_API_KEY = 'eb97ff85';
+const OMDB_API_URL = 'http://www.omdbapi.com';
+const GODRIVE_PLAYER_URL = 'https://godriveplayer.com/player.php';
+
 app.get('/view/movie/:id', async (req, res) => {
   try {
     const tmdbId = req.params.id;
@@ -741,6 +745,33 @@ app.get('/view/movie/:id', async (req, res) => {
     
     const imdbId = externalIds.imdb_id;
     
+    // Fetch OMDB data if we have an IMDB ID
+    let omdbData = {};
+    if (imdbId) {
+      try {
+        const omdbResponse = await fetch(`${OMDB_API_URL}/?i=${imdbId}&apikey=${OMDB_API_KEY}`);
+        if (omdbResponse.ok) {
+          omdbData = await omdbResponse.json();
+          // Validate OMDB data
+          if (omdbData.Response === 'True') {
+            // Convert 'N/A' values to null for better handling
+            Object.keys(omdbData).forEach(key => {
+              if (omdbData[key] === 'N/A') {
+                omdbData[key] = null;
+              }
+            });
+          } else {
+            console.warn('OMDB API returned false response:', omdbData.Error);
+            omdbData = {};
+          }
+        } else {
+          console.error('OMDB API returned non-200 status:', omdbResponse.status);
+        }
+      } catch (error) {
+        console.error('OMDB API Error:', error);
+      }
+    }
+    
     const similarMovies = similarData.results.slice(0, 12).map(m => ({
       id: m.id,
       title: m.title,
@@ -750,25 +781,50 @@ app.get('/view/movie/:id', async (req, res) => {
     // Generate embed URLs
     const embedUrl = `${VIDSRC_EMBED_BASE}/movie/${tmdbId}`;
     const imdbEmbedUrl = imdbId ? `${VIDSRC_EMBED_BASE}/movie/${imdbId}` : null;
+    const goDriveUrl = omdbData.imdbID ? `https://godriveplayer.com/player.php?imdb=${omdbData.imdbID}` : null;
     
     const movie = {
       tmdbId,
-      imdbId,
+      imdbId: omdbData.imdbID || imdbId,
       title: movieData.title,
       overview: movieData.overview,
-      runtime: `${movieData.runtime} min.`,
-      rating: `${movieData.vote_average}/10`,
-      poster: movieData.poster_path ? `https://image.tmdb.org/t/p/w500${movieData.poster_path}` : null,
+      runtime: omdbData.Runtime || (movieData.runtime ? `${movieData.runtime} min.` : 'N/A'),
+      rating: movieData.vote_average ? `${Number(movieData.vote_average).toFixed(1)}/10` : 'N/A',
+      poster: omdbData.Poster || (movieData.poster_path ? `https://image.tmdb.org/t/p/w500${movieData.poster_path}` : null),
       background: movieData.backdrop_path ? `https://image.tmdb.org/t/p/original${movieData.backdrop_path}` : null,
-      year: movieData.release_date ? `(${movieData.release_date.split('-')[0]})` : '',
+      year: omdbData.Year || (movieData.release_date ? `(${movieData.release_date.split('-')[0]})` : ''),
       tagline: movieData.tagline,
       embedUrl: embedUrl,
+      imdbEmbedUrl: imdbEmbedUrl,
+      goDriveUrl: goDriveUrl,
       similarMovies: similarMovies,
-      trailers: trailers
+      trailers: trailers,
+      // Add OMDB data with proper validation
+      imdbRating: omdbData.imdbRating || null,
+      imdbVotes: omdbData.imdbVotes || null,
+      rated: omdbData.Rated || null,
+      genre: omdbData.Genre || movieData.genres?.map(g => g.name).join(', '),
+      director: omdbData.Director || null,
+      writer: omdbData.Writer || null,
+      actors: omdbData.Actors || null,
+      awards: omdbData.Awards || null,
+      boxOffice: omdbData.BoxOffice || null,
+      production: omdbData.Production || null,
+      released: omdbData.Released || movieData.release_date,
+      country: omdbData.Country || null,
+      language: omdbData.Language || null,
+      plot: omdbData.Plot || movieData.overview,
+      // Additional OMDB fields
+      metascore: omdbData.Metascore || null,
+      dvd: omdbData.DVD || null,
+      website: omdbData.Website || null,
+      type: omdbData.Type || 'movie',
+      ratings: omdbData.Ratings || []
     };
     
     res.render('movie', { movie });
   } catch (error) {
+    console.error('Movie details error:', error);
     res.render('error', { 
       msg: "An error occurred while retrieving movie details.",
       code: 500 
@@ -990,6 +1046,33 @@ app.get('/view/tv/:id', async (req, res) => {
     
     const imdbId = externalIds.imdb_id;
     
+    // Fetch OMDB data if we have an IMDB ID
+    let omdbData = {};
+    if (imdbId) {
+      try {
+        const omdbResponse = await fetch(`${OMDB_API_URL}/?i=${imdbId}&apikey=${OMDB_API_KEY}`);
+        if (omdbResponse.ok) {
+          omdbData = await omdbResponse.json();
+          // Validate OMDB data
+          if (omdbData.Response === 'True') {
+            // Convert 'N/A' values to null for better handling
+            Object.keys(omdbData).forEach(key => {
+              if (omdbData[key] === 'N/A') {
+                omdbData[key] = null;
+              }
+            });
+          } else {
+            console.warn('OMDB API returned false response:', omdbData.Error);
+            omdbData = {};
+          }
+        } else {
+          console.error('OMDB API returned non-200 status:', omdbResponse.status);
+        }
+      } catch (error) {
+        console.error('OMDB API Error:', error);
+      }
+    }
+    
     const similarShows = similarData.results.slice(0, 12).map(s => ({
       id: s.id,
       title: s.name,
@@ -1005,24 +1088,52 @@ app.get('/view/tv/:id', async (req, res) => {
       poster: season.poster_path ? `https://image.tmdb.org/t/p/w300${season.poster_path}` : null
     }));
     
+    // Generate embed URLs
+    const embedUrl = `${VIDSRC_EMBED_BASE}/tv/${tmdbId}`;
+    const imdbEmbedUrl = imdbId ? `${VIDSRC_EMBED_BASE}/tv/${imdbId}` : null;
+    const goDriveUrl = omdbData.imdbID ? `https://godriveplayer.com/player.php?imdb=${omdbData.imdbID}` : null;
+    
     const show = {
       tmdbId,
-      imdbId,
+      imdbId: omdbData.imdbID || imdbId,
       title: showData.name,
       overview: showData.overview,
-      status: showData.status,
-      rating: `${showData.vote_average}/10`,
-      poster: showData.poster_path ? `https://image.tmdb.org/t/p/w500${showData.poster_path}` : null,
+      status: showData.status || 'N/A',
+      rating: showData.vote_average ? `${Number(showData.vote_average).toFixed(1)}/10` : 'N/A',
+      poster: omdbData.Poster || (showData.poster_path ? `https://image.tmdb.org/t/p/w500${showData.poster_path}` : null),
       background: showData.backdrop_path ? `https://image.tmdb.org/t/p/original${showData.backdrop_path}` : null,
-      year: showData.first_air_date ? `(${showData.first_air_date.split('-')[0]})` : '',
+      year: omdbData.Year || (showData.first_air_date ? `(${showData.first_air_date.split('-')[0]})` : ''),
       tagline: showData.tagline,
       seasons: seasons,
       similarShows: similarShows,
-      trailers: trailers
+      trailers: trailers,
+      embedUrl: embedUrl,
+      imdbEmbedUrl: imdbEmbedUrl,
+      goDriveUrl: goDriveUrl,
+      // Add OMDB data with proper validation
+      imdbRating: omdbData.imdbRating || null,
+      imdbVotes: omdbData.imdbVotes || null,
+      rated: omdbData.Rated || null,
+      genre: omdbData.Genre || showData.genres?.map(g => g.name).join(', '),
+      creator: omdbData.Writer || showData.created_by?.map(c => c.name).join(', '),
+      actors: omdbData.Actors || null,
+      awards: omdbData.Awards || null,
+      plot: omdbData.Plot || showData.overview,
+      totalSeasons: omdbData.totalSeasons || seasons.length,
+      country: omdbData.Country || null,
+      language: omdbData.Language || null,
+      // Additional OMDB fields
+      metascore: omdbData.Metascore || null,
+      dvd: omdbData.DVD || null,
+      website: omdbData.Website || null,
+      type: omdbData.Type || 'series',
+      ratings: omdbData.Ratings || [],
+      runtime: omdbData.Runtime || null
     };
     
     res.render('tv', { show });
   } catch (error) {
+    console.error('TV show details error:', error);
     res.render('error', { 
       msg: "An error occurred while retrieving TV show details.",
       code: 500 

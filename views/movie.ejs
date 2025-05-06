@@ -37,6 +37,37 @@
                         <p class="text-xl text-green-400 italic mb-4"><%= movie.tagline %></p>
                     <% } %>
                     
+                    <% if (movie.genre || movie.director || movie.actors) { %>
+                        <div class="mb-6 text-gray-300">
+                            <% if (movie.genre) { %>
+                                <p class="mb-2"><strong class="text-white">Genre:</strong> <%= movie.genre %></p>
+                            <% } %>
+                            <% if (movie.director) { %>
+                                <p class="mb-2"><strong class="text-white">Director:</strong> <%= movie.director %></p>
+                            <% } %>
+                            <% if (movie.writer) { %>
+                                <p class="mb-2"><strong class="text-white">Writer:</strong> <%= movie.writer %></p>
+                            <% } %>
+                            <% if (movie.actors) { %>
+                                <p class="mb-2"><strong class="text-white">Cast:</strong> <%= movie.actors %></p>
+                            <% } %>
+                            <% if (movie.released) { %>
+                                <p class="mb-2"><strong class="text-white">Released:</strong> <%= movie.released %></p>
+                            <% } %>
+                            <% if (movie.runtime) { %>
+                                <p class="mb-2"><strong class="text-white">Runtime:</strong> <%= movie.runtime %></p>
+                            <% } %>
+                            <% if (movie.language) { %>
+                                <p class="mb-2"><strong class="text-white">Language:</strong> <%= movie.language %></p>
+                            <% } %>
+                            <% if (movie.country) { %>
+                                <p class="mb-2"><strong class="text-white">Country:</strong> <%= movie.country %></p>
+                            <% } %>
+                        </div>
+                    <% } %>
+                    
+                    <p class="text-gray-200 mb-8 text-lg leading-relaxed"><%= movie.plot %></p>
+                    
                     <div class="flex flex-wrap gap-4 justify-center md:justify-start mb-6">
                         <div class="flex items-center bg-gray-800/70 px-3 py-1 rounded-full">
                             <i class="fas fa-star text-yellow-500 mr-2"></i>
@@ -56,12 +87,30 @@
                         <% } %>
                     </div>
                     
-                    <p class="text-gray-200 mb-8 text-lg leading-relaxed"><%= movie.overview %></p>
-                    
-                    <div class="flex flex-wrap gap-3 justify-center md:justify-start">
-                        <a href="<%= movie.embedUrl %>" class="play-btn px-6 py-3 bg-green-600 hover:bg-green-500 rounded-lg transition-all flex items-center shadow-lg animate__animated animate__pulse animate__infinite group">
-                            <i class="fas fa-play mr-2 group-hover:animate-ping"></i> Watch Now
-                        </a>
+                    <div class="flex flex-wrap gap-3 justify-center md:justify-start mb-6">
+                        <div class="relative group">
+                            <button class="play-btn px-6 py-3 bg-green-600 hover:bg-green-500 rounded-lg transition-all flex items-center shadow-lg animate__animated animate__pulse animate__infinite">
+                                <i class="fas fa-play mr-2"></i> Watch Now
+                            </button>
+                            <!-- Player Selection Dropdown -->
+                            <div class="player-select hidden absolute top-full left-0 mt-2 w-48 bg-gray-800 rounded-lg shadow-xl z-50">
+                                <div class="p-2">
+                                    <a href="<%= movie.embedUrl %>" class="player-option block px-4 py-2 text-sm rounded-lg hover:bg-gray-700 transition">
+                                        <i class="fas fa-play-circle mr-2"></i> Default Player
+                                    </a>
+                                    <% if (movie.imdbEmbedUrl) { %>
+                                        <a href="<%= movie.imdbEmbedUrl %>" class="player-option block px-4 py-2 text-sm rounded-lg hover:bg-gray-700 transition">
+                                            <i class="fab fa-imdb mr-2"></i> IMDb Player
+                                        </a>
+                                    <% } %>
+                                    <% if (movie.goDriveUrl) { %>
+                                        <a href="<%= movie.goDriveUrl %>" target="_blank" class="block px-4 py-2 text-sm rounded-lg hover:bg-gray-700 transition">
+                                            <i class="fas fa-external-link-alt mr-2"></i> GoDrive Player
+                                        </a>
+                                    <% } %>
+                                </div>
+                            </div>
+                        </div>
                         
                         <button 
                             class="watch-party-btn px-6 py-3 bg-purple-600 hover:bg-purple-500 rounded-lg transition flex items-center shadow-lg hover:shadow-xl"
@@ -87,6 +136,68 @@
                             <i class="far fa-heart mr-2"></i> Add to Favorites
                         </button>
                     </div>
+                    
+                    <% if (movie.awards || movie.boxOffice || movie.production || movie.ratings?.length > 0) { %>
+                        <div class="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <% if (movie.awards) { %>
+                                <div class="bg-gray-800/50 rounded-lg p-4">
+                                    <h3 class="text-lg font-bold mb-2"><i class="fas fa-trophy text-yellow-500 mr-2"></i>Awards</h3>
+                                    <p class="text-sm text-gray-300"><%= movie.awards %></p>
+                                </div>
+                            <% } %>
+                            
+                            <% if (movie.boxOffice) { %>
+                                <div class="bg-gray-800/50 rounded-lg p-4">
+                                    <h3 class="text-lg font-bold mb-2"><i class="fas fa-dollar-sign text-green-500 mr-2"></i>Box Office</h3>
+                                    <p class="text-sm text-gray-300"><%= movie.boxOffice %></p>
+                                </div>
+                            <% } %>
+                            
+                            <% if (movie.production) { %>
+                                <div class="bg-gray-800/50 rounded-lg p-4">
+                                    <h3 class="text-lg font-bold mb-2"><i class="fas fa-film text-blue-500 mr-2"></i>Production</h3>
+                                    <p class="text-sm text-gray-300"><%= movie.production %></p>
+                                </div>
+                            <% } %>
+                            
+                            <% if (movie.ratings?.length > 0) { %>
+                                <div class="bg-gray-800/50 rounded-lg p-4">
+                                    <h3 class="text-lg font-bold mb-2"><i class="fas fa-star text-yellow-500 mr-2"></i>Ratings</h3>
+                                    <div class="space-y-2">
+                                        <% movie.ratings.forEach(rating => { %>
+                                            <div class="flex justify-between items-center">
+                                                <span class="text-sm text-gray-300"><%= rating.Source %></span>
+                                                <span class="text-sm font-bold text-white"><%= rating.Value %></span>
+                                            </div>
+                                        <% }); %>
+                                        <% if (movie.metascore) { %>
+                                            <div class="flex justify-between items-center">
+                                                <span class="text-sm text-gray-300">Metascore</span>
+                                                <span class="text-sm font-bold text-white"><%= movie.metascore %>/100</span>
+                                            </div>
+                                        <% } %>
+                                    </div>
+                                </div>
+                            <% } %>
+                            
+                            <% if (movie.dvd || movie.website) { %>
+                                <div class="bg-gray-800/50 rounded-lg p-4">
+                                    <h3 class="text-lg font-bold mb-2"><i class="fas fa-info-circle text-purple-500 mr-2"></i>Additional Info</h3>
+                                    <% if (movie.dvd) { %>
+                                        <p class="text-sm text-gray-300 mb-2"><strong>DVD Release:</strong> <%= movie.dvd %></p>
+                                    <% } %>
+                                    <% if (movie.website) { %>
+                                        <p class="text-sm text-gray-300">
+                                            <strong>Website:</strong> 
+                                            <a href="<%= movie.website %>" target="_blank" class="text-blue-400 hover:text-blue-300 transition">
+                                                <%= movie.website %>
+                                            </a>
+                                        </p>
+                                    <% } %>
+                                </div>
+                            <% } %>
+                        </div>
+                    <% } %>
                 </div>
             </div>
         </div>
@@ -298,20 +409,30 @@
         const fullscreenBtn = document.getElementById('player-fullscreen-btn');
         const openDedicatedPlayer = document.getElementById('open-dedicated-player');
         const playBtn = document.querySelector('.play-btn');
+        const playerSelect = document.querySelector('.player-select');
         
         // Play button functionality
         if (playBtn) {
-            playBtn.addEventListener('mouseenter', function() {
-                this.classList.remove('animate__pulse');
-                this.classList.add('animate__animated', 'animate__bounceIn');
-            });
-            
-            playBtn.addEventListener('mouseleave', function() {
-                this.classList.remove('animate__bounceIn');
-                this.classList.add('animate__pulse');
-            });
+            let isDropdownVisible = false;
             
             playBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                isDropdownVisible = !isDropdownVisible;
+                playerSelect.classList.toggle('hidden', !isDropdownVisible);
+            });
+            
+            // Close dropdown when clicking outside
+            document.addEventListener('click', function(e) {
+                if (!playBtn.contains(e.target) && !playerSelect.contains(e.target)) {
+                    isDropdownVisible = false;
+                    playerSelect.classList.add('hidden');
+                }
+            });
+            
+            // Handle player option clicks
+            document.querySelectorAll('.player-option').forEach(option => {
+                option.addEventListener('click', function(e) {
                 e.preventDefault();
                 const embedUrl = this.getAttribute('href');
                 const movieTitle = '<%= movie.title %>';
@@ -340,6 +461,24 @@
                         }, 500);
                     }, 1500);
                 });
+                    
+                    // Hide dropdown after selection
+                    isDropdownVisible = false;
+                    playerSelect.classList.add('hidden');
+                });
+            });
+            
+            // Animation handling
+            playBtn.addEventListener('mouseenter', function() {
+                this.classList.remove('animate__pulse');
+                this.classList.add('animate__animated', 'animate__bounceIn');
+            });
+            
+            playBtn.addEventListener('mouseleave', function() {
+                if (!isDropdownVisible) {
+                    this.classList.remove('animate__bounceIn');
+                    this.classList.add('animate__pulse');
+                }
             });
         }
         
