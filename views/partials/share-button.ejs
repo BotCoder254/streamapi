@@ -1,0 +1,65 @@
+<!-- Share Button Component -->
+<button 
+    class="share-btn px-6 py-3 bg-gray-700 hover:bg-gray-600 rounded-lg transition flex items-center shadow-lg hover:shadow-xl"
+    data-url="<%= url %>"
+    data-title="<%= title %>"
+>
+    <i class="fas fa-share-alt mr-2"></i> Share
+</button>
+
+<!-- Toast Notification for Share -->
+<div id="shareToast" class="fixed bottom-4 right-4 bg-green-600 text-white px-6 py-3 rounded-lg shadow-lg transform translate-y-full opacity-0 transition-all duration-300 z-50">
+    <div class="flex items-center">
+        <i class="fas fa-check-circle mr-2"></i>
+        <span>Link copied to clipboard!</span>
+    </div>
+</div>
+
+<!-- Share Button Script -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const shareBtn = document.querySelector('.share-btn');
+    const shareToast = document.getElementById('shareToast');
+    
+    if (shareBtn) {
+        shareBtn.addEventListener('click', async function() {
+            const url = this.dataset.url;
+            const title = this.dataset.title;
+            
+            try {
+                if (navigator.share) {
+                    // Use Web Share API if available
+                    await navigator.share({
+                        title: title,
+                        url: url
+                    });
+                } else {
+                    // Fallback to clipboard
+                    await navigator.clipboard.writeText(url);
+                    
+                    // Show toast notification
+                    shareToast.classList.remove('translate-y-full', 'opacity-0');
+                    
+                    // Hide toast after 3 seconds
+                    setTimeout(() => {
+                        shareToast.classList.add('translate-y-full', 'opacity-0');
+                    }, 3000);
+                }
+            } catch (err) {
+                console.error('Error sharing:', err);
+            }
+        });
+        
+        // Add hover animation
+        shareBtn.addEventListener('mouseenter', function() {
+            const icon = this.querySelector('i');
+            icon.classList.add('animate__animated', 'animate__bounceIn');
+        });
+        
+        shareBtn.addEventListener('mouseleave', function() {
+            const icon = this.querySelector('i');
+            icon.classList.remove('animate__animated', 'animate__bounceIn');
+        });
+    }
+});
+</script> 

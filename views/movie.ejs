@@ -135,6 +135,12 @@
                         <button class="favorite-btn px-6 py-3 bg-gray-700 hover:bg-gray-600 rounded-lg transition flex items-center shadow-lg hover:shadow-xl">
                             <i class="far fa-heart mr-2"></i> Add to Favorites
                         </button>
+                        
+                        <!-- Share Button -->
+                        <%- include('partials/share-button', { 
+                            url: `${process.env.SITE_URL || 'http://localhost:3000'}/view/movie/${movie.tmdbId}`,
+                            title: movie.title
+                        }) %>
                     </div>
                     
                     <% if (movie.awards || movie.boxOffice || movie.production || movie.ratings?.length > 0) { %>
