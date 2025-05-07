@@ -1,31 +1,44 @@
 const express = require('express');
 const router = express.Router();
 const User = require('../models/User');
-const { ensureAuthenticated } = require('../config/auth');
+const { isAuthenticated } = require('../middleware/auth');
 
 // Get watchlist items
-router.get('/', ensureAuthenticated, async (req, res) => {
+router.get('/', isAuthenticated, async (req, res) => {
     try {
         const page = parseInt(req.query.page) || 1;
         const limit = 20;
         const skip = (page - 1) * limit;
         
         const user = await User.findById(req.user._id);
+        if (!user) {
+            return res.status(404).json({ success: false, error: 'User not found' });
+        }
+        
         const watchlist = user.watchlist || [];
         
         // Sort by added date
-        watchlist.sort((a, b) => b.added_date - a.added_date);
+        watchlist.sort((a, b) => new Date(b.added_date) - new Date(a.added_date));
+        
+        // Format items for the existing UI
+        const items = watchlist.map(item => ({
+            id: item.mediaId,
+            type: item.mediaType,
+            title: item.title,
+            poster: item.poster,
+            year: item.year
+        }));
         
         // Paginate
-        const paginatedItems = watchlist.slice(skip, skip + limit);
-        const totalPages = Math.ceil(watchlist.length / limit) || 1;
+        const paginatedItems = items.slice(skip, skip + limit);
+        const totalPages = Math.ceil(items.length / limit) || 1;
         
         res.render('watchlist', {
             items: paginatedItems,
             pagination: {
                 currentPage: page,
                 totalPages: totalPages,
-                total: watchlist.length
+                total: items.length
             }
         });
     } catch (error) {
@@ -38,9 +51,9 @@ router.get('/', ensureAuthenticated, async (req, res) => {
 });
 
 // Add item to watchlist
-router.post('/add', ensureAuthenticated, async (req, res) => {
+router.post('/add', isAuthenticated, async (req, res) => {
     try {
-        const { id, type, title, poster } = req.body;
+        const { id, type, title, poster, year } = req.body;
         
         if (!id || !type || !title) {
             return res.status(400).json({ success: false, error: "Missing required fields" });
@@ -50,7 +63,7 @@ router.post('/add', ensureAuthenticated, async (req, res) => {
         
         // Check if item already exists
         const exists = user.watchlist.some(item => 
-            item.id === id && item.type === type
+            item.mediaId === id && item.mediaType === type
         );
         
         if (exists) {
@@ -59,10 +72,11 @@ router.post('/add', ensureAuthenticated, async (req, res) => {
         
         // Add new item
         user.watchlist.push({
-            id,
-            type,
+            mediaId: id,
+            mediaType: type,
             title,
-            poster,
+            poster: poster || null,
+            year: year || '',
             added_date: new Date()
         });
         
@@ -75,7 +89,7 @@ router.post('/add', ensureAuthenticated, async (req, res) => {
 });
 
 // Remove item from watchlist
-router.post('/remove', ensureAuthenticated, async (req, res) => {
+router.post('/remove', isAuthenticated, async (req, res) => {
     try {
         const { id, type } = req.body;
         
@@ -88,7 +102,7 @@ router.post('/remove', ensureAuthenticated, async (req, res) => {
         // Remove item
         const initialLength = user.watchlist.length;
         user.watchlist = user.watchlist.filter(item => 
-            !(item.id === id && item.type === type)
+            !(item.mediaId === id && item.mediaType === type)
         );
         
         if (user.watchlist.length === initialLength) {
@@ -104,23 +118,23 @@ router.post('/remove', ensureAuthenticated, async (req, res) => {
 });
 
 // Check if item is in watchlist
-router.get('/check', ensureAuthenticated, async (req, res) => {
+router.get('/check', isAuthenticated, async (req, res) => {
     try {
         const { id, type } = req.query;
         
         if (!id || !type) {
-            return res.status(400).json({ success: false, error: "Missing required fields" });
+            return res.status(400).json({ success: false, message: 'Missing required fields' });
         }
         
         const user = await User.findById(req.user._id);
         const inWatchlist = user.watchlist.some(item => 
-            item.id === id && item.type === type
+            item.mediaId === id && item.mediaType === type
         );
         
-        res.json({ success: true, inWatchlist });
+        res.json({ inWatchlist });
     } catch (error) {
         console.error('Check watchlist error:', error);
-        res.status(500).json({ success: false, error: "Failed to check watchlist" });
+        res.status(500).json({ success: false, message: 'Failed to check watchlist' });
     }
 });
 

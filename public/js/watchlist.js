@@ -4,141 +4,69 @@
  */
 
 document.addEventListener('DOMContentLoaded', () => {
-  // Initialize watchlist buttons on page load
-  initWatchlistButtons();
-
-  // Handle remove from watchlist buttons on the watchlist page
-  initWatchlistRemoveButtons();
-});
-
-/**
- * Initialize watchlist buttons on movie and TV show pages
- */
-function initWatchlistButtons() {
+  // Initialize watchlist buttons
   const watchlistButtons = document.querySelectorAll('.watchlist-toggle');
-  
   watchlistButtons.forEach(button => {
-    const id = button.dataset.id;
-    const type = button.dataset.type;
+    const mediaId = button.dataset.id;
+    const mediaType = button.dataset.type;
     
-    if (id && type) {
-      // Check if this item is already in the watchlist
-      checkWatchlistStatus(id, type, button);
+    if (mediaId && mediaType) {
+      // Check initial watchlist status
+      checkWatchlistStatus(mediaId, mediaType, button);
       
-      // Add click event listener
+      // Add click handler
       button.addEventListener('click', function(e) {
         e.preventDefault();
+        e.stopPropagation();
         
-        const isInWatchlist = button.classList.contains('in-watchlist');
+        const isInWatchlist = this.classList.contains('in-watchlist');
         
         if (isInWatchlist) {
-          removeFromWatchlist(id, type, button);
+          removeFromWatchlist(mediaId, mediaType, this);
         } else {
-          const title = button.dataset.title || 'Untitled';
-          const poster = button.dataset.poster || '';
-          const year = button.dataset.year || '';
-          
-          addToWatchlist({ id, type, title, poster, year }, button);
+          const item = {
+            id: mediaId,
+            type: mediaType,
+            title: this.dataset.title,
+            poster: this.dataset.poster,
+            year: this.dataset.year
+          };
+          addToWatchlist(item, this);
         }
       });
     }
   });
-}
-
-/**
- * Initialize remove buttons specifically on the watchlist page
- */
-function initWatchlistRemoveButtons() {
-  const removeButtons = document.querySelectorAll('.watchlist-remove');
   
+  // Initialize remove buttons on watchlist page
+  const removeButtons = document.querySelectorAll('.watchlist-remove');
   removeButtons.forEach(button => {
     button.addEventListener('click', function(e) {
       e.preventDefault();
       e.stopPropagation();
       
       const itemCard = this.closest('.watchlist-item');
-      const id = itemCard.dataset.id;
-      const type = itemCard.dataset.type;
+      const mediaId = itemCard.dataset.id;
+      const mediaType = itemCard.dataset.type;
       
-      if (id && type && itemCard) {
-        // Confirm removal
+      if (mediaId && mediaType && itemCard) {
         if (confirm('Remove this item from your watchlist?')) {
-          // Animate the removal
           itemCard.classList.add('animate__animated', 'animate__fadeOut');
           
-          // Send request to remove the item
           setTimeout(() => {
-            fetch('/api/watchlist/remove', {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-              },
-              body: JSON.stringify({ id, type }),
-            })
-            .then(response => {
-              if (!response.ok) {
-                throw new Error('Network response was not ok');
-              }
-              return response.json();
-            })
-            .then(data => {
-              if (data.success) {
-                // Remove the item from DOM
-                itemCard.remove();
-                
-                // Check if watchlist is now empty
-                const remainingItems = document.querySelectorAll('.watchlist-item');
-                if (remainingItems.length === 0) {
-                  // Show empty state
-                  const container = document.querySelector('.grid');
-                  if (container) {
-                    container.innerHTML = `
-                    <div class="col-span-full text-center py-16 animate__animated animate__fadeIn">
-                        <i class="fas fa-bookmark text-6xl text-gray-600 mb-6"></i>
-                        <h2 class="text-2xl font-bold mb-2">Your Watchlist is Empty</h2>
-                        <p class="text-gray-400 mb-8">Add movies and TV shows to your watchlist to keep track of what you want to watch.</p>
-                        
-                        <div class="flex flex-col sm:flex-row items-center justify-center space-y-4 sm:space-y-0 sm:space-x-4">
-                            <a href="/browse" class="px-6 py-3 bg-green-600 hover:bg-green-700 rounded-lg transition flex items-center">
-                                <i class="fas fa-film mr-2"></i> Browse Movies
-                            </a>
-                            
-                            <a href="/browse/tv" class="px-6 py-3 bg-gray-800 hover:bg-gray-700 rounded-lg transition flex items-center">
-                                <i class="fas fa-tv mr-2"></i> Browse TV Shows
-                            </a>
-                        </div>
-                    </div>
-                    `;
-                  }
-                }
-                
-                showNotification('Removed from watchlist', 'success');
-              } else {
-                showNotification(data.message || 'Failed to remove from watchlist', 'error');
-              }
-            })
-            .catch(error => {
-              console.error('Error:', error);
-              showNotification('An error occurred', 'error');
-            });
+            removeFromWatchlist(mediaId, mediaType, null, itemCard);
           }, 300);
         }
       }
     });
   });
-}
+});
 
 /**
  * Check if an item is in the watchlist
  */
-function checkWatchlistStatus(id, type, buttonElement) {
-  fetch(`/api/watchlist/check?id=${id}&type=${type}`)
-    .then(response => {
-      if (!response.ok) {
-        throw new Error('Network response was not ok');
-      }
-      return response.json();
-    })
+function checkWatchlistStatus(mediaId, mediaType, buttonElement) {
+  fetch(`/watchlist/check?id=${mediaId}&type=${mediaType}`)
+    .then(response => response.json())
     .then(data => {
       if (data.inWatchlist) {
         buttonElement.classList.add('in-watchlist', 'bg-green-600');
@@ -152,6 +80,7 @@ function checkWatchlistStatus(id, type, buttonElement) {
     })
     .catch(error => {
       console.error('Error checking watchlist status:', error);
+      showNotification('Error checking watchlist status', 'error');
     });
 }
 
@@ -159,19 +88,14 @@ function checkWatchlistStatus(id, type, buttonElement) {
  * Add an item to the watchlist
  */
 function addToWatchlist(item, buttonElement) {
-  fetch('/api/watchlist/add', {
+  fetch('/watchlist/add', {
     method: 'POST',
     headers: {
-      'Content-Type': 'application/json',
+      'Content-Type': 'application/json'
     },
-    body: JSON.stringify(item),
+    body: JSON.stringify(item)
   })
-  .then(response => {
-    if (!response.ok) {
-      throw new Error('Network response was not ok');
-    }
-    return response.json();
-  })
+  .then(response => response.json())
   .then(data => {
     if (data.success) {
       buttonElement.classList.add('in-watchlist', 'bg-green-600');
@@ -179,7 +103,7 @@ function addToWatchlist(item, buttonElement) {
       buttonElement.innerHTML = '<i class="fas fa-check mr-2"></i> In Watchlist';
       showNotification('Added to watchlist', 'success');
     } else {
-      showNotification(data.message || 'Item already in watchlist', 'info');
+      showNotification(data.error || 'Failed to add to watchlist', 'error');
     }
   })
   .catch(error => {
@@ -191,28 +115,29 @@ function addToWatchlist(item, buttonElement) {
 /**
  * Remove an item from the watchlist
  */
-function removeFromWatchlist(id, type, buttonElement) {
-  fetch('/api/watchlist/remove', {
+function removeFromWatchlist(mediaId, mediaType, buttonElement, itemCard = null) {
+  fetch('/watchlist/remove', {
     method: 'POST',
     headers: {
-      'Content-Type': 'application/json',
+      'Content-Type': 'application/json'
     },
-    body: JSON.stringify({ id, type }),
+    body: JSON.stringify({ id: mediaId, type: mediaType })
   })
-  .then(response => {
-    if (!response.ok) {
-      throw new Error('Network response was not ok');
-    }
-    return response.json();
-  })
+  .then(response => response.json())
   .then(data => {
     if (data.success) {
-      buttonElement.classList.remove('in-watchlist', 'bg-green-600');
-      buttonElement.classList.add('bg-gray-700');
-      buttonElement.innerHTML = '<i class="fas fa-plus mr-2"></i> Add to Watchlist';
+      if (buttonElement) {
+        buttonElement.classList.remove('in-watchlist', 'bg-green-600');
+        buttonElement.classList.add('bg-gray-700');
+        buttonElement.innerHTML = '<i class="fas fa-plus mr-2"></i> Add to Watchlist';
+      }
+      if (itemCard) {
+        itemCard.remove();
+        checkEmptyWatchlist();
+      }
       showNotification('Removed from watchlist', 'success');
     } else {
-      showNotification(data.message || 'Failed to remove from watchlist', 'info');
+      showNotification(data.error || 'Failed to remove from watchlist', 'error');
     }
   })
   .catch(error => {
@@ -222,54 +147,69 @@ function removeFromWatchlist(id, type, buttonElement) {
 }
 
 /**
+ * Check if the watchlist is empty
+ */
+function checkEmptyWatchlist() {
+  const remainingItems = document.querySelectorAll('.watchlist-item');
+  if (remainingItems.length === 0) {
+    const container = document.querySelector('.grid');
+    if (container) {
+      container.innerHTML = `
+        <div class="col-span-full text-center py-16 animate__animated animate__fadeIn">
+          <i class="fas fa-bookmark text-6xl text-gray-600 mb-6"></i>
+          <h2 class="text-2xl font-bold mb-2">Your Watchlist is Empty</h2>
+          <p class="text-gray-400 mb-8">Add movies and TV shows to your watchlist to keep track of what you want to watch.</p>
+          
+          <div class="flex flex-col sm:flex-row items-center justify-center space-y-4 sm:space-y-0 sm:space-x-4">
+            <a href="/browse" class="px-6 py-3 bg-green-600 hover:bg-green-700 rounded-lg transition flex items-center">
+              <i class="fas fa-film mr-2"></i> Browse Movies
+            </a>
+            
+            <a href="/browse/tv" class="px-6 py-3 bg-gray-800 hover:bg-gray-700 rounded-lg transition flex items-center">
+              <i class="fas fa-tv mr-2"></i> Browse TV Shows
+            </a>
+          </div>
+        </div>
+      `;
+    }
+  }
+}
+
+/**
  * Display a notification message
  */
 function showNotification(message, type = 'info') {
-  // Check if notification toast exists
-  let toast = document.getElementById('notification-toast');
+  const toast = document.getElementById('notification-toast');
+  const messageElement = document.getElementById('notification-message');
   
-  // Create toast if it doesn't exist
-  if (!toast) {
-    toast = document.createElement('div');
-    toast.id = 'notification-toast';
-    toast.className = 'fixed bottom-4 right-4 px-4 py-3 rounded-lg shadow-lg hidden animate__animated animate__fadeInUp z-50';
+  if (toast && messageElement) {
+    messageElement.textContent = message;
+    toast.className = 'fixed bottom-4 right-4 px-4 py-3 rounded-lg shadow-lg animate__animated animate__fadeInUp z-50';
     
-    const messageElement = document.createElement('span');
-    messageElement.id = 'notification-message';
-    toast.appendChild(messageElement);
+    switch (type) {
+      case 'success':
+        toast.classList.add('bg-green-600', 'text-white');
+        break;
+      case 'error':
+        toast.classList.add('bg-red-600', 'text-white');
+        break;
+      case 'info':
+        toast.classList.add('bg-blue-600', 'text-white');
+        break;
+      default:
+        toast.classList.add('bg-gray-800', 'text-white');
+    }
     
-    document.body.appendChild(toast);
-  }
-  
-  // Get or create message element
-  let messageElement = document.getElementById('notification-message');
-  if (!messageElement) {
-    messageElement = document.createElement('span');
-    messageElement.id = 'notification-message';
-    toast.appendChild(messageElement);
-  }
-  
-  // Set message
-  messageElement.textContent = message;
-  
-  // Set color based on type
-  if (type === 'success') {
-    toast.className = 'fixed bottom-4 right-4 px-4 py-3 rounded-lg shadow-lg bg-green-600 text-white animate__animated animate__fadeInUp z-50';
-  } else if (type === 'error') {
-    toast.className = 'fixed bottom-4 right-4 px-4 py-3 rounded-lg shadow-lg bg-red-600 text-white animate__animated animate__fadeInUp z-50';
-  } else {
-    toast.className = 'fixed bottom-4 right-4 px-4 py-3 rounded-lg shadow-lg bg-blue-600 text-white animate__animated animate__fadeInUp z-50';
-  }
-  
-  // Show the toast
-  toast.classList.remove('hidden');
-  
-  // Hide after 3 seconds
-  setTimeout(() => {
-    toast.classList.add('animate__fadeOutDown');
+    toast.classList.remove('hidden');
+    
     setTimeout(() => {
-      toast.classList.add('hidden');
-      toast.classList.remove('animate__fadeOutDown');
-    }, 300);
-  }, 3000);
+      toast.classList.remove('animate__fadeInUp');
+      toast.classList.add('animate__fadeOutDown');
+      setTimeout(() => {
+        toast.classList.add('hidden');
+        toast.classList.remove('animate__fadeOutDown');
+        toast.className = 'fixed bottom-4 right-4 px-4 py-3 rounded-lg shadow-lg hidden';
+      }, 300);
+    }, 3000);
+  }
 } 

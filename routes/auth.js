@@ -11,6 +11,8 @@ const ejs = require('ejs');
 const fs = require('fs');
 const path = require('path');
 const multer = require('multer');
+const WatchHistory = require('../models/WatchHistory');
+const Achievement = require('../models/Achievement');
 
 // Configure multer for image upload
 const storage = multer.diskStorage({
@@ -48,12 +50,12 @@ const upload = multer({
 
 // Configure nodemailer
 const transporter = nodemailer.createTransport({
-    host: 'smtp.gmail.com',
+    host: 'smtp.gmail.com',  // Use your email provider's SMTP server
     port: 587,
     secure: false,
     auth: {
-        user: 'teumteum776@gmail.com',
-        pass: 'pihl zudv xrwi racy'
+        user: 'teumteum776@gmail.com',  // Your email address
+        pass: 'pihl zudv xrwi racy'  // Your email password
     },
     tls: {
         rejectUnauthorized: false
@@ -463,6 +465,126 @@ router.post('/update-profile-image', ensureAuthenticated, upload.single('profile
         res.status(500).json({ 
             success: false, 
             message: 'Failed to update profile image' 
+        });
+    }
+});
+
+// User Stats Route
+router.get('/stats', ensureAuthenticated, async (req, res) => {
+    try {
+        // Get user's watch history with real-time updates
+        const watchHistory = await WatchHistory.find({ user: req.user._id })
+            .sort({ watchedAt: -1 })
+            .lean();
+
+        // Get user's achievements with badge information
+        const achievements = await Achievement.find({ user: req.user._id })
+            .sort({ completedAt: -1 })
+            .lean();
+
+        // Calculate total watch time in minutes
+        const totalWatchTime = watchHistory.reduce((acc, curr) => acc + (curr.duration || 0), 0);
+
+        // Get favorite genres with real-time aggregation
+        const favoriteGenres = await WatchHistory.aggregate([
+            { $match: { user: req.user._id } },
+            { $unwind: "$genre" },
+            { $group: { _id: "$genre", count: { $sum: 1 } } },
+            { $sort: { count: -1 } },
+            { $limit: 5 }
+        ]);
+
+        // Get activity data for the last 30 days
+        const thirtyDaysAgo = new Date();
+        thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+        const activityData = await WatchHistory.aggregate([
+            {
+                $match: {
+                    user: req.user._id,
+                    watchedAt: { $gte: thirtyDaysAgo }
+                }
+            },
+            {
+                $group: {
+                    _id: { $dateToString: { format: "%Y-%m-%d", date: "$watchedAt" } },
+                    count: { $sum: 1 }
+                }
+            },
+            { $sort: { _id: 1 } }
+        ]);
+
+        // Format data for Chart.js
+        const chartData = {
+            labels: activityData.map(d => d._id),
+            datasets: [{
+                label: 'Watched Items',
+                data: activityData.map(d => d.count),
+                borderColor: '#10B981',
+                backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                tension: 0.4,
+                fill: true
+            }]
+        };
+
+        res.render('stats', {
+            user: req.user,
+            watchHistory,
+            achievements,
+            totalWatchTime,
+            favoriteGenres,
+            activityData: chartData
+        });
+    } catch (error) {
+        console.error('Stats page error:', error);
+        req.flash('error_msg', 'Error loading stats page');
+        res.redirect('/dashboard');
+    }
+});
+
+// Add to Watchlist Route
+router.post('/watchlist/add', ensureAuthenticated, async (req, res) => {
+    try {
+        const { mediaId, mediaType, title, poster, genre, duration } = req.body;
+
+        // Check if already in watchlist
+        const existingEntry = await WatchHistory.findOne({
+            user: req.user._id,
+            mediaId,
+            mediaType
+        });
+
+        if (existingEntry) {
+            return res.status(400).json({
+                success: false,
+                message: 'Already in watchlist'
+            });
+        }
+
+        // Create new watchlist entry
+        const watchEntry = new WatchHistory({
+            user: req.user._id,
+            mediaId,
+            mediaType,
+            title,
+            poster,
+            genre: Array.isArray(genre) ? genre : [genre],
+            duration: duration || 0,
+            progress: 0,
+            completed: false
+        });
+
+        await watchEntry.save();
+
+        res.json({
+            success: true,
+            message: 'Added to watchlist successfully'
+        });
+    } catch (error) {
+        console.error('Add to watchlist error:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Failed to add to watchlist'
         });
     }
 });

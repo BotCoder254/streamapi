@@ -185,23 +185,34 @@
                             </div>
                         <% } else { %>
                             <div class="relative group">
-                                <button class="bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded-full text-sm font-medium transition-colors flex items-center">
-                                    <i class="fas fa-user-circle mr-2"></i>
-                                    <%= user.name %>
-                                    <i class="fas fa-chevron-down ml-2 text-xs"></i>
-                                </button>
-                                <div class="absolute right-0 mt-2 w-48 bg-gray-800 border border-gray-700 rounded-lg shadow-xl hidden group-hover:block">
-                                    <div class="py-1">
-                                        <a href="/watchlist" class="block px-4 py-2 text-sm hover:bg-gray-700 transition-colors">
-                                            <i class="fas fa-bookmark mr-2"></i>My Watchlist
-                                        </a>
-                                        <a href="/auth/profile" class="block px-4 py-2 text-sm hover:bg-gray-700 transition-colors">
-                                            <i class="fas fa-cog mr-2"></i>Settings
-                                        </a>
-                                        <a href="/auth/logout" class="block px-4 py-2 text-sm text-red-400 hover:bg-gray-700 transition-colors">
-                                            <i class="fas fa-sign-out-alt mr-2"></i>Logout
-                                        </a>
+                                <button class="flex items-center gap-2 hover:text-green-400 transition">
+                                    <div class="w-8 h-8 rounded-full bg-gray-700 flex items-center justify-center">
+                                        <% if (user.profileImage) { %>
+                                            <img src="<%= user.profileImage %>" alt="<%= user.name %>" class="w-full h-full rounded-full object-cover">
+                                        <% } else { %>
+                                            <i class="fas fa-user text-gray-400"></i>
+                                        <% } %>
                                     </div>
+                                    <span><%= user.name %></span>
+                                    <i class="fas fa-chevron-down text-xs"></i>
+                                </button>
+                                <div class="absolute right-0 mt-2 w-48 bg-gray-800 rounded-lg shadow-xl py-2 hidden group-hover:block">
+                                    <a href="/auth/profile" class="block px-4 py-2 hover:bg-gray-700 transition">
+                                        <i class="fas fa-user-circle mr-2"></i> Profile
+                                    </a>
+                                    <a href="/auth/stats" class="block px-4 py-2 hover:bg-gray-700 transition">
+                                        <i class="fas fa-chart-bar mr-2"></i> Achievements
+                                    </a>
+                                    <a href="/watchlist" class="block px-4 py-2 hover:bg-gray-700 transition">
+                                        <i class="fas fa-bookmark mr-2"></i> Watchlist
+                                    </a>
+                                    <a href="/auth/settings" class="block px-4 py-2 hover:bg-gray-700 transition">
+                                        <i class="fas fa-cog mr-2"></i> Settings
+                                    </a>
+                                    <div class="border-t border-gray-700 my-2"></div>
+                                    <a href="/auth/logout" class="block px-4 py-2 hover:bg-gray-700 transition text-red-400 hover:text-red-300">
+                                        <i class="fas fa-sign-out-alt mr-2"></i> Logout
+                                    </a>
                                 </div>
                             </div>
                         <% } %>
