@@ -172,15 +172,15 @@
                     <div class="ml-4 flex items-center space-x-4">
                         <div class="bg-gray-700 px-4 py-2 rounded-full">
                             <i class="fas fa-users text-green-500 mr-2"></i>
-                            <span class="text-sm font-medium" id="active-users-count"><%= activeUsers %> online</span>
+                            <span class="text-sm font-medium" id="active-users-count"><%= activeUsers %></span>
                         </div>
                         <% if (!user) { %>
                             <div class="flex items-center space-x-2">
                                 <a href="/auth/login" class="bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded-full text-sm font-medium transition-colors">
-                                    <i class="fas fa-sign-in-alt mr-2"></i>Login
+                                    <i class="fas fa-sign-in-alt mr-2"></i>
                                 </a>
                                 <a href="/auth/register" class="bg-green-600 hover:bg-green-500 px-4 py-2 rounded-full text-sm font-medium transition-colors">
-                                    <i class="fas fa-user-plus mr-2"></i>Sign Up
+                                    <i class="fas fa-user-plus mr-2"></i>
                                 </a>
                             </div>
                         <% } else { %>
@@ -638,7 +638,7 @@
             if (data.type === 'userCount') {
                 // Animate the counter update
                 activeUsersCount.classList.add('animate__animated', 'animate__pulse');
-                activeUsersCount.textContent = `${data.count} online`;
+                activeUsersCount.textContent = `${data.count}`;
                 setTimeout(() => {
                     activeUsersCount.classList.remove('animate__animated', 'animate__pulse');
                 }, 1000);
