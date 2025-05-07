@@ -1,7 +1,7 @@
 <!-- Two Column Layout -->
-<div class="min-h-screen flex bg-gray-900">
+<div class="min-h-screen flex flex-col md:flex-row bg-gray-900">
     <!-- Left Column - Auth Form -->
-    <div class="w-1/2 flex items-center justify-center p-8">
+    <div class="w-full md:w-1/2 flex items-center justify-center p-4 md:p-8">
         <div class="max-w-md w-full">
             <!-- Logo -->
             <div class="text-center mb-8">
@@ -11,7 +11,7 @@
             </div>
 
             <!-- Register Form -->
-            <div class="bg-gray-800 rounded-lg p-8 shadow-2xl">
+            <div class="bg-gray-800 rounded-lg p-6 md:p-8 shadow-2xl">
                 <h2 class="text-2xl font-bold text-center mb-6">Create an Account</h2>
                 
                 <!-- Display Errors -->
@@ -27,11 +27,11 @@
                 <div class="grid grid-cols-2 gap-4 mb-6">
                     <button class="flex items-center justify-center gap-2 bg-[#4285F4] hover:bg-[#4285F4]/90 text-white rounded-lg px-4 py-2 transition">
                         <i class="fab fa-google text-xl"></i>
-                        Google
+                        <span class="hidden sm:inline">Google</span>
                     </button>
                     <button class="flex items-center justify-center gap-2 bg-[#3b5998] hover:bg-[#3b5998]/90 text-white rounded-lg px-4 py-2 transition">
                         <i class="fab fa-facebook-f text-xl"></i>
-                        Facebook
+                        <span class="hidden sm:inline">Facebook</span>
                     </button>
                 </div>
 
@@ -77,7 +77,7 @@
                                 <i class="fas fa-lock"></i>
                             </span>
                             <input type="password" name="password" required 
-                                class="w-full bg-gray-700 text-white rounded-lg pl-10 pr-4 py-2 focus:outline-none focus:ring-2 focus:ring-green-500"
+                                class="w-full bg-gray-700 text-white rounded-lg pl-10 pr-10 py-2 focus:outline-none focus:ring-2 focus:ring-green-500"
                                 placeholder="Create a password"
                                 value="<%= typeof password != 'undefined' ? password : '' %>">
                             <button type="button" class="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-gray-300 toggle-password">
@@ -94,7 +94,7 @@
                                 <i class="fas fa-lock"></i>
                             </span>
                             <input type="password" name="password2" required 
-                                class="w-full bg-gray-700 text-white rounded-lg pl-10 pr-4 py-2 focus:outline-none focus:ring-2 focus:ring-green-500"
+                                class="w-full bg-gray-700 text-white rounded-lg pl-10 pr-10 py-2 focus:outline-none focus:ring-2 focus:ring-green-500"
                                 placeholder="Confirm your password"
                                 value="<%= typeof password2 != 'undefined' ? password2 : '' %>">
                             <button type="button" class="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-gray-300 toggle-password">
@@ -132,7 +132,7 @@
     </div>
 
     <!-- Right Column - Movie Slider -->
-    <div class="w-1/2  p-8 flex items-center">
+    <div class="hidden md:flex w-full md:w-1/2 p-8 items-center">
         <div class="relative w-full rounded-lg" style="height: 600px;">
             <!-- Movie Slider -->
             <div class="movie-slider absolute inset-0">
