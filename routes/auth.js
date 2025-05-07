@@ -6,6 +6,53 @@ const User = require('../models/User');
 const { forwardAuthenticated, ensureAuthenticated } = require('../config/auth');
 const axios = require('axios');
 const bcrypt = require('bcryptjs');
+const nodemailer = require('nodemailer');
+const ejs = require('ejs');
+const fs = require('fs');
+const path = require('path');
+
+// Configure nodemailer
+const transporter = nodemailer.createTransport({
+    host: 'smtp.gmail.com',
+    port: 587,
+    secure: false,
+    auth: {
+        user: 'teumteum776@gmail.com',
+        pass: 'pihl zudv xrwi racy'
+    },
+    tls: {
+        rejectUnauthorized: false
+    }
+});
+
+// Email template rendering function
+const renderEmailTemplate = async (templateName, data) => {
+    const templatePath = path.join(__dirname, '..', 'views', 'emails', `${templateName}.ejs`);
+    try {
+        const template = fs.readFileSync(templatePath, 'utf-8');
+        return ejs.render(template, data);
+    } catch (error) {
+        console.error(`Error rendering email template: ${templateName}`, error);
+        throw error;
+    }
+};
+
+// Send email function
+const sendEmail = async (options) => {
+    const mailOptions = {
+        from: 'StreamAPI <teumteum776@gmail.com>',
+        ...options
+    };
+
+    try {
+        const info = await transporter.sendMail(mailOptions);
+        console.log('Email sent:', info.messageId);
+        return info;
+    } catch (error) {
+        console.error('Error sending email:', error);
+        throw error;
+    }
+};
 
 // Function to fetch latest movies
 async function fetchLatestMovies() {
@@ -143,38 +190,48 @@ router.post('/forgot-password', async (req, res) => {
     try {
         const { email } = req.body;
         const user = await User.findOne({ email: email.toLowerCase() });
-        
+
         if (!user) {
             req.flash('error_msg', 'No account with that email address exists.');
             return res.redirect('/auth/forgot-password');
         }
-        
+
         // Generate reset token
-        const token = crypto.randomBytes(20).toString('hex');
-        user.resetPasswordToken = token;
-        user.resetPasswordExpires = Date.now() + 3600000; // 1 hour
-        
+        const resetToken = user.generatePasswordReset();
         await user.save();
-        
-        // Send password reset email
-        const resetUrl = `${req.protocol}://${req.get('host')}/auth/reset-password/${token}`;
-        const mailOptions = {
-            to: user.email,
-            subject: 'Password Reset',
-            html: `
-                <p>You are receiving this because you (or someone else) have requested the reset of the password for your account.</p>
-                <p>Please click on the following link, or paste this into your browser to complete the process:</p>
-                <p><a href="${resetUrl}">${resetUrl}</a></p>
-                <p>If you did not request this, please ignore this email and your password will remain unchanged.</p>
-            `
-        };
-        
-        await sendEmail(mailOptions);
-        req.flash('success_msg', 'An email has been sent with further instructions.');
-        res.redirect('/auth/forgot-password');
-    } catch (err) {
-        console.error('Password reset error:', err);
-        req.flash('error_msg', 'An error occurred. Please try again.');
+
+        // Create reset URL
+        const resetUrl = `${req.protocol}://${req.get('host')}/auth/reset-password/${resetToken}`;
+
+        try {
+            // Render email template
+            const html = await renderEmailTemplate('password_reset', {
+                name: user.name,
+                resetUrl,
+                siteUrl: `${req.protocol}://${req.get('host')}`
+            });
+
+            // Send email
+            await sendEmail({
+                to: user.email,
+                subject: 'Password Reset Request - StreamAPI',
+                html
+            });
+
+            req.flash('success_msg', 'An email has been sent with password reset instructions.');
+            res.redirect('/auth/login');
+        } catch (emailError) {
+            console.error('Email sending error:', emailError);
+            user.resetPasswordToken = undefined;
+            user.resetPasswordExpires = undefined;
+            await user.save();
+            
+            req.flash('error_msg', 'Failed to send password reset email. Please try again.');
+            return res.redirect('/auth/forgot-password');
+        }
+    } catch (error) {
+        console.error('Password reset error:', error);
+        req.flash('error_msg', 'An error occurred while processing your request.');
         res.redirect('/auth/forgot-password');
     }
 });
@@ -186,16 +243,18 @@ router.get('/reset-password/:token', async (req, res) => {
             resetPasswordToken: req.params.token,
             resetPasswordExpires: { $gt: Date.now() }
         });
-        
+
         if (!user) {
             req.flash('error_msg', 'Password reset token is invalid or has expired.');
             return res.redirect('/auth/forgot-password');
         }
-        
-        res.render('reset-password', { token: req.params.token });
-    } catch (err) {
-        console.error('Reset password error:', err);
-        req.flash('error_msg', 'An error occurred. Please try again.');
+
+        res.render('reset-password', {
+            token: req.params.token
+        });
+    } catch (error) {
+        console.error('Reset password error:', error);
+        req.flash('error_msg', 'An error occurred while processing your request.');
         res.redirect('/auth/forgot-password');
     }
 });
@@ -207,35 +266,41 @@ router.post('/reset-password/:token', async (req, res) => {
             resetPasswordToken: req.params.token,
             resetPasswordExpires: { $gt: Date.now() }
         });
-        
+
         if (!user) {
             req.flash('error_msg', 'Password reset token is invalid or has expired.');
             return res.redirect('/auth/forgot-password');
         }
-        
+
         const { password, password2 } = req.body;
-        
+
+        // Validate password
+        if (!password || !password2) {
+            req.flash('error_msg', 'Please fill in all fields.');
+            return res.redirect(`/auth/reset-password/${req.params.token}`);
+        }
+
         if (password !== password2) {
             req.flash('error_msg', 'Passwords do not match.');
-            return res.redirect('back');
+            return res.redirect(`/auth/reset-password/${req.params.token}`);
         }
-        
+
         if (password.length < 6) {
-            req.flash('error_msg', 'Password should be at least 6 characters.');
-            return res.redirect('back');
+            req.flash('error_msg', 'Password must be at least 6 characters.');
+            return res.redirect(`/auth/reset-password/${req.params.token}`);
         }
-        
+
+        // Update password and clear reset token
         user.password = password;
         user.resetPasswordToken = undefined;
         user.resetPasswordExpires = undefined;
-        
         await user.save();
-        
-        req.flash('success_msg', 'Your password has been updated. You can now log in with your new password.');
+
+        req.flash('success_msg', 'Your password has been updated. Please log in with your new password.');
         res.redirect('/auth/login');
-    } catch (err) {
-        console.error('Reset password error:', err);
-        req.flash('error_msg', 'An error occurred. Please try again.');
+    } catch (error) {
+        console.error('Reset password error:', error);
+        req.flash('error_msg', 'An error occurred while resetting your password.');
         res.redirect('/auth/forgot-password');
     }
 });
