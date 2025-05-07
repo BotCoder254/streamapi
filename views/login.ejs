@@ -1,0 +1,130 @@
+<!-- Two Column Layout -->
+<div class="min-h-screen flex bg-gray-900">
+    <!-- Left Column - Auth Form -->
+    <div class="w-1/2 flex items-center justify-center p-8">
+        <div class="max-w-md w-full">
+            <!-- Logo -->
+            <div class="text-center mb-8">
+                <a href="/" class="inline-block">
+                    <img src="/images/logo.png" alt="StreamAPI" class="h-12 mx-auto">
+                </a>
+            </div>
+
+            <!-- Login Form -->
+            <div class="bg-gray-800 rounded-lg p-8 shadow-2xl">
+                <h2 class="text-2xl font-bold text-center mb-6">Welcome Back!</h2>
+                
+                <!-- Social Login Buttons -->
+                <div class="grid grid-cols-2 gap-4 mb-6">
+                    <button class="flex items-center justify-center gap-2 bg-[#4285F4] hover:bg-[#4285F4]/90 text-white rounded-lg px-4 py-2 transition">
+                        <i class="fab fa-google text-xl"></i>
+                        Google
+                    </button>
+                    <button class="flex items-center justify-center gap-2 bg-[#3b5998] hover:bg-[#3b5998]/90 text-white rounded-lg px-4 py-2 transition">
+                        <i class="fab fa-facebook-f text-xl"></i>
+                        Facebook
+                    </button>
+                </div>
+
+                <div class="relative my-6">
+                    <hr class="border-gray-600">
+                    <span class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-gray-800 px-4 text-gray-400 text-sm">or</span>
+                </div>
+
+                <form action="/auth/login" method="POST" class="space-y-6">
+                    <!-- Email Input -->
+                    <div>
+                        <label class="block text-gray-300 mb-2">Email Address</label>
+                        <div class="relative">
+                            <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
+                                <i class="far fa-envelope"></i>
+                            </span>
+                            <input type="email" name="email" required 
+                                class="w-full bg-gray-700 text-white rounded-lg pl-10 pr-4 py-2 focus:outline-none focus:ring-2 focus:ring-green-500"
+                                placeholder="Enter your email">
+                        </div>
+                    </div>
+
+                    <!-- Password Input -->
+                    <div>
+                        <label class="block text-gray-300 mb-2">Password</label>
+                        <div class="relative">
+                            <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
+                                <i class="fas fa-lock"></i>
+                            </span>
+                            <input type="password" name="password" required 
+                                class="w-full bg-gray-700 text-white rounded-lg pl-10 pr-4 py-2 focus:outline-none focus:ring-2 focus:ring-green-500"
+                                placeholder="Enter your password">
+                        </div>
+                    </div>
+
+                    <!-- Remember Me & Forgot Password -->
+                    <div class="flex items-center justify-between text-sm">
+                        <label class="flex items-center text-gray-300">
+                            <input type="checkbox" name="remember" class="mr-2 text-green-500">
+                            Remember me
+                        </label>
+                        <a href="/auth/forgot-password" class="text-green-500 hover:text-green-400">Forgot password?</a>
+                    </div>
+
+                    <!-- Login Button -->
+                    <button type="submit" 
+                        class="w-full bg-green-600 hover:bg-green-500 text-white rounded-lg px-4 py-2 transition flex items-center justify-center gap-2">
+                        <i class="fas fa-sign-in-alt"></i>
+                        Sign In
+                    </button>
+                </form>
+
+                <!-- Sign Up Link -->
+                <p class="text-center mt-6 text-gray-400">
+                    Don't have an account? 
+                    <a href="/auth/register" class="text-green-500 hover:text-green-400">Sign up</a>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Right Column - Movie Slider -->
+    <div class="w-1/2 bg-gray-800 p-8 flex items-center">
+        <div class="relative w-full rounded-lg" style="height: 600px;">
+            <!-- Movie Slider -->
+            <div class="movie-slider absolute inset-0">
+                <% latestMovies.forEach(movie => { %>
+                    <div class="movie-slide absolute inset-0">
+                        <img src="<%= movie.backdrop %>" alt="<%= movie.title %>" 
+                            class="w-full h-full object-cover rounded-lg">
+                        <div class="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent rounded-lg"></div>
+                        <div class="absolute bottom-0 left-0 right-0 p-8">
+                            <h3 class="text-2xl font-bold mb-2"><%= movie.title %></h3>
+                            <p class="text-gray-300 mb-4 line-clamp-2"><%= movie.overview %></p>
+                            <div class="flex items-center gap-4">
+                                <span class="flex items-center gap-1">
+                                    <i class="fas fa-star text-yellow-500"></i>
+                                    <%= movie.rating || '8.5' %>
+                                </span>
+                                <span class="flex items-center gap-1">
+                                    <i class="fas fa-calendar text-blue-400"></i>
+                                    <%= movie.year || '2024' %>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                <% }); %>
+            </div>
+
+            <!-- Slider Controls -->
+            <button class="absolute left-4 top-1/2 transform -translate-y-1/2 bg-black/50 hover:bg-black/75 text-white rounded-full p-3 transition slider-prev">
+                <i class="fas fa-chevron-left"></i>
+            </button>
+            <button class="absolute right-4 top-1/2 transform -translate-y-1/2 bg-black/50 hover:bg-black/75 text-white rounded-full p-3 transition slider-next">
+                <i class="fas fa-chevron-right"></i>
+            </button>
+
+            <!-- Slider Pagination -->
+            <div class="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex gap-2 slider-pagination"></div>
+        </div>
+    </div>
+</div>
+
+<!-- Include Slider Script -->
+<%- include('partials/auth-slider') %> 

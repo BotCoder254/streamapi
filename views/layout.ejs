@@ -107,48 +107,48 @@
                     <a href="/browse/tv" class="nav-link hover:text-green-400"><i class="fas fa-tv mr-1"></i> TV Shows</a>
                     <a href="/latest" class="nav-link hover:text-green-400"><i class="fas fa-clock mr-1"></i> Latest</a>
                     <a href="/top" class="nav-link hover:text-green-400"><i class="fas fa-star mr-1"></i> Top Rated</a>
-                    <a href="/watchlist" class="nav-link hover:text-green-400"><i class="fas fa-bookmark mr-1"></i> Watchlist</a>
-                    <!-- <a href="/torrent/search" class="nav-link hover:text-green-400"><i class="fas fa-magnet mr-1"></i> Torrents</a> -->
-                    <a href="/contact" class="nav-link hover:text-green-400"><i class="fas fa-envelope mr-1"></i> Contact</a>
-                    
-                    <!-- User Info Dropdown -->
-                    <div class="relative group">
-                        <button class="nav-link hover:text-green-400 flex items-center">
-                            <i class="fas fa-info-circle mr-1"></i> Info
-                            <i class="fas fa-chevron-down ml-1 text-xs"></i>
-                        </button>
-                        <div class="absolute right-0 mt-2 w-64 bg-gray-800 border border-gray-700 rounded-lg shadow-xl hidden group-hover:block text-sm">
-                            <div class="p-4 space-y-2">
-                                <div class="flex items-center justify-between">
-                                    <span class="text-gray-400">OS:</span>
-                                    <span class="text-green-400"><%= userInfo.systemInfo.platform %> <%= userInfo.systemInfo.release %></span>
-                                </div>
-                                <div class="flex items-center justify-between">
-                                    <span class="text-gray-400">Browser:</span>
-                                    <span class="text-green-400"><%= userInfo.browser %> <%= userInfo.version %></span>
-                                </div>
-                                <div class="flex items-center justify-between">
-                                    <span class="text-gray-400">System:</span>
-                                    <span class="text-green-400"><%= userInfo.userOs %></span>
-                                </div>
-                                <div class="flex items-center justify-between">
-                                    <span class="text-gray-400">Time Spent:</span>
-                                    <span class="text-green-400">
-                                        <% 
-                                        const hours = Math.floor(userInfo.timeSpent / 3600);
-                                        const minutes = Math.floor((userInfo.timeSpent % 3600) / 60);
-                                        const seconds = userInfo.timeSpent % 60;
-                                        %>
-                                        <%= hours %>h <%= minutes %>m <%= seconds %>s
-                                    </span>
-                                </div>
-                                <div class="flex items-center justify-between">
-                                    <span class="text-gray-400">Network Speed:</span>
-                                    <span class="text-green-400"><%= userInfo.networkSpeed %></span>
+                    <% if (user) { %>
+                        <a href="/watchlist" class="nav-link hover:text-green-400"><i class="fas fa-bookmark mr-1"></i> Watchlist</a>
+                        <!-- User Info Dropdown -->
+                        <div class="relative group">
+                            <button class="nav-link hover:text-green-400 flex items-center">
+                                <i class="fas fa-info-circle mr-1"></i> Info
+                                <i class="fas fa-chevron-down ml-1 text-xs"></i>
+                            </button>
+                            <div class="absolute right-0 mt-2 w-64 bg-gray-800 border border-gray-700 rounded-lg shadow-xl hidden group-hover:block text-sm">
+                                <div class="p-4 space-y-2">
+                                    <div class="flex items-center justify-between">
+                                        <span class="text-gray-400">OS:</span>
+                                        <span class="text-green-400"><%= userInfo.systemInfo.platform %> <%= userInfo.systemInfo.release %></span>
+                                    </div>
+                                    <div class="flex items-center justify-between">
+                                        <span class="text-gray-400">Browser:</span>
+                                        <span class="text-green-400"><%= userInfo.browser %> <%= userInfo.version %></span>
+                                    </div>
+                                    <div class="flex items-center justify-between">
+                                        <span class="text-gray-400">System:</span>
+                                        <span class="text-green-400"><%= userInfo.userOs %></span>
+                                    </div>
+                                    <div class="flex items-center justify-between">
+                                        <span class="text-gray-400">Time Spent:</span>
+                                        <span class="text-green-400">
+                                            <% 
+                                            const hours = Math.floor(userInfo.timeSpent / 3600);
+                                            const minutes = Math.floor((userInfo.timeSpent % 3600) / 60);
+                                            const seconds = userInfo.timeSpent % 60;
+                                            %>
+                                            <%= hours %>h <%= minutes %>m <%= seconds %>s
+                                        </span>
+                                    </div>
+                                    <div class="flex items-center justify-between">
+                                        <span class="text-gray-400">Network Speed:</span>
+                                        <span class="text-green-400"><%= userInfo.networkSpeed %></span>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
+                    <% } %>
+                    <a href="/contact" class="nav-link hover:text-green-400"><i class="fas fa-envelope mr-1"></i> Contact</a>
                 </div>
                 
                 <!-- Search Bar -->
@@ -169,9 +169,42 @@
                         </div>
                     </div>
                     <!-- Active Users Counter -->
-                    <div class="ml-4 flex items-center bg-gray-700 px-4 py-2 rounded-full">
-                        <i class="fas fa-users text-green-500 mr-2"></i>
-                        <span class="text-sm font-medium" id="active-users-count"><%= activeUsers %> online</span>
+                    <div class="ml-4 flex items-center space-x-4">
+                        <div class="bg-gray-700 px-4 py-2 rounded-full">
+                            <i class="fas fa-users text-green-500 mr-2"></i>
+                            <span class="text-sm font-medium" id="active-users-count"><%= activeUsers %> online</span>
+                        </div>
+                        <% if (!user) { %>
+                            <div class="flex items-center space-x-2">
+                                <a href="/auth/login" class="bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded-full text-sm font-medium transition-colors">
+                                    <i class="fas fa-sign-in-alt mr-2"></i>Login
+                                </a>
+                                <a href="/auth/register" class="bg-green-600 hover:bg-green-500 px-4 py-2 rounded-full text-sm font-medium transition-colors">
+                                    <i class="fas fa-user-plus mr-2"></i>Sign Up
+                                </a>
+                            </div>
+                        <% } else { %>
+                            <div class="relative group">
+                                <button class="bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded-full text-sm font-medium transition-colors flex items-center">
+                                    <i class="fas fa-user-circle mr-2"></i>
+                                    <%= user.name %>
+                                    <i class="fas fa-chevron-down ml-2 text-xs"></i>
+                                </button>
+                                <div class="absolute right-0 mt-2 w-48 bg-gray-800 border border-gray-700 rounded-lg shadow-xl hidden group-hover:block">
+                                    <div class="py-1">
+                                        <a href="/watchlist" class="block px-4 py-2 text-sm hover:bg-gray-700 transition-colors">
+                                            <i class="fas fa-bookmark mr-2"></i>My Watchlist
+                                        </a>
+                                        <a href="/auth/profile" class="block px-4 py-2 text-sm hover:bg-gray-700 transition-colors">
+                                            <i class="fas fa-cog mr-2"></i>Settings
+                                        </a>
+                                        <a href="/auth/logout" class="block px-4 py-2 text-sm text-red-400 hover:bg-gray-700 transition-colors">
+                                            <i class="fas fa-sign-out-alt mr-2"></i>Logout
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        <% } %>
                     </div>
                 </div>
                 
@@ -179,9 +212,11 @@
                     <a href="/search" class="p-2 rounded-lg bg-gray-700 hover:bg-gray-600 transition mr-2 md:hidden">
                         <i class="fas fa-search"></i>
                     </a>
-                    <a href="/watchlist" class="p-2 rounded-lg bg-gray-700 hover:bg-gray-600 transition mr-2">
-                        <i class="fas fa-bookmark"></i>
-                    </a>
+                    <% if (user) { %>
+                        <a href="/watchlist" class="p-2 rounded-lg bg-gray-700 hover:bg-gray-600 transition mr-2">
+                            <i class="fas fa-bookmark"></i>
+                        </a>
+                    <% } %>
                     <button class="md:hidden p-2" id="mobile-menu-button">
                         <i class="fas fa-bars"></i>
                     </button>
@@ -202,10 +237,6 @@
                         <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                             <i class="fas fa-search text-gray-400"></i>
                         </div>
-                        <!-- Mobile Search Results Dropdown (hidden by default) -->
-                        <div id="mobile-search-results" class="absolute mt-2 w-full bg-gray-800 border border-gray-700 rounded-lg shadow-xl hidden z-50 max-h-96 overflow-y-auto">
-                            <!-- Results will be populated by JavaScript -->
-                        </div>
                     </div>
                     
                     <a href="/browse" class="block px-3 py-2 rounded-lg hover:bg-gray-700 transition">
@@ -220,53 +251,75 @@
                     <a href="/top" class="block px-3 py-2 rounded-lg hover:bg-gray-700 transition">
                         <i class="fas fa-star mr-2"></i> Top Rated
                     </a>
-                    <a href="/watchlist" class="block px-3 py-2 rounded-lg hover:bg-gray-700 transition">
-                        <i class="fas fa-bookmark mr-2"></i> Watchlist
-                    </a>
-                    <a href="/torrent/search" class="block px-3 py-2 rounded-lg hover:bg-gray-700 transition">
-                        <i class="fas fa-magnet mr-2"></i> Torrents
-                    </a>
+                    <% if (user) { %>
+                        <a href="/watchlist" class="block px-3 py-2 rounded-lg hover:bg-gray-700 transition">
+                            <i class="fas fa-bookmark mr-2"></i> Watchlist
+                        </a>
+                    <% } %>
                     <a href="/contact" class="block px-3 py-2 rounded-lg hover:bg-gray-700 transition">
                         <i class="fas fa-envelope mr-2"></i> Contact
                     </a>
                     
-                    <!-- Mobile User Info -->
-                    <div class="mt-4 px-3 py-3 bg-gray-700 rounded-lg">
-                        <h4 class="text-sm font-semibold text-green-400 mb-2">System Information</h4>
-                        <div class="space-y-2 text-sm">
-                            <div class="flex justify-between">
-                                <span class="text-gray-400">OS:</span>
-                                <span><%= userInfo.systemInfo.platform %> <%= userInfo.systemInfo.release %></span>
-                            </div>
-                            <div class="flex justify-between">
-                                <span class="text-gray-400">Browser:</span>
-                                <span><%= userInfo.browser %> <%= userInfo.version %></span>
-                            </div>
-                            <div class="flex justify-between">
-                                <span class="text-gray-400">System:</span>
-                                <span><%= userInfo.userOs %></span>
-                            </div>
-                            <div class="flex justify-between">
-                                <span class="text-gray-400">Time Spent:</span>
-                                <span>
-                                    <% 
-                                    const mHours = Math.floor(userInfo.timeSpent / 3600);
-                                    const mMinutes = Math.floor((userInfo.timeSpent % 3600) / 60);
-                                    const mSeconds = userInfo.timeSpent % 60;
-                                    %>
-                                    <%= mHours %>h <%= mMinutes %>m <%= mSeconds %>s
-                                </span>
-                            </div>
-                            <div class="flex justify-between">
-                                <span class="text-gray-400">Network Speed:</span>
-                                <span><%= userInfo.networkSpeed %></span>
+                    <% if (user) { %>
+                        <!-- Mobile User Info -->
+                        <div class="mt-4 px-3 py-3 bg-gray-700 rounded-lg">
+                            <h4 class="text-sm font-semibold text-green-400 mb-2">System Information</h4>
+                            <div class="space-y-2 text-sm">
+                                <div class="flex justify-between">
+                                    <span class="text-gray-400">OS:</span>
+                                    <span><%= userInfo.systemInfo.platform %> <%= userInfo.systemInfo.release %></span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-400">Browser:</span>
+                                    <span><%= userInfo.browser %> <%= userInfo.version %></span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-400">System:</span>
+                                    <span><%= userInfo.userOs %></span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-400">Time Spent:</span>
+                                    <span>
+                                        <% 
+                                        const mHours = Math.floor(userInfo.timeSpent / 3600);
+                                        const mMinutes = Math.floor((userInfo.timeSpent % 3600) / 60);
+                                        const mSeconds = userInfo.timeSpent % 60;
+                                        %>
+                                        <%= mHours %>h <%= mMinutes %>m <%= mSeconds %>s
+                                    </span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-400">Network Speed:</span>
+                                    <span><%= userInfo.networkSpeed %></span>
+                                </div>
                             </div>
                         </div>
-                    </div>
+                    <% } %>
                 </div>
             </div>
         </div>
     </nav>
+
+    <!-- Flash Messages -->
+    <div class="container mx-auto px-4">
+        <% if(success_msg != ''){ %>
+            <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-4 animate__animated animate__fadeIn" role="alert">
+                <span class="block sm:inline"><%= success_msg %></span>
+            </div>
+        <% } %>
+
+        <% if(error_msg != ''){ %>
+            <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4 animate__animated animate__fadeIn" role="alert">
+                <span class="block sm:inline"><%= error_msg %></span>
+            </div>
+        <% } %>
+
+        <% if(error != ''){ %>
+            <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4 animate__animated animate__fadeIn" role="alert">
+                <span class="block sm:inline"><%= error %></span>
+            </div>
+        <% } %>
+    </div>
 
     <!-- Main Content -->
     <main class="container mx-auto px-4 py-8">
@@ -300,8 +353,9 @@
                         <li><a href="/browse/tv" class="hover:text-green-400 transition"><i class="fas fa-chevron-right text-xs mr-2"></i>TV Shows</a></li>
                         <li><a href="/latest" class="hover:text-green-400 transition"><i class="fas fa-chevron-right text-xs mr-2"></i>Latest Releases</a></li>
                         <li><a href="/top" class="hover:text-green-400 transition"><i class="fas fa-chevron-right text-xs mr-2"></i>Top Rated</a></li>
-                        <li><a href="/watchlist" class="hover:text-green-400 transition"><i class="fas fa-chevron-right text-xs mr-2"></i>My Watchlist</a></li>
-                        <li><a href="/torrent/search" class="hover:text-green-400 transition"><i class="fas fa-magnet text-xs mr-2"></i>Torrent Search</a></li>
+                        <% if (user) { %>
+                            <li><a href="/watchlist" class="hover:text-green-400 transition"><i class="fas fa-chevron-right text-xs mr-2"></i>My Watchlist</a></li>
+                        <% } %>
                     </ul>
                 </div>
                 

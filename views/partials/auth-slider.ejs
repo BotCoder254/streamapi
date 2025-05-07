@@ -1,0 +1,70 @@
+<!-- Slider JavaScript -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const slider = document.querySelector('.movie-slider');
+    const slides = document.querySelectorAll('.movie-slide');
+    const prevBtn = document.querySelector('.slider-prev');
+    const nextBtn = document.querySelector('.slider-next');
+    const pagination = document.querySelector('.slider-pagination');
+    
+    let currentSlide = 0;
+    const slideCount = slides.length;
+
+    // Create pagination dots
+    slides.forEach((_, index) => {
+        const dot = document.createElement('button');
+        dot.classList.add('w-2', 'h-2', 'rounded-full', 'bg-white/50', 'hover:bg-white', 'transition');
+        dot.addEventListener('click', () => goToSlide(index));
+        pagination.appendChild(dot);
+    });
+
+    const dots = pagination.querySelectorAll('button');
+
+    function updateSlider() {
+        slides.forEach((slide, index) => {
+            slide.style.opacity = index === currentSlide ? '1' : '0';
+            slide.style.visibility = index === currentSlide ? 'visible' : 'hidden';
+            slide.style.transition = 'opacity 0.5s ease-in-out, visibility 0.5s ease-in-out';
+        });
+
+        dots.forEach((dot, index) => {
+            dot.classList.toggle('bg-white', index === currentSlide);
+            dot.classList.toggle('bg-white/50', index !== currentSlide);
+        });
+    }
+
+    function goToSlide(index) {
+        currentSlide = index;
+        updateSlider();
+    }
+
+    function nextSlide() {
+        currentSlide = (currentSlide + 1) % slideCount;
+        updateSlider();
+    }
+
+    function prevSlide() {
+        currentSlide = (currentSlide - 1 + slideCount) % slideCount;
+        updateSlider();
+    }
+
+    // Event listeners
+    prevBtn.addEventListener('click', prevSlide);
+    nextBtn.addEventListener('click', nextSlide);
+
+    // Auto advance slides
+    let autoSlideInterval = setInterval(nextSlide, 5000);
+
+    // Pause auto-advance on hover
+    slider.addEventListener('mouseenter', () => {
+        clearInterval(autoSlideInterval);
+    });
+
+    slider.addEventListener('mouseleave', () => {
+        autoSlideInterval = setInterval(nextSlide, 5000);
+    });
+
+    // Initialize slider
+    updateSlider();
+});
+</script> 

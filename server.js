@@ -14,9 +14,65 @@ const NetworkSpeed = require('network-speed');
 const testNetworkSpeed = new NetworkSpeed();
 const WebSocket = require('ws');
 const WebTorrent = require('webtorrent');
+const mongoose = require('mongoose');
+const passport = require('passport');
+const flash = require('connect-flash');
+const session = require('express-session');
+const MongoStore = require('connect-mongo');
+const { MongoClient, ServerApiVersion } = require('mongodb');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+
+// MongoDB Connection Configuration
+const uri = "mongodb+srv://Telvin:soulmind254@cluster0.f5dduen.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
+
+mongoose.connect(uri, {
+    serverApi: {
+        version: ServerApiVersion.v1,
+        strict: true,
+        deprecationErrors: true,
+    },
+    useNewUrlParser: true,
+    useUnifiedTopology: true
+}).then(() => {
+    console.log('MongoDB Atlas Connected Successfully!');
+}).catch(err => {
+    console.error('MongoDB Connection Error:', err);
+});
+
+// Passport Config
+require('./config/passport')(passport);
+
+// Express Session with MongoDB store
+app.use(session({
+    secret: process.env.SESSION_SECRET || 'secret',
+    resave: true,
+    saveUninitialized: true,
+    store: MongoStore.create({ 
+        mongoUrl: uri,
+        collection: 'sessions'
+    }),
+    cookie: {
+        maxAge: 1000 * 60 * 60 * 24 // 1 day
+    }
+}));
+
+// Passport Middleware
+app.use(passport.initialize());
+app.use(passport.session());
+
+// Connect Flash
+app.use(flash());
+
+// Global Variables
+app.use((req, res, next) => {
+    res.locals.success_msg = req.flash('success_msg');
+    res.locals.error_msg = req.flash('error_msg');
+    res.locals.error = req.flash('error');
+    res.locals.user = req.user || null;
+    next();
+});
 
 // Create HTTP server
 const server = require('http').createServer(app);
@@ -176,6 +232,17 @@ function broadcastUserCount() {
 
 // Import routes
 const torrentRoutes = require('./routes/torrent');
+const authRoutes = require('./routes/auth');
+const watchlistRoutes = require('./routes/watchlist');
+
+// Protected route middleware
+const ensureAuthenticated = (req, res, next) => {
+    if (req.isAuthenticated()) {
+        return next();
+    }
+    req.flash('error_msg', 'Please log in to view this resource');
+    res.redirect('/auth/login');
+};
 
 // Configuration
 const TMDB_API_KEY = process.env.TMDB_API_KEY || 'fdbc5d0ea9e499aaeba73d29c21726be'; //Dont mess with this 
@@ -375,6 +442,8 @@ app.use((req, res, next) => {
 
 // Routes
 app.use('/torrent', torrentRoutes);
+app.use('/auth', authRoutes);
+app.use('/watchlist', watchlistRoutes);
 
 // Middleware to track user session time and get network speed
 app.use(async (req, res, next) => {
@@ -1320,7 +1389,7 @@ app.get('/api/trending', async (req, res) => {
 });
 
 // Watchlist Routes
-app.get('/watchlist', async (req, res) => {
+app.get('/watchlist', ensureAuthenticated, async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
     const { watchlist, pagination } = watchlistStorage.getItems(page);
@@ -1352,7 +1421,7 @@ app.get('/watchlist', async (req, res) => {
 });
 
 // API endpoints for watchlist management
-app.post('/api/watchlist/add', async (req, res) => {
+app.post('/api/watchlist/add', ensureAuthenticated, async (req, res) => {
   try {
     const { id, type, title, poster } = req.body;
     
@@ -1377,7 +1446,7 @@ app.post('/api/watchlist/add', async (req, res) => {
   }
 });
 
-app.post('/api/watchlist/remove', async (req, res) => {
+app.post('/api/watchlist/remove', ensureAuthenticated, async (req, res) => {
   try {
     const { id, type } = req.body;
     
@@ -1401,7 +1470,7 @@ app.post('/api/watchlist/remove', async (req, res) => {
   }
 });
 
-app.get('/api/watchlist/check', async (req, res) => {
+app.get('/api/watchlist/check', ensureAuthenticated, async (req, res) => {
   try {
     const { id, type } = req.query;
     
@@ -1987,34 +2056,6 @@ app.get('/api/watch-party/active/:mediaId', (req, res) => {
     const { mediaId } = req.params;
     const count = watchPartyStorage.getActivePartiesCount(mediaId);
     res.json({ count });
-});
-
-// Routes
-app.use('/torrent', torrentRoutes);
-
-// Add torrent download route
-app.post('/api/torrent/download', (req, res) => {
-    const { magnetURI } = req.body;
-    
-    if (!magnetURI) {
-        return res.status(400).json({ error: 'Magnet URI is required' });
-    }
-
-    torrentClient.add(magnetURI, torrent => {
-        const files = torrent.files.map(file => ({
-            name: file.name,
-            length: file.length,
-            path: file.path
-        }));
-
-        res.json({ 
-            infoHash: torrent.infoHash,
-            files: files
-        });
-
-        // Clean up after sending response
-        torrent.destroy();
-    });
 });
 
 // Start the server
