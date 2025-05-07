@@ -54,4 +54,12 @@ UserSchema.methods.comparePassword = async function(candidatePassword) {
     }
 };
 
+// Generate password reset token
+UserSchema.methods.generatePasswordReset = function() {
+    const crypto = require('crypto');
+    this.resetPasswordToken = crypto.randomBytes(32).toString('hex');
+    this.resetPasswordExpires = Date.now() + 3600000; // 1 hour
+    return this.resetPasswordToken;
+};
+
 module.exports = mongoose.model('User', UserSchema); 
