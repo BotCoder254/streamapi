@@ -3,21 +3,41 @@
     <!-- Profile Header -->
     <div class="relative h-48 bg-gradient-to-r from-green-600 to-green-400">
         <div class="absolute -bottom-16 left-8">
-            <div class="w-32 h-32 rounded-full border-4 border-gray-800 overflow-hidden bg-gray-700">
-                <img src="https://avatar.iran.liara.run/public" alt="<%= user.name %>" class="w-full h-full object-cover">
+            <div class="relative group">
+                <div class="w-32 h-32 rounded-full border-4 border-gray-800 overflow-hidden bg-gray-700">
+                    <img id="profileImage" src="<%= user.profileImage || 'https://avatar.iran.liara.run/public' %>" alt="<%= user.name %>" class="w-full h-full object-cover">
+                    <div class="absolute inset-0 bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                        <label for="imageUpload" class="cursor-pointer text-white">
+                            <i class="fas fa-camera text-2xl"></i>
+                        </label>
+                        <input type="file" id="imageUpload" accept="image/*" class="hidden" onchange="handleImageUpload(event)">
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 
     <!-- Profile Content -->
     <div class="pt-20 pb-8 px-8">
+        <!-- Messages -->
+        <% if(typeof success_msg !== 'undefined' && success_msg.length > 0) { %>
+            <div class="bg-green-600 text-white px-4 py-3 rounded-lg mb-4">
+                <%= success_msg %>
+            </div>
+        <% } %>
+        <% if(typeof error_msg !== 'undefined' && error_msg.length > 0) { %>
+            <div class="bg-red-600 text-white px-4 py-3 rounded-lg mb-4">
+                <%= error_msg %>
+            </div>
+        <% } %>
+
         <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-8">
             <div>
                 <h1 class="text-2xl font-bold mb-2"><%= user.name %></h1>
                 <p class="text-gray-400"><%= user.email %></p>
             </div>
             <div class="mt-4 md:mt-0 flex gap-4">
-                <button class="px-4 py-2 bg-green-600 hover:bg-green-500 rounded-lg transition flex items-center">
+                <button onclick="toggleEditMode()" class="px-4 py-2 bg-green-600 hover:bg-green-500 rounded-lg transition flex items-center">
                     <i class="fas fa-edit mr-2"></i> Edit Profile
                 </button>
                 <button class="px-4 py-2 bg-red-600 hover:bg-red-500 rounded-lg transition flex items-center" onclick="confirmDeleteAccount()">
@@ -31,17 +51,31 @@
             <!-- Account Settings -->
             <div class="bg-gray-700 rounded-lg p-6">
                 <h2 class="text-xl font-bold mb-6"><i class="fas fa-user-cog mr-2"></i>Account Settings</h2>
-                <form action="/auth/update-profile" method="POST" class="space-y-4">
+                <form id="profileForm" action="/auth/update-profile" method="POST" class="space-y-4">
                     <div>
                         <label class="block text-sm font-medium mb-2">Name</label>
-                        <input type="text" name="name" value="<%= user.name %>" class="w-full bg-gray-800 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-green-500">
+                        <div class="relative">
+                            <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
+                                <i class="fas fa-user"></i>
+                            </span>
+                            <input type="text" name="name" value="<%= user.name %>" 
+                                class="w-full bg-gray-800 rounded-lg pl-10 pr-4 py-2 focus:outline-none focus:ring-2 focus:ring-green-500"
+                                disabled>
+                        </div>
                     </div>
                     <div>
                         <label class="block text-sm font-medium mb-2">Email</label>
-                        <input type="email" name="email" value="<%= user.email %>" class="w-full bg-gray-800 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-green-500">
+                        <div class="relative">
+                            <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
+                                <i class="fas fa-envelope"></i>
+                            </span>
+                            <input type="email" name="email" value="<%= user.email %>" 
+                                class="w-full bg-gray-800 rounded-lg pl-10 pr-4 py-2 focus:outline-none focus:ring-2 focus:ring-green-500"
+                                disabled>
+                        </div>
                     </div>
-                    <button type="submit" class="w-full px-4 py-2 bg-green-600 hover:bg-green-500 rounded-lg transition">
-                        Save Changes
+                    <button type="submit" class="w-full px-4 py-2 bg-green-600 hover:bg-green-500 rounded-lg transition hidden" id="saveProfileBtn">
+                        <i class="fas fa-save mr-2"></i> Save Changes
                     </button>
                 </form>
             </div>
@@ -52,18 +86,45 @@
                 <form action="/auth/change-password" method="POST" class="space-y-4">
                     <div>
                         <label class="block text-sm font-medium mb-2">Current Password</label>
-                        <input type="password" name="currentPassword" class="w-full bg-gray-800 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-green-500">
+                        <div class="relative">
+                            <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
+                                <i class="fas fa-lock"></i>
+                            </span>
+                            <input type="password" name="currentPassword" 
+                                class="w-full bg-gray-800 rounded-lg pl-10 pr-10 py-2 focus:outline-none focus:ring-2 focus:ring-green-500">
+                            <button type="button" class="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-gray-300 toggle-password">
+                                <i class="far fa-eye"></i>
+                            </button>
+                        </div>
                     </div>
                     <div>
                         <label class="block text-sm font-medium mb-2">New Password</label>
-                        <input type="password" name="newPassword" class="w-full bg-gray-800 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-green-500">
+                        <div class="relative">
+                            <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
+                                <i class="fas fa-lock"></i>
+                            </span>
+                            <input type="password" name="newPassword" 
+                                class="w-full bg-gray-800 rounded-lg pl-10 pr-10 py-2 focus:outline-none focus:ring-2 focus:ring-green-500">
+                            <button type="button" class="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-gray-300 toggle-password">
+                                <i class="far fa-eye"></i>
+                            </button>
+                        </div>
                     </div>
                     <div>
                         <label class="block text-sm font-medium mb-2">Confirm New Password</label>
-                        <input type="password" name="confirmPassword" class="w-full bg-gray-800 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-green-500">
+                        <div class="relative">
+                            <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
+                                <i class="fas fa-lock"></i>
+                            </span>
+                            <input type="password" name="confirmPassword" 
+                                class="w-full bg-gray-800 rounded-lg pl-10 pr-10 py-2 focus:outline-none focus:ring-2 focus:ring-green-500">
+                            <button type="button" class="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-gray-300 toggle-password">
+                                <i class="far fa-eye"></i>
+                            </button>
+                        </div>
                     </div>
                     <button type="submit" class="w-full px-4 py-2 bg-green-600 hover:bg-green-500 rounded-lg transition">
-                        Update Password
+                        <i class="fas fa-key mr-2"></i> Update Password
                     </button>
                 </form>
             </div>
@@ -90,6 +151,62 @@
 </div>
 
 <script>
+// Toggle password visibility
+document.querySelectorAll('.toggle-password').forEach(button => {
+    button.addEventListener('click', function() {
+        const input = this.parentElement.querySelector('input');
+        const icon = this.querySelector('i');
+        
+        if (input.type === 'password') {
+            input.type = 'text';
+            icon.classList.remove('fa-eye');
+            icon.classList.add('fa-eye-slash');
+        } else {
+            input.type = 'password';
+            icon.classList.remove('fa-eye-slash');
+            icon.classList.add('fa-eye');
+        }
+    });
+});
+
+// Profile image upload
+async function handleImageUpload(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const formData = new FormData();
+    formData.append('profileImage', file);
+
+    try {
+        const response = await fetch('/auth/update-profile-image', {
+            method: 'POST',
+            body: formData
+        });
+
+        const data = await response.json();
+        if (data.success) {
+            document.getElementById('profileImage').src = data.imageUrl;
+        } else {
+            alert('Failed to upload image. Please try again.');
+        }
+    } catch (error) {
+        console.error('Error uploading image:', error);
+        alert('Failed to upload image. Please try again.');
+    }
+}
+
+// Toggle edit mode
+function toggleEditMode() {
+    const inputs = document.querySelectorAll('#profileForm input');
+    const saveBtn = document.getElementById('saveProfileBtn');
+    
+    inputs.forEach(input => {
+        input.disabled = !input.disabled;
+    });
+    
+    saveBtn.classList.toggle('hidden');
+}
+
 function confirmDeleteAccount() {
     document.getElementById('deleteAccountModal').classList.remove('hidden');
 }

@@ -10,6 +10,41 @@ const nodemailer = require('nodemailer');
 const ejs = require('ejs');
 const fs = require('fs');
 const path = require('path');
+const multer = require('multer');
+
+// Configure multer for image upload
+const storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+        const uploadDir = 'public/uploads/profiles';
+        // Create directory if it doesn't exist
+        if (!fs.existsSync(uploadDir)) {
+            fs.mkdirSync(uploadDir, { recursive: true });
+        }
+        cb(null, uploadDir);
+    },
+    filename: function (req, file, cb) {
+        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+        cb(null, 'profile-' + uniqueSuffix + path.extname(file.originalname));
+    }
+});
+
+const upload = multer({
+    storage: storage,
+    limits: {
+        fileSize: 5 * 1024 * 1024 // 5MB limit
+    },
+    fileFilter: function (req, file, cb) {
+        const allowedTypes = /jpeg|jpg|png|gif/;
+        const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
+        const mimetype = allowedTypes.test(file.mimetype);
+
+        if (extname && mimetype) {
+            return cb(null, true);
+        } else {
+            cb(new Error('Only image files are allowed!'));
+        }
+    }
+});
 
 // Configure nodemailer
 const transporter = nodemailer.createTransport({
@@ -391,6 +426,44 @@ router.post('/delete-account', ensureAuthenticated, async (req, res) => {
         console.error('Account deletion error:', err);
         req.flash('error_msg', 'Failed to delete account');
         res.redirect('/auth/profile');
+    }
+});
+
+// Profile Image Upload Route
+router.post('/update-profile-image', ensureAuthenticated, upload.single('profileImage'), async (req, res) => {
+    try {
+        if (!req.file) {
+            return res.status(400).json({ 
+                success: false, 
+                message: 'No image file provided' 
+            });
+        }
+
+        // Get the uploaded file path
+        const imageUrl = `/uploads/profiles/${req.file.filename}`;
+
+        // Update user's profile image in database
+        await User.findByIdAndUpdate(req.user.id, {
+            profileImage: imageUrl
+        });
+
+        res.json({ 
+            success: true, 
+            imageUrl: imageUrl,
+            message: 'Profile image updated successfully' 
+        });
+    } catch (error) {
+        console.error('Profile image upload error:', error);
+        // If there's an error, delete the uploaded file
+        if (req.file) {
+            fs.unlink(req.file.path, (err) => {
+                if (err) console.error('Error deleting file:', err);
+            });
+        }
+        res.status(500).json({ 
+            success: false, 
+            message: 'Failed to update profile image' 
+        });
     }
 });
 
