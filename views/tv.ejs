@@ -121,29 +121,37 @@
                             </div>
                         </div>
                         
-                        <button 
-                            class="watch-party-btn px-6 py-3 bg-purple-600 hover:bg-purple-500 rounded-lg transition flex items-center shadow-lg hover:shadow-xl"
-                            data-id="<%= show.tmdbId %>"
-                            data-type="tv"
-                            data-title="<%= show.title %>"
-                        >
-                            <i class="fas fa-users mr-2"></i> Watch Party
-                        </button>
-                        
-                        <button 
-                            class="watchlist-toggle px-6 py-3 bg-gray-700 hover:bg-gray-600 rounded-lg transition flex items-center shadow-lg hover:shadow-xl"
-                            data-id="<%= show.tmdbId %>"
-                            data-type="tv"
-                            data-title="<%= show.title %>"
-                            data-poster="<%= show.poster %>"
-                            data-year="<%= show.year %>"
-                        >
-                            <i class="fas fa-bookmark mr-2"></i> Add to Watchlist
-                        </button>
-                        
-                        <button class="favorite-btn px-6 py-3 bg-gray-700 hover:bg-gray-600 rounded-lg transition flex items-center shadow-lg hover:shadow-xl">
-                            <i class="far fa-heart mr-2"></i> Add to Favorites
-                        </button>
+                        <% if (user) { %>
+                            <button 
+                                class="watch-party-btn px-6 py-3 bg-purple-600 hover:bg-purple-500 rounded-lg transition flex items-center shadow-lg hover:shadow-xl"
+                                data-id="<%= show.tmdbId %>"
+                                data-type="tv"
+                                data-title="<%= show.title %>"
+                            >
+                                <i class="fas fa-users mr-2"></i> Watch Party
+                            </button>
+                            
+                            <button 
+                                class="watchlist-toggle px-6 py-3 bg-gray-700 hover:bg-gray-600 rounded-lg transition flex items-center shadow-lg hover:shadow-xl"
+                                data-id="<%= show.tmdbId %>"
+                                data-type="tv"
+                                data-title="<%= show.title %>"
+                                data-poster="<%= show.poster %>"
+                                data-year="<%= show.year %>"
+                            >
+                                <i class="fas fa-bookmark mr-2"></i> Add to Watchlist
+                            </button>
+                            
+                            <button class="favorite-btn px-6 py-3 bg-gray-700 hover:bg-gray-600 rounded-lg transition flex items-center shadow-lg hover:shadow-xl">
+                                <i class="far fa-heart mr-2"></i> Add to Favorites
+                            </button>
+                        <% } else { %>
+                            <div class="bg-gray-800/70 px-6 py-3 rounded-lg text-center">
+                                <a href="/auth/login" class="text-green-400 hover:text-green-300 transition">
+                                    <i class="fas fa-sign-in-alt mr-2"></i> Login to access more features
+                                </a>
+                            </div>
+                        <% } %>
                         
                         <!-- Share Button -->
                         <%- include('partials/share-button', { 
