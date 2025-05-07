@@ -25,11 +25,29 @@ const UserSchema = new mongoose.Schema({
         default: Date.now
     },
     watchlist: [{
-        id: String,
-        type: String,
-        title: String,
+        mediaId: {
+            type: String,
+            required: true
+        },
+        mediaType: {
+            type: String,
+            enum: ['movie', 'tv'],
+            required: true
+        },
+        title: {
+            type: String,
+            required: true
+        },
         poster: String,
-        added_date: Date
+        genre: [String],
+        duration: {
+            type: Number,
+            default: 0
+        },
+        added_date: {
+            type: Date,
+            default: Date.now
+        }
     }],
     resetPasswordToken: String,
     resetPasswordExpires: Date
