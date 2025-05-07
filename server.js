@@ -34,7 +34,15 @@ mongoose.connect(uri, {
         deprecationErrors: true,
     },
     useNewUrlParser: true,
-    useUnifiedTopology: true
+    useUnifiedTopology: true,
+    ssl: true,
+    tls: true,
+    tlsAllowInvalidCertificates: true,
+    tlsAllowInvalidHostnames: true,
+    retryWrites: true,
+    maxPoolSize: 10,
+    socketTimeoutMS: 45000,
+    connectTimeoutMS: 30000,
 }).then(() => {
     console.log('MongoDB Atlas Connected Successfully!');
 }).catch(err => {
