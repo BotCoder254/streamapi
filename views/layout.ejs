@@ -355,6 +355,11 @@
                         <li><a href="/top" class="hover:text-green-400 transition"><i class="fas fa-chevron-right text-xs mr-2"></i>Top Rated</a></li>
                         <% if (user) { %>
                             <li><a href="/watchlist" class="hover:text-green-400 transition"><i class="fas fa-chevron-right text-xs mr-2"></i>My Watchlist</a></li>
+                            <li><a href="/api" class="hover:text-green-400 transition flex items-center"><i class="fas fa-chevron-right text-xs mr-2"></i>API Reference</a></li>
+                            <li><a href="/torrent/search" class="hover:text-green-400 transition"><i class="fas fa-magnet text-xs mr-2"></i>Torrents</a></li>
+                        <% } else { %>
+                            <li><a href="/auth/login" class="hover:text-green-400 transition"><i class="fas fa-chevron-right text-xs mr-2"></i>My Watchlist</a></li>
+                            <li><a href="/auth/login" class="hover:text-green-400 transition"><i class="fas fa-magnet text-xs mr-2"></i>Torrents</a></li>
                         <% } %>
                     </ul>
                 </div>
@@ -366,7 +371,8 @@
                         <li><a href="/terms" class="hover:text-green-400 transition flex items-center"><i class="fas fa-chevron-right text-xs mr-2"></i>Terms of Service</a></li>
                         <li><a href="/privacy" class="hover:text-green-400 transition flex items-center"><i class="fas fa-chevron-right text-xs mr-2"></i>Privacy Policy</a></li>
                         <li><a href="/copyright" class="hover:text-green-400 transition flex items-center"><i class="fas fa-chevron-right text-xs mr-2"></i>Copyright</a></li>
-                        <li><a href="/api" class="hover:text-green-400 transition flex items-center"><i class="fas fa-chevron-right text-xs mr-2"></i>API Reference</a></li>
+                        
+
                         <li><a href="/contact" class="hover:text-green-400 transition flex items-center"><i class="fas fa-chevron-right text-xs mr-2"></i>Contact Us</a></li>
                     </ul>
                 </div>
