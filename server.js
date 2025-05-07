@@ -24,30 +24,39 @@ const { MongoClient, ServerApiVersion } = require('mongodb');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// MongoDB Connection Configuration
-const uri = "mongodb+srv://Telvin:soulmind254@cluster0.f5dduen.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
+const uri = "mongodb+srv://stream:telvinteum@stream.o3qip.mongodb.net/?retryWrites=true&w=majority&appName=stream";
 
-mongoose.connect(uri, {
+// Create a MongoClient with a MongoClientOptions object
+const client = new MongoClient(uri, {
     serverApi: {
         version: ServerApiVersion.v1,
         strict: true,
         deprecationErrors: true,
-    },
+    }
+});
+
+// DB Config with Mongoose
+mongoose.connect(uri, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
-    ssl: true,
-    tls: true,
-    tlsAllowInvalidCertificates: true,
-    tlsAllowInvalidHostnames: true,
-    retryWrites: true,
-    maxPoolSize: 10,
-    socketTimeoutMS: 45000,
-    connectTimeoutMS: 30000,
-}).then(() => {
-    console.log('MongoDB Atlas Connected Successfully!');
-}).catch(err => {
-    console.error('MongoDB Connection Error:', err);
-});
+    serverApi: {
+        version: ServerApiVersion.v1,
+        strict: true,
+        deprecationErrors: true
+    }
+})
+.then(async () => {
+    try {
+        // Connect the client to the server
+        await client.connect();
+        // Send a ping to confirm a successful connection
+        await client.db("admin").command({ ping: 1 });
+        console.log("MongoDB Connected Successfully!");
+    } catch (err) {
+        console.error("Error connecting to MongoDB:", err);
+    }
+})
+.catch(err => console.error('MongoDB connection error:', err));
 
 // Passport Config
 require('./config/passport')(passport);
