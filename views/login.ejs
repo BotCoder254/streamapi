@@ -1,7 +1,7 @@
 <!-- Two Column Layout -->
-<div class="min-h-screen flex bg-gray-900">
+<div class="min-h-screen flex flex-col md:flex-row bg-gray-900">
     <!-- Left Column - Auth Form -->
-    <div class="w-1/2 flex items-center justify-center p-8">
+    <div class="w-full md:w-1/2 flex items-center justify-center p-4 md:p-8">
         <div class="max-w-md w-full">
             <!-- Logo -->
             <div class="text-center mb-8">
@@ -11,18 +11,18 @@
             </div>
 
             <!-- Login Form -->
-            <div class="bg-gray-800 rounded-lg p-8 shadow-2xl">
+            <div class="bg-gray-800 rounded-lg p-6 md:p-8 shadow-2xl">
                 <h2 class="text-2xl font-bold text-center mb-6">Welcome Back!</h2>
                 
                 <!-- Social Login Buttons -->
                 <div class="grid grid-cols-2 gap-4 mb-6">
                     <button class="flex items-center justify-center gap-2 bg-[#4285F4] hover:bg-[#4285F4]/90 text-white rounded-lg px-4 py-2 transition">
                         <i class="fab fa-google text-xl"></i>
-                        Google
+                        <span class="hidden sm:inline">Google</span>
                     </button>
                     <button class="flex items-center justify-center gap-2 bg-[#3b5998] hover:bg-[#3b5998]/90 text-white rounded-lg px-4 py-2 transition">
                         <i class="fab fa-facebook-f text-xl"></i>
-                        Facebook
+                        <span class="hidden sm:inline">Facebook</span>
                     </button>
                 </div>
 
@@ -59,7 +59,7 @@
                     </div>
 
                     <!-- Remember Me & Forgot Password -->
-                    <div class="flex items-center justify-between text-sm">
+                    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between text-sm gap-3">
                         <label class="flex items-center text-gray-300">
                             <input type="checkbox" name="remember" class="mr-2 text-green-500">
                             Remember me
@@ -85,7 +85,7 @@
     </div>
 
     <!-- Right Column - Movie Slider -->
-    <div class="w-1/2  p-8 flex items-center">
+    <div class="hidden md:flex w-full md:w-1/2 p-8 items-center">
         <div class="relative w-full rounded-lg" style="height: 600px;">
             <!-- Movie Slider -->
             <div class="movie-slider absolute inset-0">

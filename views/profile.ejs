@@ -1,148 +1,150 @@
 <!-- User Profile Page -->
-<div class="max-w-4xl mx-auto bg-gray-800 rounded-lg shadow-xl overflow-hidden">
-    <!-- Profile Header -->
-    <div class="relative h-48 bg-gradient-to-r from-green-600 to-green-400">
-        <div class="absolute -bottom-16 left-8">
-            <div class="relative group">
-                <div class="w-32 h-32 rounded-full border-4 border-gray-800 overflow-hidden bg-gray-700">
-                    <img id="profileImage" src="<%= user.profileImage || 'https://avatar.iran.liara.run/public' %>" alt="<%= user.name %>" class="w-full h-full object-cover">
-                    <div class="absolute inset-0 bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                        <label for="imageUpload" class="cursor-pointer text-white">
-                            <i class="fas fa-camera text-2xl"></i>
-                        </label>
-                        <input type="file" id="imageUpload" accept="image/*" class="hidden" onchange="handleImageUpload(event)">
+<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="bg-gray-800 rounded-lg shadow-xl overflow-hidden">
+        <!-- Profile Header -->
+        <div class="relative h-32 sm:h-48 bg-gradient-to-r from-green-600 to-green-400">
+            <div class="absolute -bottom-12 sm:-bottom-16 left-4 sm:left-8">
+                <div class="relative group">
+                    <div class="w-24 h-24 sm:w-32 sm:h-32 rounded-full border-4 border-gray-800 overflow-hidden bg-gray-700">
+                        <img id="profileImage" src="<%= user.profileImage || 'https://avatar.iran.liara.run/public' %>" alt="<%= user.name %>" class="w-full h-full object-cover">
+                        <div class="absolute inset-0 bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                            <label for="imageUpload" class="cursor-pointer text-white">
+                                <i class="fas fa-camera text-xl sm:text-2xl"></i>
+                            </label>
+                            <input type="file" id="imageUpload" accept="image/*" class="hidden" onchange="handleImageUpload(event)">
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
 
-    <!-- Profile Content -->
-    <div class="pt-20 pb-8 px-8">
-        <!-- Messages -->
-        <% if(typeof success_msg !== 'undefined' && success_msg.length > 0) { %>
-            <div class="bg-green-600 text-white px-4 py-3 rounded-lg mb-4">
-                <%= success_msg %>
-            </div>
-        <% } %>
-        <% if(typeof error_msg !== 'undefined' && error_msg.length > 0) { %>
-            <div class="bg-red-600 text-white px-4 py-3 rounded-lg mb-4">
-                <%= error_msg %>
-            </div>
-        <% } %>
+        <!-- Profile Content -->
+        <div class="pt-16 sm:pt-20 pb-6 sm:pb-8 px-4 sm:px-8">
+            <!-- Messages -->
+            <% if(typeof success_msg !== 'undefined' && success_msg.length > 0) { %>
+                <div class="bg-green-600 text-white px-4 py-3 rounded-lg mb-4">
+                    <%= success_msg %>
+                </div>
+            <% } %>
+            <% if(typeof error_msg !== 'undefined' && error_msg.length > 0) { %>
+                <div class="bg-red-600 text-white px-4 py-3 rounded-lg mb-4">
+                    <%= error_msg %>
+                </div>
+            <% } %>
 
-        <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-8">
-            <div>
-                <h1 class="text-2xl font-bold mb-2"><%= user.name %></h1>
-                <p class="text-gray-400"><%= user.email %></p>
-            </div>
-            <div class="mt-4 md:mt-0 flex gap-4">
-                <button onclick="toggleEditMode()" class="px-4 py-2 bg-green-600 hover:bg-green-500 rounded-lg transition flex items-center">
-                    <i class="fas fa-edit mr-2"></i> Edit Profile
-                </button>
-                <button class="px-4 py-2 bg-red-600 hover:bg-red-500 rounded-lg transition flex items-center" onclick="confirmDeleteAccount()">
-                    <i class="fas fa-trash-alt mr-2"></i> Delete Account
-                </button>
-            </div>
-        </div>
-
-        <!-- Settings Sections -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <!-- Account Settings -->
-            <div class="bg-gray-700 rounded-lg p-6">
-                <h2 class="text-xl font-bold mb-6"><i class="fas fa-user-cog mr-2"></i>Account Settings</h2>
-                <form id="profileForm" action="/auth/update-profile" method="POST" class="space-y-4">
-                    <div>
-                        <label class="block text-sm font-medium mb-2">Name</label>
-                        <div class="relative">
-                            <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
-                                <i class="fas fa-user"></i>
-                            </span>
-                            <input type="text" name="name" value="<%= user.name %>" minlength="3" maxlength="6"
-                                class="w-full bg-gray-800 rounded-lg pl-10 pr-4 py-2 focus:outline-none focus:ring-2 focus:ring-green-500"
-                                disabled>
-                        </div>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium mb-2">Email</label>
-                        <div class="relative">
-                            <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
-                                <i class="fas fa-envelope"></i>
-                            </span>
-                            <input type="email" name="email" value="<%= user.email %>" 
-                                class="w-full bg-gray-800 rounded-lg pl-10 pr-4 py-2 focus:outline-none focus:ring-2 focus:ring-green-500"
-                                disabled>
-                        </div>
-                    </div>
-                    <button type="submit" class="w-full px-4 py-2 bg-green-600 hover:bg-green-500 rounded-lg transition hidden" id="saveProfileBtn">
-                        <i class="fas fa-save mr-2"></i> Save Changes
+            <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-6 sm:mb-8">
+                <div>
+                    <h1 class="text-xl sm:text-2xl font-bold mb-2"><%= user.name %></h1>
+                    <p class="text-gray-400 text-sm sm:text-base"><%= user.email %></p>
+                </div>
+                <div class="mt-4 md:mt-0 flex flex-col sm:flex-row gap-3 sm:gap-4">
+                    <button onclick="toggleEditMode()" class="px-4 py-2 bg-green-600 hover:bg-green-500 rounded-lg transition flex items-center justify-center sm:justify-start">
+                        <i class="fas fa-edit mr-2"></i> Edit Profile
                     </button>
-                </form>
+                    <button class="px-4 py-2 bg-red-600 hover:bg-red-500 rounded-lg transition flex items-center justify-center sm:justify-start" onclick="confirmDeleteAccount()">
+                        <i class="fas fa-trash-alt mr-2"></i> Delete Account
+                    </button>
+                </div>
             </div>
 
-            <!-- Password Reset -->
-            <div class="bg-gray-700 rounded-lg p-6">
-                <h2 class="text-xl font-bold mb-6"><i class="fas fa-lock mr-2"></i>Change Password</h2>
-                <form action="/auth/change-password" method="POST" class="space-y-4">
-                    <div>
-                        <label class="block text-sm font-medium mb-2">Current Password</label>
-                        <div class="relative">
-                            <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
-                                <i class="fas fa-lock"></i>
-                            </span>
-                            <input type="password" name="currentPassword" 
-                                class="w-full bg-gray-800 rounded-lg pl-10 pr-10 py-2 focus:outline-none focus:ring-2 focus:ring-green-500">
-                            <button type="button" class="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-gray-300 toggle-password">
-                                <i class="far fa-eye"></i>
-                            </button>
+            <!-- Settings Sections -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-8">
+                <!-- Account Settings -->
+                <div class="bg-gray-700 rounded-lg p-4 sm:p-6">
+                    <h2 class="text-lg sm:text-xl font-bold mb-4 sm:mb-6"><i class="fas fa-user-cog mr-2"></i>Account Settings</h2>
+                    <form id="profileForm" action="/auth/update-profile" method="POST" class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium mb-2">Name</label>
+                            <div class="relative">
+                                <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
+                                    <i class="fas fa-user"></i>
+                                </span>
+                                <input type="text" name="name" value="<%= user.name %>" minlength="3" maxlength="6"
+                                    class="w-full bg-gray-800 rounded-lg pl-10 pr-4 py-2 focus:outline-none focus:ring-2 focus:ring-green-500 text-sm sm:text-base"
+                                    disabled>
+                            </div>
                         </div>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium mb-2">New Password</label>
-                        <div class="relative">
-                            <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
-                                <i class="fas fa-lock"></i>
-                            </span>
-                            <input type="password" name="newPassword" 
-                                class="w-full bg-gray-800 rounded-lg pl-10 pr-10 py-2 focus:outline-none focus:ring-2 focus:ring-green-500">
-                            <button type="button" class="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-gray-300 toggle-password">
-                                <i class="far fa-eye"></i>
-                            </button>
+                        <div>
+                            <label class="block text-sm font-medium mb-2">Email</label>
+                            <div class="relative">
+                                <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
+                                    <i class="fas fa-envelope"></i>
+                                </span>
+                                <input type="email" name="email" value="<%= user.email %>" 
+                                    class="w-full bg-gray-800 rounded-lg pl-10 pr-4 py-2 focus:outline-none focus:ring-2 focus:ring-green-500 text-sm sm:text-base"
+                                    disabled>
+                            </div>
                         </div>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium mb-2">Confirm New Password</label>
-                        <div class="relative">
-                            <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
-                                <i class="fas fa-lock"></i>
-                            </span>
-                            <input type="password" name="confirmPassword" 
-                                class="w-full bg-gray-800 rounded-lg pl-10 pr-10 py-2 focus:outline-none focus:ring-2 focus:ring-green-500">
-                            <button type="button" class="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-gray-300 toggle-password">
-                                <i class="far fa-eye"></i>
-                            </button>
+                        <button type="submit" class="w-full px-4 py-2 bg-green-600 hover:bg-green-500 rounded-lg transition hidden text-sm sm:text-base" id="saveProfileBtn">
+                            <i class="fas fa-save mr-2"></i> Save Changes
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Password Reset -->
+                <div class="bg-gray-700 rounded-lg p-4 sm:p-6">
+                    <h2 class="text-lg sm:text-xl font-bold mb-4 sm:mb-6"><i class="fas fa-lock mr-2"></i>Change Password</h2>
+                    <form action="/auth/change-password" method="POST" class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium mb-2">Current Password</label>
+                            <div class="relative">
+                                <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
+                                    <i class="fas fa-lock"></i>
+                                </span>
+                                <input type="password" name="currentPassword" 
+                                    class="w-full bg-gray-800 rounded-lg pl-10 pr-10 py-2 focus:outline-none focus:ring-2 focus:ring-green-500 text-sm sm:text-base">
+                                <button type="button" class="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-gray-300 toggle-password">
+                                    <i class="far fa-eye"></i>
+                                </button>
+                            </div>
                         </div>
-                    </div>
-                    <button type="submit" class="w-full px-4 py-2 bg-green-600 hover:bg-green-500 rounded-lg transition">
-                        <i class="fas fa-key mr-2"></i> Update Password
-                    </button>
-                </form>
+                        <div>
+                            <label class="block text-sm font-medium mb-2">New Password</label>
+                            <div class="relative">
+                                <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
+                                    <i class="fas fa-lock"></i>
+                                </span>
+                                <input type="password" name="newPassword" 
+                                    class="w-full bg-gray-800 rounded-lg pl-10 pr-10 py-2 focus:outline-none focus:ring-2 focus:ring-green-500 text-sm sm:text-base">
+                                <button type="button" class="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-gray-300 toggle-password">
+                                    <i class="far fa-eye"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-2">Confirm New Password</label>
+                            <div class="relative">
+                                <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
+                                    <i class="fas fa-lock"></i>
+                                </span>
+                                <input type="password" name="confirmPassword" 
+                                    class="w-full bg-gray-800 rounded-lg pl-10 pr-10 py-2 focus:outline-none focus:ring-2 focus:ring-green-500 text-sm sm:text-base">
+                                <button type="button" class="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-gray-300 toggle-password">
+                                    <i class="far fa-eye"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <button type="submit" class="w-full px-4 py-2 bg-green-600 hover:bg-green-500 rounded-lg transition text-sm sm:text-base">
+                            <i class="fas fa-key mr-2"></i> Update Password
+                        </button>
+                    </form>
+                </div>
             </div>
         </div>
     </div>
 </div>
 
 <!-- Delete Account Confirmation Modal -->
-<div id="deleteAccountModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center">
-    <div class="bg-gray-800 rounded-lg p-8 max-w-md w-full mx-4">
-        <h3 class="text-xl font-bold mb-4">Delete Account</h3>
-        <p class="text-gray-400 mb-6">Are you sure you want to delete your account? This action cannot be undone.</p>
-        <div class="flex justify-end gap-4">
-            <button onclick="closeDeleteModal()" class="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg transition">
+<div id="deleteAccountModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-gray-800 rounded-lg p-6 sm:p-8 max-w-md w-full mx-4">
+        <h3 class="text-lg sm:text-xl font-bold mb-4">Delete Account</h3>
+        <p class="text-gray-400 mb-6 text-sm sm:text-base">Are you sure you want to delete your account? This action cannot be undone.</p>
+        <div class="flex justify-end gap-3 sm:gap-4">
+            <button onclick="closeDeleteModal()" class="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg transition text-sm sm:text-base">
                 Cancel
             </button>
             <form action="/auth/delete-account" method="POST" class="inline">
-                <button type="submit" class="px-4 py-2 bg-red-600 hover:bg-red-500 rounded-lg transition">
+                <button type="submit" class="px-4 py-2 bg-red-600 hover:bg-red-500 rounded-lg transition text-sm sm:text-base">
                     Delete Account
                 </button>
             </form>
