@@ -1,18 +1,20 @@
-const serverless = require('serverless-http');
 const express = require('express');
-const path = require('path');
-const fs = require('fs');
+const serverless = require('serverless-http');
+const app = require('../../server'); // Import your Express app
 
-// Set up the server path
-let serverPath;
-if (fs.existsSync(path.join(__dirname, '../../server.js'))) {
-  serverPath = path.join(__dirname, '../../server.js');
-} else if (fs.existsSync(path.join(__dirname, '../../../server.js'))) {
-  serverPath = path.join(__dirname, '../../../server.js');
-}
+// Handle Netlify functions
+const handler = serverless(app);
 
-// Import the Express app from your main server.js file
-const app = require(serverPath);
-
-// Export the serverless function
-module.exports.handler = serverless(app); 
+module.exports = {
+  handler: async (event, context) => {
+    // Add CORS headers
+    const response = await handler(event, context);
+    response.headers = {
+      ...response.headers,
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Headers': 'Content-Type',
+      'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE'
+    };
+    return response;
+  }
+}; 

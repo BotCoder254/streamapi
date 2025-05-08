@@ -2116,7 +2116,13 @@ app.delete('/api/watch-history/clear', ensureAuthenticated, async (req, res) => 
   }
 });
 
-// Start the server
-server.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
+// Modify the server start section at the bottom of the file
+if (process.env.NETLIFY) {
+  // Export the app for Netlify Functions
+  module.exports = app;
+} else {
+  // Start the server normally
+  server.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
+  });
+}
