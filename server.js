@@ -2116,7 +2116,7 @@ app.delete('/api/watch-history/clear', ensureAuthenticated, async (req, res) => 
   }
 });
 
-// Start the server
+// Remove the Netlify condition and just start the server
 server.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });

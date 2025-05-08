@@ -61,18 +61,18 @@
     <!-- Continue Watching Section -->
     <% if (locals.user && watchHistory && watchHistory.length > 0) { %>
         <div class="mb-12 continue-watching-section">
-            <div class="flex justify-between items-center mb-6">
-                <h2 class="text-2xl font-bold">
-                    <i class="fas fa-history mr-2 text-purple-400"></i>
-                    Continue Watching
-                </h2>
-                <button class="text-purple-400 hover:text-purple-300 transition flex items-center" id="clear-continue-watching">
-                    Clear All <i class="fas fa-times ml-1 text-sm"></i>
-                </button>
-            </div>
-            
-            <div class="content-slider relative group">
-                <div class="content-wrapper flex space-x-4 overflow-x-auto pb-4 snap-x scrollbar-hide" id="continue-watching-wrapper">
+        <div class="flex justify-between items-center mb-6">
+            <h2 class="text-2xl font-bold">
+                <i class="fas fa-history mr-2 text-purple-400"></i>
+                Continue Watching
+            </h2>
+            <button class="text-purple-400 hover:text-purple-300 transition flex items-center" id="clear-continue-watching">
+                Clear All <i class="fas fa-times ml-1 text-sm"></i>
+            </button>
+        </div>
+        
+        <div class="content-slider relative group">
+            <div class="content-wrapper flex space-x-4 overflow-x-auto pb-4 snap-x scrollbar-hide" id="continue-watching-wrapper">
                     <% watchHistory.forEach(item => { %>
                         <div class="movie-card flex-shrink-0 w-[180px] md:w-[200px] snap-start bg-gray-800 rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 group/card">
                             <a href="/view/<%= item.mediaType %>/<%= item.mediaId %>">
@@ -106,16 +106,16 @@
                             </a>
                         </div>
                     <% }); %>
-                </div>
-                
-                <button class="slider-prev absolute top-1/2 left-0 -translate-y-1/2 w-10 h-10 bg-black/50 hover:bg-black/70 text-white rounded-full flex items-center justify-center z-10 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <i class="fas fa-chevron-left"></i>
-                </button>
-                <button class="slider-next absolute top-1/2 right-0 -translate-y-1/2 w-10 h-10 bg-black/50 hover:bg-black/70 text-white rounded-full flex items-center justify-center z-10 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <i class="fas fa-chevron-right"></i>
-                </button>
             </div>
+            
+            <button class="slider-prev absolute top-1/2 left-0 -translate-y-1/2 w-10 h-10 bg-black/50 hover:bg-black/70 text-white rounded-full flex items-center justify-center z-10 opacity-0 group-hover:opacity-100 transition-opacity">
+                <i class="fas fa-chevron-left"></i>
+            </button>
+            <button class="slider-next absolute top-1/2 right-0 -translate-y-1/2 w-10 h-10 bg-black/50 hover:bg-black/70 text-white rounded-full flex items-center justify-center z-10 opacity-0 group-hover:opacity-100 transition-opacity">
+                <i class="fas fa-chevron-right"></i>
+            </button>
         </div>
+    </div>
     <% } %>
     
     <!-- Popular TV Shows Slider Section -->
@@ -567,7 +567,7 @@
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
-                        document.querySelector('.continue-watching-section').style.display = 'none';
+                    document.querySelector('.continue-watching-section').style.display = 'none';
                     }
                 })
                 .catch(console.error);

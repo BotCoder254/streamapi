@@ -36,7 +36,7 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     }
   });
-  
+
   // Initialize remove buttons on watchlist page
   const removeButtons = document.querySelectorAll('.watchlist-remove');
   removeButtons.forEach(button => {
@@ -127,9 +127,9 @@ function removeFromWatchlist(mediaId, mediaType, buttonElement, itemCard = null)
   .then(data => {
     if (data.success) {
       if (buttonElement) {
-        buttonElement.classList.remove('in-watchlist', 'bg-green-600');
-        buttonElement.classList.add('bg-gray-700');
-        buttonElement.innerHTML = '<i class="fas fa-plus mr-2"></i> Add to Watchlist';
+      buttonElement.classList.remove('in-watchlist', 'bg-green-600');
+      buttonElement.classList.add('bg-gray-700');
+      buttonElement.innerHTML = '<i class="fas fa-plus mr-2"></i> Add to Watchlist';
       }
       if (itemCard) {
         itemCard.remove();
@@ -200,16 +200,16 @@ function showNotification(message, type = 'info') {
         toast.classList.add('bg-gray-800', 'text-white');
     }
     
-    toast.classList.remove('hidden');
-    
+  toast.classList.remove('hidden');
+  
     setTimeout(() => {
       toast.classList.remove('animate__fadeInUp');
       toast.classList.add('animate__fadeOutDown');
-      setTimeout(() => {
-        toast.classList.add('hidden');
-        toast.classList.remove('animate__fadeOutDown');
+    setTimeout(() => {
+      toast.classList.add('hidden');
+      toast.classList.remove('animate__fadeOutDown');
         toast.className = 'fixed bottom-4 right-4 px-4 py-3 rounded-lg shadow-lg hidden';
-      }, 300);
-    }, 3000);
+    }, 300);
+  }, 3000);
   }
 } 
