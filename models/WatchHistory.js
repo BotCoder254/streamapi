@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 
-const WatchHistorySchema = new mongoose.Schema({
+const watchHistorySchema = new mongoose.Schema({
     user: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
@@ -19,7 +19,9 @@ const WatchHistorySchema = new mongoose.Schema({
         type: String,
         required: true
     },
-    poster: String,
+    poster: {
+        type: String
+    },
     genre: [String],
     duration: {
         type: Number,
@@ -27,7 +29,9 @@ const WatchHistorySchema = new mongoose.Schema({
     },
     progress: {
         type: Number,
-        default: 0
+        default: 0,
+        min: 0,
+        max: 100
     },
     watchedAt: {
         type: Date,
@@ -39,4 +43,7 @@ const WatchHistorySchema = new mongoose.Schema({
     }
 });
 
-module.exports = mongoose.model('WatchHistory', WatchHistorySchema); 
+// Create a compound index on user and mediaId to ensure uniqueness
+watchHistorySchema.index({ user: 1, mediaId: 1 }, { unique: true });
+
+module.exports = mongoose.model('WatchHistory', watchHistorySchema); 
