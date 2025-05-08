@@ -1,15 +1,19 @@
 [build]
-  command = "npm ci"
+  command = "npm install && npm run build"
   publish = "public"
   functions = "netlify/functions"
 
 [functions]
   node_bundler = "esbuild"
+  included_files = ["views/**/*", "public/**/*"]
 
 [[redirects]]
   from = "/*"
   to = "/.netlify/functions/server"
   status = 200
+
+[build.environment]
+  NODE_VERSION = "18"
 
 [dev]
   command = "npm run dev"
