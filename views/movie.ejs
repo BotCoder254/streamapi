@@ -635,4 +635,234 @@
         localStorage.setItem('userId', userId);
         return userId;
     }
-</script> 
+</script>
+
+<!-- Comments Section -->
+<div class="mb-8">
+    <h2 class="text-2xl font-bold mb-6"><i class="fas fa-comments mr-2"></i>Comments & Discussions</h2>
+    
+    <% if (locals.user) { %>
+        <!-- Comment Form -->
+        <div class="bg-gray-800 rounded-lg p-4 mb-6">
+            <form id="commentForm" class="space-y-4">
+                <input type="hidden" name="mediaId" value="<%= movie.tmdbId %>">
+                <input type="hidden" name="mediaType" value="movie">
+                <div>
+                    <textarea 
+                        name="content" 
+                        id="commentContent"
+                        rows="3" 
+                        class="w-full bg-gray-700 text-white rounded-lg p-3 focus:ring-2 focus:ring-green-500 focus:outline-none"
+                        placeholder="Share your thoughts about this movie..."
+                        required
+                    ></textarea>
+                </div>
+                <div class="flex justify-between items-center">
+                    <div id="commentError" class="text-red-500 text-sm hidden"></div>
+                    <button type="submit" class="px-6 py-2 bg-green-600 hover:bg-green-500 rounded-lg transition flex items-center">
+                        <i class="fas fa-paper-plane mr-2"></i> Post Comment
+                    </button>
+                </div>
+            </form>
+        </div>
+    <% } else { %>
+        <div class="bg-gray-800/50 rounded-lg p-4 mb-6 text-center">
+            <p class="text-gray-400">
+                <a href="/auth/login" class="text-green-400 hover:text-green-300 transition">Login</a> 
+                to join the discussion
+            </p>
+        </div>
+    <% } %>
+    
+    <!-- Comments List -->
+    <div id="commentsContainer" class="space-y-6">
+        <div class="text-center text-gray-500">
+            <div class="animate-spin inline-block w-8 h-8 border-4 border-green-500 border-t-transparent rounded-full mb-2"></div>
+            <p>Loading comments...</p>
+        </div>
+    </div>
+</div>
+
+<!-- Comments JavaScript -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const commentsContainer = document.getElementById('commentsContainer');
+    const commentForm = document.getElementById('commentForm');
+    const commentError = document.getElementById('commentError');
+    
+    // Load comments
+    async function loadComments() {
+        try {
+            commentsContainer.innerHTML = `
+                <div class="text-center text-gray-500">
+                    <div class="animate-spin inline-block w-8 h-8 border-4 border-green-500 border-t-transparent rounded-full mb-2"></div>
+                    <p>Loading comments...</p>
+                </div>
+            `;
+            
+            const response = await fetch(`/api/comments/movie/<%= movie.tmdbId %>`, {
+                headers: {
+                    'Accept': 'application/json',
+                    'Cache-Control': 'no-cache'
+                }
+            });
+            
+            if (!response.ok) {
+                throw new Error('Failed to fetch comments');
+            }
+            
+            const data = await response.json();
+            if (!data.success) {
+                throw new Error(data.message || 'Failed to load comments');
+            }
+            
+            // Clear loading state
+            commentsContainer.innerHTML = '';
+            
+            if (!data.comments || data.comments.length === 0) {
+                commentsContainer.innerHTML = `
+                    <div class="text-center text-gray-500">
+                        <p>No comments yet. Be the first to share your thoughts!</p>
+                    </div>
+                `;
+                return;
+            }
+
+            // Create a map of replies by parent ID
+            const repliesByParent = {};
+            if (data.replies && Array.isArray(data.replies)) {
+                data.replies.forEach(reply => {
+                    if (!repliesByParent[reply.parentId]) {
+                        repliesByParent[reply.parentId] = [];
+                    }
+                    repliesByParent[reply.parentId].push(reply);
+                });
+            }
+
+            // Render parent comments with their replies
+            data.comments.forEach(comment => {
+                if (!comment) return; // Skip if comment is null
+                
+                const commentElement = document.createElement('div');
+                commentElement.className = 'bg-gray-800 rounded-lg p-4';
+                commentElement.innerHTML = `
+                    <div class="flex items-start gap-3">
+                        <div class="flex-shrink-0">
+                            <div class="w-10 h-10 bg-gray-700 rounded-full flex items-center justify-center">
+                                <i class="fas fa-user text-gray-400"></i>
+                            </div>
+                        </div>
+                        <div class="flex-grow">
+                            <div class="flex items-center gap-2 mb-1">
+                                <span class="font-semibold">${comment.user ? comment.user.username : 'Anonymous'}</span>
+                                <span class="text-gray-500 text-sm">• ${new Date(comment.createdAt).toLocaleDateString()}</span>
+                            </div>
+                            <p class="text-gray-300 mb-3">${comment.content || ''}</p>
+                        </div>
+                    </div>
+                `;
+
+                // Add replies if any exist
+                const replies = repliesByParent[comment._id] || [];
+                if (replies.length > 0) {
+                    const repliesContainer = document.createElement('div');
+                    repliesContainer.className = 'ml-12 mt-4 space-y-4';
+                    
+                    replies.forEach(reply => {
+                        if (!reply) return; // Skip if reply is null
+                        
+                        const replyElement = document.createElement('div');
+                        replyElement.className = 'bg-gray-700/50 rounded-lg p-4';
+                        replyElement.innerHTML = `
+                            <div class="flex items-start gap-3">
+                                <div class="flex-shrink-0">
+                                    <div class="w-8 h-8 bg-gray-600 rounded-full flex items-center justify-center">
+                                        <i class="fas fa-user text-gray-400 text-sm"></i>
+                                    </div>
+                                </div>
+                                <div class="flex-grow">
+                                    <div class="flex items-center gap-2 mb-1">
+                                        <span class="font-semibold">${reply.user ? reply.user.username : 'Anonymous'}</span>
+                                        <span class="text-gray-500 text-sm">• ${new Date(reply.createdAt).toLocaleDateString()}</span>
+                                    </div>
+                                    <p class="text-gray-300">${reply.content || ''}</p>
+                                </div>
+                            </div>
+                        `;
+                        repliesContainer.appendChild(replyElement);
+                    });
+                    
+                    commentElement.appendChild(repliesContainer);
+                }
+
+                commentsContainer.appendChild(commentElement);
+            });
+        } catch (error) {
+            console.error('Error loading comments:', error);
+            commentsContainer.innerHTML = `
+                <div class="text-center">
+                    <p class="text-red-500 mb-2">Error loading comments</p>
+                    <button onclick="loadComments()" class="text-green-500 hover:text-green-400 transition">
+                        <i class="fas fa-sync-alt mr-1"></i> Try Again
+                    </button>
+                </div>
+            `;
+        }
+    }
+    
+    // Comment form submission
+    if (commentForm) {
+        commentForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const submitButton = commentForm.querySelector('button[type="submit"]');
+            const originalButtonText = submitButton.innerHTML;
+            
+            try {
+                // Disable form while submitting
+                submitButton.disabled = true;
+                submitButton.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Posting...';
+                commentError.classList.add('hidden');
+                
+                const content = document.getElementById('commentContent').value.trim();
+                if (!content) {
+                    throw new Error('Please enter a comment');
+                }
+                
+                const response = await fetch('/api/comments', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'Cache-Control': 'no-cache'
+                    },
+                    body: JSON.stringify({
+                        mediaId: '<%= movie.tmdbId %>',
+                        mediaType: 'movie',
+                        content: content
+                    })
+                });
+                
+                const data = await response.json();
+                if (!response.ok || !data.success) {
+                    throw new Error(data.message || 'Failed to post comment');
+                }
+                
+                // Clear form and reload comments
+                document.getElementById('commentContent').value = '';
+                await loadComments();
+            } catch (error) {
+                console.error('Error posting comment:', error);
+                commentError.textContent = error.message;
+                commentError.classList.remove('hidden');
+            } finally {
+                // Re-enable form
+                submitButton.disabled = false;
+                submitButton.innerHTML = originalButtonText;
+            }
+        });
+    }
+    
+    // Initial load
+    loadComments();
+});
+</script>

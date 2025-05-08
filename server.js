@@ -24,6 +24,7 @@ const LocalStrategy = require('passport-local').Strategy;
 const bcrypt = require('bcryptjs');
 const User = require('./models/User');
 const WatchHistory = require('./models/WatchHistory');
+const Comment = require('./models/Comment');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -2114,6 +2115,137 @@ app.delete('/api/watch-history/clear', ensureAuthenticated, async (req, res) => 
     console.error('Clear watch history error:', error);
     res.status(500).json({ success: false, message: 'Failed to clear watch history' });
   }
+});
+
+// Comments API Routes
+app.get('/api/comments/:type/:mediaId', async (req, res) => {
+    try {
+        const { type, mediaId } = req.params;
+        
+        // Validate parameters
+        if (!type || !mediaId) {
+            return res.status(400).json({
+                success: false,
+                message: 'Missing required parameters'
+            });
+        }
+
+        // Get parent comments
+        const comments = await Comment.find({
+            mediaType: type,
+            mediaId: mediaId,
+            parentId: null
+        })
+        .populate('user', 'username')
+        .sort('-createdAt')
+        .lean();
+
+        // Get replies
+        const replies = await Comment.find({
+            mediaType: type,
+            mediaId: mediaId,
+            parentId: { $ne: null }
+        })
+        .populate('user', 'username')
+        .sort('createdAt')
+        .lean();
+
+        res.json({
+            success: true,
+            comments: comments || [],
+            replies: replies || []
+        });
+    } catch (error) {
+        console.error('Error fetching comments:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Failed to load comments'
+        });
+    }
+});
+
+app.post('/api/comments', ensureAuthenticated, async (req, res) => {
+    try {
+        const { mediaId, mediaType, content, parentId } = req.body;
+        
+        // Validate required fields
+        if (!mediaId || !mediaType || !content) {
+            return res.status(400).json({
+                success: false,
+                message: 'Missing required fields'
+            });
+        }
+
+        // Create and save the comment
+        const comment = new Comment({
+            user: req.user._id,
+            mediaId,
+            mediaType,
+            content: content.trim(),
+            parentId: parentId || null
+        });
+
+        await comment.save();
+        await comment.populate('user', 'username');
+
+        res.json({
+            success: true,
+            comment: comment.toObject()
+        });
+    } catch (error) {
+        console.error('Error creating comment:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Failed to create comment'
+        });
+    }
+});
+
+app.post('/api/comments/:commentId/like', ensureAuthenticated, async (req, res) => {
+    try {
+        const comment = await Comment.findById(req.params.commentId);
+        if (!comment) {
+            return res.status(404).json({ success: false, message: 'Comment not found' });
+        }
+        
+        const userLiked = comment.likes.includes(req.user._id);
+        if (userLiked) {
+            comment.likes = comment.likes.filter(id => id.toString() !== req.user._id.toString());
+        } else {
+            comment.likes.push(req.user._id);
+        }
+        
+        await comment.save();
+        res.json({ success: true, likes: comment.likes.length });
+    } catch (error) {
+        console.error('Error toggling like:', error);
+        res.status(500).json({ success: false, message: 'Failed to toggle like' });
+    }
+});
+
+app.delete('/api/comments/:commentId', ensureAuthenticated, async (req, res) => {
+    try {
+        const comment = await Comment.findById(req.params.commentId);
+        if (!comment) {
+            return res.status(404).json({ success: false, message: 'Comment not found' });
+        }
+        
+        if (comment.user.toString() !== req.user._id.toString()) {
+            return res.status(403).json({ success: false, message: 'Unauthorized' });
+        }
+        
+        await Comment.deleteMany({
+            $or: [
+                { _id: comment._id },
+                { parentId: comment._id }
+            ]
+        });
+        
+        res.json({ success: true });
+    } catch (error) {
+        console.error('Error deleting comment:', error);
+        res.status(500).json({ success: false, message: 'Failed to delete comment' });
+    }
 });
 
 // Remove the Netlify condition and just start the server
