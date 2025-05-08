@@ -20,6 +20,10 @@ const flash = require('connect-flash');
 const session = require('express-session');
 const MongoStore = require('connect-mongo');
 const { MongoClient, ServerApiVersion } = require('mongodb');
+const LocalStrategy = require('passport-local').Strategy;
+const bcrypt = require('bcryptjs');
+const User = require('./models/User');
+const WatchHistory = require('./models/WatchHistory');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -714,18 +718,44 @@ app.get('/', async (req, res) => {
       still: episode.still_path ? `https://image.tmdb.org/t/p/w500${episode.still_path}` : null
     }));
 
+    // Get watch history for authenticated users
+    let watchHistory = [];
+    if (req.isAuthenticated() && req.user) {
+      try {
+        watchHistory = await WatchHistory.find({ user: req.user._id })
+          .sort({ watchedAt: -1 })
+          .limit(15)
+          .lean()
+          .exec();
+
+        // Format watch history items
+        watchHistory = watchHistory.map(item => ({
+          mediaId: item.mediaId,
+          mediaType: item.mediaType,
+          title: item.title,
+          poster: item.poster,
+          progress: item.progress || 0
+        }));
+      } catch (error) {
+        console.error('Error fetching watch history:', error);
+        watchHistory = [];
+      }
+    }
+
     // Render the home page with all slider data
     res.render('home', {
       featured,
       trendingMovies: formattedTrendingMovies,
       latestMovies,
       popularShows,
-      latestEpisodes
+      latestEpisodes,
+      watchHistory,
+      user: req.user
     });
   } catch (error) {
     console.error(`Home page error: ${error.message}`);
     // If there's an error, redirect to the old browse page as fallback
-  res.redirect('/browse');
+    res.redirect('/browse');
   }
 });
 
@@ -2073,6 +2103,17 @@ app.get('/api/watch-party/active/:mediaId', (req, res) => {
     const { mediaId } = req.params;
     const count = watchPartyStorage.getActivePartiesCount(mediaId);
     res.json({ count });
+});
+
+// Clear watch history
+app.delete('/api/watch-history/clear', ensureAuthenticated, async (req, res) => {
+  try {
+    await WatchHistory.deleteMany({ user: req.user._id });
+    res.json({ success: true });
+  } catch (error) {
+    console.error('Clear watch history error:', error);
+    res.status(500).json({ success: false, message: 'Failed to clear watch history' });
+  }
 });
 
 // Start the server
