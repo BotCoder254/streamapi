@@ -1,10 +1,25 @@
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 
+// Drop the existing index if it exists
+mongoose.connection.on('open', async () => {
+    try {
+        await mongoose.connection.db.collection('users').dropIndex('username_1');
+        console.log('Dropped problematic index');
+    } catch (err) {
+        console.log('No problematic index to drop or already dropped');
+    }
+});
+
 const UserSchema = new mongoose.Schema({
     name: {
         type: String,
         required: true
+    },
+    username: {
+        type: String,
+        sparse: true,  // Allow multiple documents with no value for this field
+        default: undefined
     },
     email: {
         type: String,
@@ -52,6 +67,9 @@ const UserSchema = new mongoose.Schema({
     resetPasswordToken: String,
     resetPasswordExpires: Date
 });
+
+// Create a new username index with sparse option (only indexed if field exists)
+UserSchema.index({ username: 1 }, { unique: true, sparse: true });
 
 // Hash password before saving
 UserSchema.pre('save', async function(next) {

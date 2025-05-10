@@ -144,6 +144,12 @@ router.post('/register', async (req, res) => {
         if (password.length < 6) {
             errors.push({ msg: 'Password should be at least 6 characters' });
         }
+
+        // Validate email format
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+            errors.push({ msg: 'Please enter a valid email address' });
+        }
         
         if (errors.length > 0) {
             const latestMovies = await fetchLatestMovies();
@@ -175,13 +181,41 @@ router.post('/register', async (req, res) => {
 
         // Create new user
         const newUser = new User({
-            name,
-            email: email.toLowerCase(),
+            name: name.trim(),
+            email: email.toLowerCase().trim(),
+            username: undefined,  // Explicitly set to undefined to avoid null value
             password
         });
         
         // Save user to database
         await newUser.save();
+
+        // Create default watch history record with required fields
+        await WatchHistory.create({
+            user: newUser._id,
+            mediaId: 'default',
+            mediaType: 'movie',
+            title: 'Registration Bonus'
+        });
+
+        // Create default achievement record with required fields
+        await Achievement.create({
+            user: newUser._id,
+            name: 'Welcome',
+            description: 'Welcome to StreamAPI!',
+            icon: 'fas fa-user-plus',
+            badge: {
+                name: 'New User',
+                image: '/images/badges/new-user.png'
+            },
+            category: 'special',
+            progress: {
+                current: 1,
+                target: 1
+            },
+            tier: 'bronze',
+            points: 10
+        });
         
         // Set success message
         req.flash('success_msg', 'You are now registered! Please log in with your credentials.');
@@ -189,8 +223,15 @@ router.post('/register', async (req, res) => {
         
     } catch (err) {
         console.error('Registration error:', err);
-        req.flash('error_msg', 'Registration failed. Please try again.');
-        res.redirect('/auth/register');
+        const latestMovies = await fetchLatestMovies();
+        return res.render('register', {
+            errors: [{ msg: 'An error occurred during registration. Please try again.' }],
+            name: req.body.name || '',
+            email: req.body.email || '',
+            password: '',
+            password2: '',
+            latestMovies
+        });
     }
 });
 
