@@ -1,5 +1,11 @@
 # StreamAPI
 
+![Screenshot](./Screenshot%20(15).png)
+
+
+
+
+
 A streaming API service that fetches movie and TV show data from TMDB and VidSrc. This application provides a beautiful user interface for browsing movies and TV shows, with features like watchlists, search, and more.
 
 ## Oficcial website 
