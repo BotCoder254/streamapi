@@ -1,6 +1,6 @@
 # StreamAPI
 
-![Screenshot](./Screenshot%20(15).png)
+<img src="./Screenshot%20(15).png" alt="Screenshot" style="max-width: 100%; height: auto;">
 
 
 
@@ -11,6 +11,11 @@ A streaming API service that fetches movie and TV show data from TMDB and VidSrc
 ## Oficcial website 
 
  [StreamApi](https://webstreamapi.tech/)
+
+
+ ## Mobile App
+
+ # Coming Soon
 
 
 ## Features
