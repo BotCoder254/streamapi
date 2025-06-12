@@ -12,6 +12,16 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
     <style>
         /* Custom styles */
+        body {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        main {
+            flex: 1;
+        }
+        
         .movie-card {
             transition: transform 0.3s ease, box-shadow 0.3s ease;
         }
@@ -369,8 +379,9 @@
     </main>
 
     <!-- Footer -->
-    <footer class="bg-gray-800 text-gray-400 py-8">
-        <div class="container mx-auto px-4">
+    <footer class="bg-gray-800 text-gray-400 py-8 relative z-10 mt-8 shadow-lg border-t border-gray-700">
+        <div class="absolute inset-0 bg-gray-900 opacity-90"></div>
+        <div class="container mx-auto px-4 relative z-10">
             <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
                 <!-- About -->
                 <div>

@@ -1,5 +1,5 @@
 <!-- Modern Landing Page with Hero Slider -->
-<div class="animate__animated animate__fadeIn">
+<div class="animate__animated animate__fadeIn home-container">
     <!-- Hero Section with Auto Slider -->
     <div class="relative mb-12">
         <!-- Hero Slider Container -->
@@ -620,5 +620,41 @@
 
     .progress-bar {
         width: var(--progress);
+    }
+    
+    /* Ensure background image is properly displayed */
+    body {
+        min-height: 100vh;
+        position: relative;
+        margin: 0;
+        padding: 0;
+        width: 100%;
+        overflow-x: hidden;
+    }
+    
+    .home-container {
+        min-height: 100vh;
+        padding-bottom: 2rem;
+        position: relative;
+        z-index: 1;
+        width: 100%;
+        max-width: 100%;
+        box-sizing: border-box;
+    }
+    
+    .home-container::before {
+        content: "";
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background-image: url('/images/background.jpg');
+        background-size: cover;
+        background-position: center center;
+        background-repeat: no-repeat;
+        background-attachment: fixed;
+        opacity: 0.3;
+        z-index: -1;
     }
 </style> 
