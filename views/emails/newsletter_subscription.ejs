@@ -5,92 +5,165 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Welcome to StreamAPI Newsletter - API Access Granted</title>
     <style>
-        /* Email-specific styles */
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            line-height: 1.6;
-            color: #f8f9fa;
-            background-color: #1a202c;
+        /* Modern Email Styles */
+        * {
             margin: 0;
             padding: 0;
+            box-sizing: border-box;
         }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.7;
+            color: #ffffff;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%);
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+        }
+        
         .container {
-            max-width: 600px;
+            max-width: 650px;
             margin: 0 auto;
-            padding: 20px;
+            padding: 40px 20px;
         }
+        
+        .email-wrapper {
+            background: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 24px;
+            overflow: hidden;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
         .email-header {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            padding: 40px 30px;
             text-align: center;
-            padding: 20px 0;
-            background-color: #2d3748;
-            border-radius: 8px 8px 0 0;
+            position: relative;
         }
+        
+        .email-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="25" cy="25" r="1" fill="rgba(255,255,255,0.1)"/><circle cx="75" cy="75" r="1" fill="rgba(255,255,255,0.1)"/><circle cx="50" cy="10" r="0.5" fill="rgba(255,255,255,0.05)"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+            opacity: 0.3;
+        }
+        
         .email-logo {
-            font-size: 24px;
-            font-weight: bold;
-            color: #10b981;
+            font-size: 32px;
+            font-weight: 800;
+            color: #ffffff;
             text-decoration: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            position: relative;
+            z-index: 1;
         }
+        
+        .logo-icon {
+            width: 40px;
+            height: 40px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+        }
+        
         .email-body {
-            background-color: #374151;
-            padding: 30px;
-            border-radius: 0 0 8px 8px;
+            background: rgba(30, 41, 59, 0.8);
+            padding: 50px 40px;
+            position: relative;
         }
-        .email-footer {
-            text-align: center;
-            padding: 20px 0;
-            font-size: 12px;
-            color: #9ca3af;
+        
+        .email-body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(circle at 20% 80%, rgba(16, 185, 129, 0.1) 0%, transparent 50%),
+                        radial-gradient(circle at 80% 20%, rgba(59, 130, 246, 0.1) 0%, transparent 50%);
         }
-        .button {
-            display: inline-block;
-            background-color: #10b981;
-            color: white;
-            text-decoration: none;
-            padding: 10px 20px;
-            border-radius: 5px;
-            margin-top: 20px;
-            font-weight: bold;
+        
+        .content {
+            position: relative;
+            z-index: 1;
         }
-        h1, h2, h3 {
-            color: #f8f9fa;
+        
+        .greeting {
+            font-size: 28px;
+            font-weight: 700;
+            color: #ffffff;
+            margin-bottom: 24px;
+            background: linear-gradient(135deg, #10b981, #3b82f6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
-        .social-links {
-            text-align: center;
-            margin-top: 20px;
+        
+        .message-text {
+            font-size: 16px;
+            color: #e2e8f0;
+            margin-bottom: 32px;
+            line-height: 1.8;
         }
-        .social-links a {
-            display: inline-block;
-            margin: 0 10px;
-            color: #9ca3af;
-            text-decoration: none;
-        }
-        hr {
-            border: 0;
-            height: 1px;
-            background: #4b5563;
-            margin: 30px 0;
-        }
+        
         .content-section {
-            background-color: #2d3748;
-            border-radius: 8px;
-            padding: 20px;
-            margin: 20px 0;
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid rgba(16, 185, 129, 0.2);
+            border-radius: 16px;
+            padding: 24px;
+            margin: 32px 0;
+            backdrop-filter: blur(10px);
         }
+        
+        .content-section h3 {
+            color: #10b981;
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .content-section p {
+            color: #cbd5e1;
+            margin-bottom: 12px;
+        }
+        
         .movie-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: 10px;
+            gap: 12px;
             margin-top: 20px;
         }
+        
         .movie-item {
             text-align: center;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            padding: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
+        
         .movie-item img {
             width: 100%;
-            border-radius: 5px;
-            margin-bottom: 5px;
+            border-radius: 6px;
+            margin-bottom: 8px;
         }
+        
         .movie-title {
             font-size: 12px;
             color: #e2e8f0;
@@ -98,140 +171,293 @@
             overflow: hidden;
             text-overflow: ellipsis;
         }
+        
         .api-access-box {
-            background: rgba(16, 185, 129, 0.1);
-            border: 1px solid #10b981;
-            border-radius: 8px;
-            padding: 20px;
-            margin: 20px 0;
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(59, 130, 246, 0.1));
+            border: 2px solid rgba(16, 185, 129, 0.3);
+            border-radius: 16px;
+            padding: 24px;
+            margin: 32px 0;
+            text-align: center;
+        }
+        
+        .api-access-box h3 {
+            color: #10b981;
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 12px;
+        }
+        
+        .button {
+            display: inline-block;
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: #ffffff;
+            text-decoration: none;
+            padding: 16px 32px;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 16px;
+            margin: 24px 0;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 25px -5px rgba(16, 185, 129, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 35px -5px rgba(16, 185, 129, 0.6);
+        }
+        
+        .divider {
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(16, 185, 129, 0.3), transparent);
+            margin: 40px 0;
+        }
+        
+        .email-footer {
+            background: rgba(15, 23, 42, 0.9);
+            padding: 40px 30px;
+            text-align: center;
+        }
+        
+        .social-links {
+            display: flex;
+            justify-content: center;
+            gap: 16px;
+            margin: 24px 0;
+        }
+        
+        .social-links a {
+            width: 44px;
+            height: 44px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #94a3b8;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .social-links a:hover {
+            background: rgba(16, 185, 129, 0.2);
+            color: #10b981;
+            transform: translateY(-2px);
+        }
+        
+        .footer-text {
+            color: #64748b;
+            font-size: 14px;
+            margin: 8px 0;
+        }
+        
+        .creator-link {
+            color: #10b981;
+            text-decoration: none;
+            font-weight: 600;
+        }
+        
+        .creator-link:hover {
+            color: #059669;
+        }
+        
+        @media (max-width: 600px) {
+            .container {
+                padding: 20px 10px;
+            }
+            
+            .email-header {
+                padding: 30px 20px;
+            }
+            
+            .email-body {
+                padding: 30px 20px;
+            }
+            
+            .greeting {
+                font-size: 24px;
+            }
+            
+            .content-section {
+                padding: 20px;
+            }
+            
+            .movie-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
         }
         
         .api-key-box {
-            background: #2d3748;
-            border-radius: 8px;
-            padding: 15px;
-            margin: 10px 0;
+            background: rgba(15, 23, 42, 0.8);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            border-radius: 12px;
+            padding: 16px;
+            margin: 16px 0;
             word-break: break-all;
-            font-family: monospace;
+            font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
+            font-size: 14px;
+            color: #10b981;
         }
         
         .feature-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
-            gap: 15px;
-            margin: 20px 0;
+            gap: 16px;
+            margin: 24px 0;
         }
         
         .feature-item {
             background: rgba(255, 255, 255, 0.05);
-            padding: 15px;
-            border-radius: 8px;
+            padding: 20px;
+            border-radius: 12px;
             text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
         }
         
-        .feature-item i {
+        .feature-item:hover {
+            background: rgba(16, 185, 129, 0.1);
+            border-color: rgba(16, 185, 129, 0.3);
+        }
+        
+        .feature-item h4 {
+            color: #ffffff;
+            font-size: 16px;
+            font-weight: 600;
+            margin: 12px 0 8px 0;
+        }
+        
+        .feature-item p {
+            color: #cbd5e1;
+            font-size: 14px;
+            margin: 0;
+        }
+        
+        .endpoint-list {
+            list-style: none;
+            padding: 0;
+            margin: 16px 0;
+        }
+        
+        .endpoint-list li {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            padding: 12px 16px;
+            margin: 8px 0;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .endpoint-list strong {
             color: #10b981;
-            font-size: 24px;
-            margin-bottom: 10px;
+            font-family: monospace;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <div class="email-header">
-            <div class="email-logo">
-                <span style="color: #10b981;">&#9658;</span> StreamAPI
-            </div>
-        </div>
-        
-        <div class="email-body">
-            <h1>Welcome to StreamAPI!</h1>
-            
-            <p>Hello there,</p>
-            
-            <p>Thank you for subscribing to the StreamAPI newsletter! You now have access to our comprehensive API endpoints and will receive the latest updates on movies, TV shows, and platform features.</p>
-            
-            <div class="api-access-box">
-                <h3 style="color: #10b981; margin-bottom: 15px;">🎉 API Access Granted</h3>
-                <p>You can now access all API endpoints using our base URL:</p>
-                <div class="api-key-box">
-                    https://streamapi-x4gu.onrender.com
+        <div class="email-wrapper">
+            <div class="email-header">
+                <div class="email-logo">
+                    <div class="logo-icon">▶</div>
+                    StreamAPI
                 </div>
-                <p style="margin-top: 15px; font-size: 14px;">
-                    <i class="fas fa-info-circle" style="color: #10b981;"></i> 
-                    View the complete API documentation at 
-                    <a href="https://streamapi-x4gu.onrender.com/api" style="color: #10b981;">our API Reference</a>
+            </div>
+            
+            <div class="email-body">
+                <div class="content">
+                    <h1 class="greeting">Welcome to StreamAPI!</h1>
+                    
+                    <p class="message-text">Hello there,</p>
+                    
+                    <p class="message-text">Thank you for subscribing to the StreamAPI newsletter! You now have access to our comprehensive API endpoints and will receive the latest updates on movies, TV shows, and platform features.</p>
+                    
+                    <div class="api-access-box">
+                        <h3>🎉 API Access Granted</h3>
+                        <p class="message-text">You can now access all API endpoints using our base URL:</p>
+                        <div class="api-key-box">
+                            https://streamapi-x4gu.onrender.com
+                        </div>
+                        <p style="margin-top: 15px; font-size: 14px; color: #cbd5e1;">
+                            💡 View the complete API documentation at 
+                            <a href="https://streamapi-x4gu.onrender.com/api" style="color: #10b981; text-decoration: none;">our API Reference</a>
+                        </p>
+                    </div>
+
+                    <div class="feature-grid">
+                        <div class="feature-item">
+                            <div style="font-size: 24px; margin-bottom: 12px;">🎬</div>
+                            <h4>Movie Data</h4>
+                            <p>Access detailed movie information</p>
+                        </div>
+                        <div class="feature-item">
+                            <div style="font-size: 24px; margin-bottom: 12px;">📺</div>
+                            <h4>TV Shows</h4>
+                            <p>Comprehensive TV show database</p>
+                        </div>
+                        <div class="feature-item">
+                            <div style="font-size: 24px; margin-bottom: 12px;">🎥</div>
+                            <h4>Streaming</h4>
+                            <p>Get streaming URLs and metadata</p>
+                        </div>
+                        <div class="feature-item">
+                            <div style="font-size: 24px; margin-bottom: 12px;">🔍</div>
+                            <h4>Search</h4>
+                            <p>Powerful search capabilities</p>
+                        </div>
+                    </div>
+                    
+                    <div class="content-section">
+                        <h3>🚀 Available Endpoints</h3>
+                        <ul class="endpoint-list">
+                            <li><strong>/search</strong> - Search movies and TV shows</li>
+                            <li><strong>/stream/:type/:id</strong> - Get streaming URLs</li>
+                            <li><strong>/trending</strong> - Get trending content</li>
+                            <li><strong>/watchlist</strong> - Manage watchlist items</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="content-section">
+                        <h3>📋 What's Next?</h3>
+                        <ul class="endpoint-list">
+                            <li>📚 Review our <a href="https://streamapi-x4gu.onrender.com/api" style="color: #10b981; text-decoration: none;">API documentation</a></li>
+                            <li>🔧 Test the endpoints using Postman or cURL</li>
+                            <li>💻 Integrate the API into your application</li>
+                            <li>📱 Try our responsive video player</li>
+                        </ul>
+                    </div>
+                    
+                    <div style="text-align: center;">
+                        <a href="<%= siteUrl %>" class="button">🎬 Visit StreamAPI</a>
+                    </div>
+                    
+                    <div class="divider"></div>
+                    
+                    <p class="message-text">We're excited to have you as part of our community!</p>
+                    
+                    <p class="message-text">Best regards,<br><strong>The StreamAPI Team</strong></p>
+                </div>
+            </div>
+            
+            <div class="email-footer">
+                <div class="social-links">
+                    <a href="#" title="GitHub">📱</a>
+                    <a href="#" title="Twitter">🐦</a>
+                    <a href="#" title="Discord">💬</a>
+                    <a href="#" title="Instagram">📸</a>
+                </div>
+                
+                <p class="footer-text">&copy; <%= new Date().getFullYear() %> StreamAPI. All rights reserved.</p>
+                <p class="footer-text">Created with 💚 by <a href="https://github.com/BotCoder254" class="creator-link">@BotCoder254</a></p>
+                
+                <p class="footer-text" style="margin-top: 20px; font-size: 12px; opacity: 0.7;">
+                    This email was sent to <%= email %>. If you didn't subscribe to our newsletter, you can safely ignore this email or <a href="<%= siteUrl %>/unsubscribe?email=<%= email %>" style="color: #10b981; text-decoration: none;">unsubscribe here</a>.
                 </p>
             </div>
-
-            <div class="feature-grid">
-                <div class="feature-item">
-                    <i class="fas fa-film"></i>
-                    <h4>Movie Data</h4>
-                    <p>Access detailed movie information</p>
-                </div>
-                <div class="feature-item">
-                    <i class="fas fa-tv"></i>
-                    <h4>TV Shows</h4>
-                    <p>Comprehensive TV show database</p>
-                </div>
-                <div class="feature-item">
-                    <i class="fas fa-stream"></i>
-                    <h4>Streaming</h4>
-                    <p>Get streaming URLs and metadata</p>
-                </div>
-                <div class="feature-item">
-                    <i class="fas fa-search"></i>
-                    <h4>Search</h4>
-                    <p>Powerful search capabilities</p>
-                </div>
-            </div>
-            
-            <div class="content-section">
-                <h3><span style="color: #10b981;">&#9733;</span> Available Endpoints</h3>
-                <ul style="margin-top: 10px;">
-                    <li>🔍 <strong>/search</strong> - Search movies and TV shows</li>
-                    <li>🎬 <strong>/stream/:type/:id</strong> - Get streaming URLs</li>
-                    <li>📈 <strong>/trending</strong> - Get trending content</li>
-                    <li>📋 <strong>/watchlist</strong> - Manage watchlist items</li>
-                </ul>
-            </div>
-            
-            <div class="content-section">
-                <h3><span style="color: #10b981;">&#9733;</span> What's Next?</h3>
-                <ul style="margin-top: 10px;">
-                    <li>📚 Review our <a href="https://streamapi-m8o1-802nxfyk2-botcoder254s-projects.vercel.app/api" style="color: #10b981;">API documentation</a></li>
-                    <li>🔧 Test the endpoints using Postman or cURL</li>
-                    <li>💻 Integrate the API into your application</li>
-                    <li>📱 Try our responsive video player</li>
-                </ul>
-            </div>
-            
-            <div style="text-align: center;">
-                <a href="<%= siteUrl %>" class="button">Visit StreamAPI</a>
-            </div>
-            
-            <hr>
-            
-            <p>We're excited to have you as part of our community!</p>
-            
-            <p>Best regards,<br>The StreamAPI Team</p>
-        </div>
-        
-        <div class="email-footer">
-            <div class="social-links">
-                <a href="#">Github</a> &bull;
-                <a href="#">Twitter</a> &bull;
-                <a href="#">Discord</a> &bull;
-                <a href="#">Instagram</a>
-            </div>
-            
-            <p>&copy; <%= new Date().getFullYear() %> StreamAPI. All rights reserved.</p>
-            <p>Created by <a href="https://github.com/BotCoder254" style="color: #10b981;">@BotCoder254</a></p>
-            
-            <p style="margin-top: 20px; font-size: 11px;">
-                This email was sent to <%= email %>. If you didn't subscribe to our newsletter, you can safely ignore this email or <a href="<%= siteUrl %>/unsubscribe?email=<%= email %>" style="color: #10b981;">unsubscribe here</a>.
-            </p>
         </div>
     </div>
 </body>

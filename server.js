@@ -26,7 +26,7 @@ const User = require('./models/User');
 const WatchHistory = require('./models/WatchHistory');
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 5001;
 
 const uri = "mongodb+srv://stream:telvinteum@stream.o3qip.mongodb.net/?retryWrites=true&w=majority&appName=stream";
 
