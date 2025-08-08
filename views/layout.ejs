@@ -155,25 +155,73 @@
 </head>
 
 <body class="bg-gray-900 text-white min-h-screen">
-    <!-- Navigation -->
-    <nav class="backdrop-blur-md bg-gray-800/80 border-b border-gray-700/50 py-4 sticky top-0 z-50 shadow-lg">
-        <div class="container mx-auto px-4">
+    <!-- Enhanced Modern Navigation -->
+    <nav class="backdrop-blur-xl bg-gray-800/90 border-b border-gray-700/50 py-4 sticky top-0 z-50 shadow-2xl">
+        <!-- Subtle gradient overlay -->
+        <div
+            class="absolute inset-0 bg-gradient-to-r from-green-500/5 via-transparent to-blue-500/5 pointer-events-none">
+        </div>
+
+        <div class="container mx-auto px-4 relative z-10">
             <div class="flex items-center justify-between">
-                <a href="/" class="text-2xl font-bold text-green-500 flex items-center">
-                    <i class="fas fa-play-circle mr-2"></i>
-                    StreamAPI
+                <!-- Enhanced Logo -->
+                <a href="/" class="group flex items-center space-x-3">
+                    <div class="relative">
+                        <div
+                            class="absolute inset-0 bg-gradient-to-r from-green-400 to-blue-500 rounded-xl blur-lg opacity-75 group-hover:opacity-100 transition-opacity">
+                        </div>
+                        <div
+                            class="relative w-10 h-10 bg-gradient-to-br from-green-400 to-blue-500 rounded-xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
+                            <i class="fas fa-play text-white text-lg"></i>
+                        </div>
+                    </div>
+                    <span
+                        class="text-2xl font-bold bg-gradient-to-r from-green-400 to-blue-500 bg-clip-text text-transparent">StreamAPI</span>
                 </a>
 
-                <!-- Desktop Navigation -->
-                <div class="hidden md:flex items-center space-x-6">
-                    <a href="/browse" class="nav-link hover:text-green-400"><i class="fas fa-film mr-1"></i> Movies</a>
-                    <a href="/browse/tv" class="nav-link hover:text-green-400"><i class="fas fa-tv mr-1"></i> TV
-                        Shows</a>
-                    <a href="/latest" class="nav-link hover:text-green-400"><i class="fas fa-clock mr-1"></i> Latest</a>
-                    <a href="/top" class="nav-link hover:text-green-400"><i class="fas fa-star mr-1"></i> Top Rated</a>
+                <!-- Enhanced Desktop Navigation -->
+                <div class="hidden md:flex items-center space-x-2">
+                    <a href="/browse"
+                        class="group nav-link px-4 py-2 rounded-xl hover:bg-gray-700/50 transition-all duration-300 flex items-center space-x-2">
+                        <div
+                            class="w-8 h-8 bg-gray-700/50 group-hover:bg-green-500/20 rounded-lg flex items-center justify-center transition-colors">
+                            <i class="fas fa-film text-sm group-hover:text-green-400"></i>
+                        </div>
+                        <span class="group-hover:text-green-400 transition-colors">Movies</span>
+                    </a>
+                    <a href="/browse/tv"
+                        class="group nav-link px-4 py-2 rounded-xl hover:bg-gray-700/50 transition-all duration-300 flex items-center space-x-2">
+                        <div
+                            class="w-8 h-8 bg-gray-700/50 group-hover:bg-blue-500/20 rounded-lg flex items-center justify-center transition-colors">
+                            <i class="fas fa-tv text-sm group-hover:text-blue-400"></i>
+                        </div>
+                        <span class="group-hover:text-blue-400 transition-colors">TV Shows</span>
+                    </a>
+                    <a href="/latest"
+                        class="group nav-link px-4 py-2 rounded-xl hover:bg-gray-700/50 transition-all duration-300 flex items-center space-x-2">
+                        <div
+                            class="w-8 h-8 bg-gray-700/50 group-hover:bg-purple-500/20 rounded-lg flex items-center justify-center transition-colors">
+                            <i class="fas fa-clock text-sm group-hover:text-purple-400"></i>
+                        </div>
+                        <span class="group-hover:text-purple-400 transition-colors">Latest</span>
+                    </a>
+                    <a href="/top"
+                        class="group nav-link px-4 py-2 rounded-xl hover:bg-gray-700/50 transition-all duration-300 flex items-center space-x-2">
+                        <div
+                            class="w-8 h-8 bg-gray-700/50 group-hover:bg-yellow-500/20 rounded-lg flex items-center justify-center transition-colors">
+                            <i class="fas fa-star text-sm group-hover:text-yellow-400"></i>
+                        </div>
+                        <span class="group-hover:text-yellow-400 transition-colors">Top Rated</span>
+                    </a>
                     <% if (user) { %>
-                        <a href="/watchlist" class="nav-link hover:text-green-400"><i class="fas fa-bookmark mr-1"></i>
-                            Watchlist</a>
+                        <a href="/watchlist"
+                            class="group nav-link px-4 py-2 rounded-xl hover:bg-gray-700/50 transition-all duration-300 flex items-center space-x-2">
+                            <div
+                                class="w-8 h-8 bg-gray-700/50 group-hover:bg-pink-500/20 rounded-lg flex items-center justify-center transition-colors">
+                                <i class="fas fa-bookmark text-sm group-hover:text-pink-400"></i>
+                            </div>
+                            <span class="group-hover:text-pink-400 transition-colors">Watchlist</span>
+                        </a>
                         <!-- User Info Dropdown -->
                         <div class="relative group">
                             <button class="nav-link hover:text-green-400 flex items-center">
@@ -222,96 +270,115 @@
                             </div>
                         </div>
                         <% } %>
-                            <a href="/contact" class="nav-link hover:text-green-400"><i
-                                    class="fas fa-envelope mr-1"></i> Contact</a>
+                            <a href="/contact"
+                                class="group nav-link px-4 py-2 rounded-xl hover:bg-gray-700/50 transition-all duration-300 flex items-center space-x-2">
+                                <div
+                                    class="w-8 h-8 bg-gray-700/50 group-hover:bg-orange-500/20 rounded-lg flex items-center justify-center transition-colors">
+                                    <i class="fas fa-envelope text-sm group-hover:text-orange-400"></i>
+                                </div>
+                                <span class="group-hover:text-orange-400 transition-colors">Contact</span>
+                            </a>
                 </div>
 
-                <!-- Search Bar -->
-                <div class="hidden md:flex items-center flex-grow max-w-md mx-6">
+                <!-- Enhanced Search Bar -->
+                <div class="hidden lg:flex items-center flex-grow max-w-sm mx-4">
                     <div class="relative flex-grow">
-                        <input type="text" id="navbar-search" placeholder="Search for movies or TV shows..."
-                            class="w-full bg-gray-700 text-white border border-gray-600 rounded-full py-2 pl-10 pr-4 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent text-sm transition-all">
-                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <input type="text" id="navbar-search" placeholder="Search movies & TV shows..."
+                            class="w-full bg-gray-700/80 backdrop-blur-sm text-white border border-gray-600/50 rounded-2xl py-3 pl-12 pr-4 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500/50 text-sm transition-all hover:bg-gray-600/80">
+                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                             <i class="fas fa-search text-gray-400"></i>
                         </div>
-                        <!-- Search Results Dropdown (hidden by default) -->
+                        <!-- Enhanced Search Results Dropdown -->
                         <div id="search-results"
-                            class="absolute mt-2 w-full bg-gray-800 border border-gray-700 rounded-lg shadow-xl hidden z-50 max-h-96 overflow-y-auto">
+                            class="absolute mt-2 w-full bg-gray-800/95 backdrop-blur-md border border-gray-700/50 rounded-2xl shadow-2xl hidden z-50 max-h-96 overflow-y-auto">
                             <!-- Results will be populated by JavaScript -->
                         </div>
                     </div>
-                    <!-- Active Users Counter -->
-                    <div class="ml-4 flex items-center space-x-4">
-                        <div class="bg-gray-700 px-4 py-2 rounded-full">
-                            <i class="fas fa-users text-green-500 mr-2"></i>
-                            <span class="text-sm font-medium" id="active-users-count">
-                                <%= activeUsers %>
-                            </span>
-                        </div>
-                        <% if (!user) { %>
-                            <div class="flex items-center space-x-2">
-                                <a href="/auth/login"
-                                    class="bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded-full text-sm font-medium transition-colors">
-                                    <i class="fas fa-sign-in-alt mr-2"></i>
-                                </a>
-                                <a href="/auth/register"
-                                    class="bg-green-600 hover:bg-green-500 px-4 py-2 rounded-full text-sm font-medium transition-colors">
-                                    <i class="fas fa-user-plus mr-2"></i>
-                                </a>
-                            </div>
-                            <% } else { %>
-                                <div class="relative group">
-                                    <button class="flex items-center gap-2 hover:text-green-400 transition">
-                                        <div class="w-8 h-8 rounded-full bg-gray-700 flex items-center justify-center">
-                                            <% if (user.profileImage) { %>
-                                                <img src="<%= user.profileImage %>" alt="<%= user.name %>"
-                                                    class="w-full h-full rounded-full object-cover">
-                                                <% } else { %>
-                                                    <i class="fas fa-user text-gray-400"></i>
-                                                    <% } %>
-                                        </div>
-                                        <span>
-                                            <%= user.name %>
-                                        </span>
-                                        <i class="fas fa-chevron-down text-xs"></i>
-                                    </button>
-                                    <div
-                                        class="absolute right-0 mt-2 w-48 bg-gray-800 rounded-lg shadow-xl py-2 hidden group-hover:block">
-                                        <a href="/auth/profile" class="block px-4 py-2 hover:bg-gray-700 transition">
-                                            <i class="fas fa-user-circle mr-2"></i> Profile
-                                        </a>
-                                        <a href="/auth/stats" class="block px-4 py-2 hover:bg-gray-700 transition">
-                                            <i class="fas fa-chart-bar mr-2"></i> Achievements
-                                        </a>
-                                        <a href="/watchlist" class="block px-4 py-2 hover:bg-gray-700 transition">
-                                            <i class="fas fa-bookmark mr-2"></i> Watchlist
-                                        </a>
-                                        <!-- <a href="/auth/settings" class="block px-4 py-2 hover:bg-gray-700 transition">
-                                        <i class="fas fa-cog mr-2"></i> Settings
-                                    </a> -->
-                                        <div class="border-t border-gray-700 my-2"></div>
-                                        <a href="/auth/logout"
-                                            class="block px-4 py-2 hover:bg-gray-700 transition text-red-400 hover:text-red-300">
-                                            <i class="fas fa-sign-out-alt mr-2"></i> Logout
-                                        </a>
-                                    </div>
-                                </div>
-                                <% } %>
-                    </div>
                 </div>
 
-                <div class="flex items-center">
-                    <a href="/search" class="p-2 rounded-lg bg-gray-700 hover:bg-gray-600 transition mr-2 md:hidden">
-                        <i class="fas fa-search"></i>
-                    </a>
-                    <% if (user) { %>
-                        <a href="/watchlist" class="p-2 rounded-lg bg-gray-700 hover:bg-gray-600 transition mr-2">
-                            <i class="fas fa-bookmark"></i>
-                        </a>
-                        <% } %>
-                            <button class="md:hidden p-2" id="mobile-menu-button">
-                                <i class="fas fa-bars"></i>
-                            </button>
+                <!-- Right Side Controls -->
+                <div class="flex items-center space-x-3">
+                    <!-- Active Users Counter -->
+                    <div
+                        class="hidden md:flex items-center bg-gray-700/80 backdrop-blur-sm px-4 py-2 rounded-2xl border border-gray-600/30">
+                        <i class="text-green-500 mr-2 text-sm"></i>
+                        <span class="text-sm font-medium" id="active-users-count">
+                            <%= activeUsers %>
+                        </span>
+                    </div>
+
+                    <% if (!user) { %>
+                        <!-- Auth Buttons for Non-logged Users -->
+                        <div class="hidden md:flex items-center space-x-2">
+                            <a href="/auth/login"
+                                class="bg-gray-700/80 hover:bg-gray-600/80 backdrop-blur-sm px-4 py-2 rounded-2xl text-sm font-medium transition-all border border-gray-600/30 hover:border-gray-500/50">
+                                <i class="fas fa-sign-in-alt mr-2"></i>
+                            </a>
+                            <a href="/auth/register"
+                                class="bg-gradient-to-r from-green-600 to-green-500 hover:from-green-500 hover:to-green-400 px-4 py-2 rounded-2xl text-sm font-medium transition-all shadow-lg hover:shadow-xl border border-green-500/20">
+                                <i class="fas fa-user-plus mr-2"></i>
+                            </a>
+                        </div>
+                        <% } else { %>
+                            <!-- User Profile Dropdown -->
+                            <div class="relative group">
+                                <button
+                                    class="flex items-center gap-3 bg-gray-700/80 hover:bg-gray-600/80 backdrop-blur-sm px-4 py-2 rounded-2xl transition-all border border-gray-600/30 hover:border-green-500/50">
+                                    <div
+                                        class="w-8 h-8 rounded-full bg-gradient-to-br from-green-400 to-blue-500 flex items-center justify-center shadow-lg">
+                                        <% if (user.profileImage) { %>
+                                            <img src="<%= user.profileImage %>" alt="<%= user.name %>"
+                                                class="w-full h-full rounded-full object-cover">
+                                            <% } else { %>
+                                                <i class="fas fa-user text-white text-sm"></i>
+                                                <% } %>
+                                    </div>
+                                    <span class="hidden md:inline text-sm font-medium">
+                                        <%= user.name %>
+                                    </span>
+                                    <i class="fas fa-chevron-down text-xs"></i>
+                                </button>
+                                <div
+                                    class="absolute right-0 mt-2 w-56 bg-gray-800/95 backdrop-blur-md border border-gray-700/50 rounded-2xl shadow-2xl py-2 hidden group-hover:block">
+                                    <a href="/auth/profile"
+                                        class="block px-4 py-3 hover:bg-gray-700/50 transition-all rounded-xl mx-2">
+                                        <i class="fas fa-user-circle mr-3 text-green-400"></i> Profile
+                                    </a>
+                                    <a href="/auth/stats"
+                                        class="block px-4 py-3 hover:bg-gray-700/50 transition-all rounded-xl mx-2">
+                                        <i class="fas fa-chart-bar mr-3 text-blue-400"></i> Achievements
+                                    </a>
+                                    <a href="/watchlist"
+                                        class="block px-4 py-3 hover:bg-gray-700/50 transition-all rounded-xl mx-2">
+                                        <i class="fas fa-bookmark mr-3 text-purple-400"></i> Watchlist
+                                    </a>
+                                    <div class="border-t border-gray-700/50 my-2 mx-2"></div>
+                                    <a href="/auth/logout"
+                                        class="block px-4 py-3 hover:bg-red-500/10 transition-all rounded-xl mx-2 text-red-400 hover:text-red-300">
+                                        <i class="fas fa-sign-out-alt mr-3"></i> Logout
+                                    </a>
+                                </div>
+                            </div>
+                            <% } %>
+
+                                <!-- Mobile Controls -->
+                                <div class="flex items-center space-x-2 md:hidden">
+                                    <a href="/search"
+                                        class="p-2 rounded-2xl bg-gray-700/80 hover:bg-gray-600/80 transition-all backdrop-blur-sm border border-gray-600/30">
+                                        <i class="fas fa-search text-sm"></i>
+                                    </a>
+                                    <% if (user) { %>
+                                        <a href="/watchlist"
+                                            class="p-2 rounded-2xl bg-gray-700/80 hover:bg-gray-600/80 transition-all backdrop-blur-sm border border-gray-600/30">
+                                            <i class="fas fa-bookmark text-sm"></i>
+                                        </a>
+                                        <% } %>
+                                            <button
+                                                class="p-2 rounded-2xl bg-gray-700/80 hover:bg-gray-600/80 transition-all backdrop-blur-sm border border-gray-600/30"
+                                                id="mobile-menu-button">
+                                                <i class="fas fa-bars text-sm"></i>
+                                            </button>
+                                </div>
                 </div>
             </div>
 

@@ -1,36 +1,50 @@
 <!-- TV Show Details -->
-<div class="animate__animated animate__fadeIn">
+<div class="animate__animated animate__fadeIn relative">
+    <!-- Modern background with glass morphism -->
+    <div class="fixed inset-0 bg-gradient-to-br from-gray-900/95 via-slate-800/95 to-gray-900/95 backdrop-blur-sm -z-10"></div>
+    
     <% if (show && show.tmdbId) { %>
         <!-- TV Show Hero Section with Background -->
-        <div class="relative mb-8">
+        <div class="relative mb-8 overflow-hidden">
             <% if (show.background) { %>
-                <div class="absolute inset-0 w-full h-full overflow-hidden rounded-xl min-h-[600px]">
+                <div class="absolute inset-0 w-full h-full overflow-hidden rounded-2xl min-h-[600px]">
                     <img src="<%= show.background %>" alt="<%= show.title %> Background" class="w-full h-full object-cover">
-                    <div class="absolute inset-0 bg-gradient-to-t from-gray-900 via-gray-900/80 to-transparent"></div>
+                    <div class="absolute inset-0 bg-gradient-to-t from-gray-900/95 via-gray-900/80 to-transparent backdrop-blur-sm"></div>
                 </div>
             <% } else { %>
-                <div class="absolute inset-0 w-full h-full bg-gradient-to-b from-gray-800 to-gray-900 rounded-xl min-h-[600px]"></div>
+                <div class="absolute inset-0 w-full h-full bg-gradient-to-br from-gray-800/90 to-gray-900/90 rounded-2xl min-h-[600px] backdrop-blur-md"></div>
             <% } %>
+            
+            <!-- Animated background elements -->
+            <div class="absolute inset-0 opacity-20">
+                <div class="absolute top-10 left-10 w-32 h-32 bg-green-500 rounded-full blur-3xl animate-pulse"></div>
+                <div class="absolute bottom-10 right-10 w-40 h-40 bg-blue-500 rounded-full blur-3xl animate-pulse" style="animation-delay: 1s;"></div>
+            </div>
             
             <div class="relative z-10 container mx-auto px-4 py-20 flex flex-col md:flex-row items-center md:items-start gap-8">
                 <!-- TV Show Poster -->
-                <div class="w-72 h-[28rem] flex-shrink-0 bg-gray-800 rounded-lg overflow-hidden shadow-2xl transform hover:scale-105 transition-transform duration-500 group">
+                <div class="w-72 h-[28rem] flex-shrink-0 bg-gray-800/80 backdrop-blur-md rounded-2xl overflow-hidden shadow-2xl transform hover:scale-105 transition-all duration-500 group border border-gray-700/50">
                     <% if (show.poster) { %>
                         <div class="relative w-full h-full overflow-hidden">
                             <img src="<%= show.poster %>" alt="<%= show.title %> Poster" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" onerror="this.onerror=null; this.src='https://via.placeholder.com/400x600?text=No+Poster'; this.classList.add('object-contain');">
-                            <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-                                <span class="bg-green-600/80 text-white px-4 py-2 rounded-full font-bold transform -translate-y-4 group-hover:translate-y-0 transition-transform duration-300">View Details</span>
+                            <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+                                <span class="bg-gradient-to-r from-green-500 to-green-600 text-white px-6 py-3 rounded-full font-bold transform -translate-y-4 group-hover:translate-y-0 transition-transform duration-300 shadow-lg">View Details</span>
                             </div>
                         </div>
                     <% } else { %>
-                        <div class="w-full h-full flex items-center justify-center bg-gray-700">
-                            <i class="fas fa-tv text-5xl text-gray-600"></i>
+                        <div class="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-700/80 to-gray-800/80">
+                            <i class="fas fa-tv text-6xl text-gray-500"></i>
                         </div>
                     <% } %>
                 </div>
                 
                 <!-- TV Show Details -->
-                <div class="flex-1 text-center md:text-left p-4 bg-gray-900/75 rounded-lg backdrop-blur-sm">
+                <div class="flex-1 text-center md:text-left p-8 bg-gray-900/80 backdrop-blur-md rounded-2xl border border-gray-700/50 relative overflow-hidden">
+                    <!-- Animated background elements -->
+                    <div class="absolute inset-0 bg-gradient-to-br from-green-500/5 via-transparent to-blue-500/5"></div>
+                    <div class="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-green-400/10 to-transparent rounded-full blur-2xl"></div>
+                    
+                    <div class="relative z-10"></div>
                     <h1 class="text-3xl md:text-4xl font-bold mb-2"><%= show.title %> <span class="text-gray-400 font-normal"><%= show.year %></span></h1>
                     
                     <% if (show.tagline) { %>

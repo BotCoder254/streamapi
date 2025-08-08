@@ -1,55 +1,68 @@
 <!-- Popular Movies Listing -->
-<div class="mb-8">
-    <div class="flex justify-between items-center mb-6">
-        <h1 class="text-3xl font-bold"><i class="fas fa-fire mr-2 text-red-400"></i>Popular Movies</h1>
-        <div class="flex items-center">
-            <a href="/browse/tv" class="text-green-400 hover:text-green-300 transition">
-                <i class="fas fa-tv mr-1"></i> Switch to TV Shows
-            </a>
-        </div>
+<div class="mb-8 relative">
+    <!-- Modern background with glass morphism -->
+    <div class="fixed inset-0 bg-gradient-to-br from-gray-900/95 via-slate-800/95 to-gray-900/95 backdrop-blur-sm -z-10"></div>
+    
+    <!-- Animated background elements -->
+    <div class="absolute inset-0 opacity-10 pointer-events-none">
+        <div class="absolute top-10 left-10 w-32 h-32 bg-red-500 rounded-full blur-3xl animate-pulse"></div>
+        <div class="absolute bottom-10 right-10 w-40 h-40 bg-green-500 rounded-full blur-3xl animate-pulse" style="animation-delay: 1s;"></div>
+        <div class="absolute top-1/2 left-1/2 w-24 h-24 bg-blue-500 rounded-full blur-3xl animate-pulse" style="animation-delay: 2s;"></div>
     </div>
+    
+    <div class="relative z-10">
+        <div class="flex justify-between items-center mb-8 bg-gray-800/50 backdrop-blur-md rounded-2xl p-6 border border-gray-700/50">
+            <h1 class="text-4xl font-bold bg-gradient-to-r from-red-400 via-orange-400 to-yellow-400 bg-clip-text text-transparent flex items-center">
+                <i class="fas fa-fire mr-3 text-red-400 animate-pulse"></i>Popular Movies
+            </h1>
+            <div class="flex items-center">
+                <a href="/browse/tv" class="px-4 py-2 bg-gradient-to-r from-green-500/80 to-green-600/80 backdrop-blur-sm hover:from-green-400/80 hover:to-green-500/80 rounded-xl transition-all border border-green-500/50 hover:border-green-400/50 group">
+                    <i class="fas fa-tv mr-2 group-hover:scale-110 transition-transform"></i> Switch to TV Shows
+                </a>
+            </div>
+        </div>
     
     <% if (movies && movies.length > 0) { %>
         <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
             <% movies.forEach(movie => { %>
-                <div class="movie-card bg-gray-800 rounded-lg overflow-hidden shadow-lg">
+                <div class="movie-card bg-gray-800/80 backdrop-blur-md rounded-2xl overflow-hidden shadow-2xl border border-gray-700/50 hover:border-red-500/50 transition-all duration-500 group">
                     <a href="/view/movie/<%= movie.id %>">
                         <div class="relative pb-[150%] group">
                             <% if (movie.poster) { %>
-                                <img src="<%= movie.poster %>" alt="<%= movie.title %>" class="absolute inset-0 w-full h-full object-cover">
+                                <img src="<%= movie.poster %>" alt="<%= movie.title %>" class="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-700">
                             <% } else { %>
-                                <div class="absolute inset-0 w-full h-full bg-gray-700 flex items-center justify-center">
-                                    <i class="fas fa-film text-4xl text-gray-500"></i>
+                                <div class="absolute inset-0 w-full h-full bg-gradient-to-br from-gray-700/80 to-gray-800/80 flex items-center justify-center">
+                                    <i class="fas fa-film text-5xl text-gray-500"></i>
                                 </div>
                             <% } %>
                             <% if (movie.popularity && movie.popularity > 50) { %>
-                                <div class="absolute top-0 right-0 bg-red-600 px-2 py-1 m-2 rounded text-xs font-bold">
-                                    <i class="fas fa-fire mr-1"></i> HOT
+                                <div class="absolute top-2 right-2 bg-gradient-to-r from-red-500 to-red-600 px-3 py-1 rounded-full text-xs font-bold shadow-lg backdrop-blur-sm">
+                                    <i class="fas fa-fire mr-1 animate-pulse"></i> HOT
                                 </div>
                             <% } %>
                             
-                            <!-- Play Icon with Bounce Animation -->
-                            <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                                <div class="play-icon bg-green-600/80 rounded-full p-4 transform group-hover:scale-110 transition-transform">
-                                    <i class="fas fa-play text-xl"></i>
+                            <!-- Enhanced Play Icon with Modern Animation -->
+                            <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 bg-black/40 backdrop-blur-sm">
+                                <div class="play-icon bg-gradient-to-r from-green-500 to-green-600 rounded-full p-6 transform group-hover:scale-125 transition-all duration-300 shadow-2xl border border-green-400/50">
+                                    <i class="fas fa-play text-2xl ml-1"></i>
                                 </div>
                             </div>
                             
-                            <!-- Movie Details on Hover -->
-                            <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black to-transparent py-2 px-3 transform translate-y-0 group-hover:translate-y-0 transition-transform">
-                                <h3 class="text-sm md:text-base font-bold line-clamp-2"><%= movie.title %></h3>
-                                <div class="mt-1 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                            <!-- Enhanced Movie Details on Hover -->
+                            <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 via-black/60 to-transparent py-4 px-4 transform translate-y-0 group-hover:translate-y-0 transition-transform backdrop-blur-sm">
+                                <h3 class="text-sm md:text-base font-bold line-clamp-2 text-white"><%= movie.title %></h3>
+                                <div class="mt-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center space-x-3">
                                     <% if (movie.year) { %>
-                                        <span class="text-xs text-gray-300"><%= movie.year %></span>
+                                        <span class="text-xs text-gray-200 bg-gray-700/50 px-2 py-1 rounded-full"><%= movie.year %></span>
                                     <% } %>
                                     <% if (movie.popularity) { %>
-                                        <span class="text-xs ml-2">
-                                            <i class="fas fa-fire text-red-400 mr-1"></i><%= Math.round(movie.popularity) %>
+                                        <span class="text-xs bg-red-500/20 text-red-300 px-2 py-1 rounded-full flex items-center">
+                                            <i class="fas fa-fire mr-1"></i><%= Math.round(movie.popularity) %>
                                         </span>
                                     <% } %>
                                     <% if (movie.rating) { %>
-                                        <span class="text-xs ml-2">
-                                            <i class="fas fa-star text-yellow-400 mr-1"></i><%= movie.rating %>
+                                        <span class="text-xs bg-yellow-500/20 text-yellow-300 px-2 py-1 rounded-full flex items-center">
+                                            <i class="fas fa-star mr-1"></i><%= movie.rating %>
                                         </span>
                                     <% } %>
                                 </div>
@@ -60,83 +73,108 @@
             <% }); %>
         </div>
 
-        <!-- Pagination -->
-        <div class="mt-8 flex justify-center">
-            <div class="flex space-x-1">
+        <!-- Modern Pagination -->
+        <div class="mt-12 flex justify-center">
+            <div class="flex space-x-2 bg-gray-800/50 backdrop-blur-md rounded-2xl p-2 border border-gray-700/50">
                 <% if (parseInt(page) > 1) { %>
-                    <a href="/browse?p=<%= parseInt(page) - 1 %>" class="px-4 py-2 bg-gray-800 rounded-l-lg hover:bg-gray-700 transition">
-                        <i class="fas fa-chevron-left"></i>
+                    <a href="/browse?p=<%= parseInt(page) - 1 %>" class="px-6 py-3 bg-gray-700/80 backdrop-blur-sm hover:bg-gray-600/80 rounded-xl transition-all border border-gray-600/50 hover:border-green-500/50 group">
+                        <i class="fas fa-chevron-left group-hover:text-green-400 transition-colors"></i>
                     </a>
                 <% } else { %>
-                    <span class="px-4 py-2 bg-gray-800 opacity-50 rounded-l-lg">
+                    <span class="px-6 py-3 bg-gray-800/50 opacity-50 rounded-xl border border-gray-700/30">
                         <i class="fas fa-chevron-left"></i>
                     </span>
                 <% } %>
 
-                <span class="px-4 py-2 bg-red-600 font-bold"><%= page %></span>
+                <span class="px-6 py-3 bg-gradient-to-r from-red-500 to-red-600 font-bold rounded-xl shadow-lg border border-red-400/50"><%= page %></span>
 
-                <a href="/browse?p=<%= parseInt(page) + 1 %>" class="px-4 py-2 bg-gray-800 rounded-r-lg hover:bg-gray-700 transition">
-                    <i class="fas fa-chevron-right"></i>
+                <a href="/browse?p=<%= parseInt(page) + 1 %>" class="px-6 py-3 bg-gray-700/80 backdrop-blur-sm hover:bg-gray-600/80 rounded-xl transition-all border border-gray-600/50 hover:border-green-500/50 group">
+                    <i class="fas fa-chevron-right group-hover:text-green-400 transition-colors"></i>
                 </a>
             </div>
         </div>
     <% } else { %>
-        <div class="text-center py-12">
-            <i class="fas fa-film text-6xl text-gray-700 mb-4"></i>
-            <h2 class="text-2xl font-bold text-gray-400">No movies found</h2>
-            <p class="mt-2 text-gray-500">Try refreshing the page or check your connection.</p>
+        <div class="text-center py-16 bg-gray-800/50 backdrop-blur-md rounded-2xl border border-gray-700/50">
+            <i class="fas fa-film text-8xl text-gray-600 mb-6 animate-pulse"></i>
+            <h2 class="text-3xl font-bold text-gray-300 mb-4">No movies found</h2>
+            <p class="text-gray-400 text-lg">Try refreshing the page or check your connection.</p>
+            <button onclick="location.reload()" class="mt-6 px-6 py-3 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-400 hover:to-green-500 rounded-xl transition-all shadow-lg">
+                <i class="fas fa-refresh mr-2"></i> Refresh Page
+            </button>
         </div>
     <% } %>
 </div>
 
-<!-- Categories -->
-<div class="mb-10">
-    <h2 class="text-2xl font-bold mb-6"><i class="fas fa-tags mr-2"></i>Browse by Genre</h2>
-    <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
-        <% const genres = ["Action", "Drama", "Comedy", "Sci-Fi", "Horror", "Romance", "Adventure", "Animation"]; %>
-        <% genres.forEach(genre => { %>
-            <a href="/browse?genre=<%= genre.toLowerCase() %>" class="category-card bg-gray-800 hover:bg-gray-700 transition p-4 rounded-lg text-center">
-                <h3 class="font-bold"><%= genre %></h3>
-            </a>
-        <% }); %>
-    </div>
-</div>
-
-<!-- Trending This Week -->
-<div class="mb-10">
-    <h2 class="text-2xl font-bold mb-6"><i class="fas fa-chart-line mr-2 text-yellow-400"></i>Trending This Week</h2>
-    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 animate__animated animate__fadeIn">
-        <% for(let i = 0; i < 3; i++) { %>
-        <div class="bg-gray-800 rounded-lg overflow-hidden shadow-lg">
-            <div class="relative aspect-video bg-gray-700">
-                <div class="absolute inset-0 w-full h-full flex items-center justify-center">
-                    <div class="animate-pulse">
-                        <i class="fas fa-film text-3xl text-gray-600"></i>
-                    </div>
-                </div>
-                <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black to-transparent py-2 px-3">
-                    <h3 class="text-sm md:text-base font-bold">Trending Movie</h3>
+        <!-- Modern Categories -->
+        <div class="mb-12 bg-gray-800/50 backdrop-blur-md rounded-2xl p-8 border border-gray-700/50 relative overflow-hidden">
+            <!-- Animated background -->
+            <div class="absolute inset-0 bg-gradient-to-br from-purple-500/5 via-transparent to-pink-500/5"></div>
+            <div class="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-purple-400/10 to-transparent rounded-full blur-2xl"></div>
+            
+            <div class="relative z-10">
+                <h2 class="text-3xl font-bold mb-8 bg-gradient-to-r from-purple-400 to-pink-500 bg-clip-text text-transparent flex items-center">
+                    <i class="fas fa-tags mr-3 text-purple-400"></i>Browse by Genre
+                </h2>
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                    <% const genres = ["Action", "Drama", "Comedy", "Sci-Fi", "Horror", "Romance", "Adventure", "Animation"]; %>
+                    <% genres.forEach(genre => { %>
+                        <a href="/browse?genre=<%= genre.toLowerCase() %>" class="category-card bg-gray-700/80 backdrop-blur-sm hover:bg-gray-600/80 transition-all p-6 rounded-xl text-center border border-gray-600/50 hover:border-purple-500/50 group transform hover:scale-105 shadow-lg hover:shadow-xl">
+                            <h3 class="font-bold text-lg group-hover:text-purple-400 transition-colors"><%= genre %></h3>
+                        </a>
+                    <% }); %>
                 </div>
             </div>
         </div>
-        <% } %>
-    </div>
-</div>
 
-<!-- Quick Links -->
-<div class="flex flex-wrap justify-center gap-4 mb-8">
-    <a href="/search" class="px-5 py-2 bg-gray-800 hover:bg-gray-700 rounded-lg transition flex items-center">
-        <i class="fas fa-search mr-2"></i> Search Movies
-    </a>
-    <a href="/top" class="px-5 py-2 bg-gray-800 hover:bg-gray-700 rounded-lg transition flex items-center">
-        <i class="fas fa-star mr-2"></i> Top Rated
-    </a>
-    <a href="/latest" class="px-5 py-2 bg-gray-800 hover:bg-gray-700 rounded-lg transition flex items-center">
-        <i class="fas fa-clock mr-2"></i> Latest Releases
-    </a>
-    <a href="/browse/tv" class="px-5 py-2 bg-gray-800 hover:bg-gray-700 rounded-lg transition flex items-center">
-        <i class="fas fa-tv mr-2"></i> TV Shows
-    </a>
+        <!-- Modern Trending This Week -->
+        <div class="mb-12 bg-gray-800/50 backdrop-blur-md rounded-2xl p-8 border border-gray-700/50 relative overflow-hidden">
+            <!-- Animated background -->
+            <div class="absolute inset-0 bg-gradient-to-br from-yellow-500/5 via-transparent to-orange-500/5"></div>
+            <div class="absolute bottom-0 left-0 w-40 h-40 bg-gradient-to-br from-yellow-400/10 to-transparent rounded-full blur-2xl"></div>
+            
+            <div class="relative z-10">
+                <h2 class="text-3xl font-bold mb-8 bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent flex items-center">
+                    <i class="fas fa-chart-line mr-3 text-yellow-400 animate-pulse"></i>Trending This Week
+                </h2>
+                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 animate__animated animate__fadeIn">
+                    <% for(let i = 0; i < 3; i++) { %>
+                    <div class="bg-gray-700/80 backdrop-blur-sm rounded-xl overflow-hidden shadow-lg border border-gray-600/50 hover:border-yellow-500/50 transition-all group">
+                        <div class="relative aspect-video bg-gradient-to-br from-gray-700/80 to-gray-800/80">
+                            <div class="absolute inset-0 w-full h-full flex items-center justify-center">
+                                <div class="animate-pulse">
+                                    <i class="fas fa-film text-4xl text-gray-500 group-hover:text-yellow-400 transition-colors"></i>
+                                </div>
+                            </div>
+                            <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 to-transparent py-3 px-4 backdrop-blur-sm">
+                                <h3 class="text-sm md:text-base font-bold group-hover:text-yellow-400 transition-colors">Trending Movie</h3>
+                            </div>
+                        </div>
+                    </div>
+                    <% } %>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modern Quick Links -->
+        <div class="flex flex-wrap justify-center gap-4 mb-8 bg-gray-800/50 backdrop-blur-md rounded-2xl p-6 border border-gray-700/50">
+            <a href="/search" class="px-6 py-3 bg-gray-700/80 backdrop-blur-sm hover:bg-blue-500/20 rounded-xl transition-all flex items-center border border-gray-600/50 hover:border-blue-500/50 group shadow-lg hover:shadow-xl">
+                <i class="fas fa-search mr-2 group-hover:text-blue-400 transition-colors"></i> 
+                <span class="group-hover:text-blue-400 transition-colors">Search Movies</span>
+            </a>
+            <a href="/top" class="px-6 py-3 bg-gray-700/80 backdrop-blur-sm hover:bg-yellow-500/20 rounded-xl transition-all flex items-center border border-gray-600/50 hover:border-yellow-500/50 group shadow-lg hover:shadow-xl">
+                <i class="fas fa-star mr-2 group-hover:text-yellow-400 transition-colors"></i> 
+                <span class="group-hover:text-yellow-400 transition-colors">Top Rated</span>
+            </a>
+            <a href="/latest" class="px-6 py-3 bg-gray-700/80 backdrop-blur-sm hover:bg-green-500/20 rounded-xl transition-all flex items-center border border-gray-600/50 hover:border-green-500/50 group shadow-lg hover:shadow-xl">
+                <i class="fas fa-clock mr-2 group-hover:text-green-400 transition-colors"></i> 
+                <span class="group-hover:text-green-400 transition-colors">Latest Releases</span>
+            </a>
+            <a href="/browse/tv" class="px-6 py-3 bg-gray-700/80 backdrop-blur-sm hover:bg-purple-500/20 rounded-xl transition-all flex items-center border border-gray-600/50 hover:border-purple-500/50 group shadow-lg hover:shadow-xl">
+                <i class="fas fa-tv mr-2 group-hover:text-purple-400 transition-colors"></i> 
+                <span class="group-hover:text-purple-400 transition-colors">TV Shows</span>
+            </a>
+        </div>
+    </div>
 </div>
 
 <script>

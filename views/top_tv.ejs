@@ -1,80 +1,115 @@
 <!-- Top Rated TV Shows Listing -->
-<div class="mb-8">
-    <div class="flex justify-between items-center mb-6">
-        <h1 class="text-3xl font-bold"><i class="fas fa-star mr-2 text-yellow-500"></i>Top Rated TV Shows</h1>
-        <div class="flex items-center">
-            <a href="/top" class="text-green-400 hover:text-green-300 transition">
-                <i class="fas fa-film mr-1"></i> Switch to Movies
-            </a>
-        </div>
+<div class="mb-8 relative">
+    <!-- Modern background with glass morphism -->
+    <div class="fixed inset-0 bg-gradient-to-br from-gray-900/95 via-slate-800/95 to-gray-900/95 backdrop-blur-sm -z-10"></div>
+    
+    <!-- Animated background elements -->
+    <div class="absolute inset-0 opacity-10 pointer-events-none">
+        <div class="absolute top-10 left-10 w-32 h-32 bg-yellow-500 rounded-full blur-3xl animate-pulse"></div>
+        <div class="absolute bottom-10 right-10 w-40 h-40 bg-orange-500 rounded-full blur-3xl animate-pulse" style="animation-delay: 1s;"></div>
+        <div class="absolute top-1/2 left-1/2 w-24 h-24 bg-amber-500 rounded-full blur-3xl animate-pulse" style="animation-delay: 2s;"></div>
     </div>
     
-    <% if (shows && shows.length > 0) { %>
-        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
-            <% shows.forEach(show => { %>
-                <div class="movie-card bg-gray-800 rounded-lg overflow-hidden shadow-lg">
-                    <a href="/view/tv/<%= show.id %>">
-                        <div class="relative pb-[150%]">
-                            <% if (show.poster) { %>
-                                <img src="<%= show.poster %>" alt="<%= show.title %>" class="absolute inset-0 w-full h-full object-cover">
-                            <% } else { %>
-                                <div class="absolute inset-0 w-full h-full bg-gray-700 flex items-center justify-center">
-                                    <i class="fas fa-tv text-4xl text-gray-500"></i>
-                                </div>
-                            <% } %>
-                            <div class="absolute top-0 right-0 bg-yellow-600 px-2 py-1 m-2 rounded text-xs font-bold">
-                                <i class="fas fa-star mr-1"></i> TOP
-                            </div>
-                            <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black to-transparent py-2 px-3">
-                                <h3 class="text-sm md:text-base font-bold line-clamp-2"><%= show.title %></h3>
-                            </div>
-                        </div>
-                    </a>
-                </div>
-            <% }); %>
-        </div>
-
-        <!-- Pagination -->
-        <div class="mt-8 flex justify-center">
-            <div class="flex space-x-1">
-                <% if (parseInt(page) > 1) { %>
-                    <a href="/top/tv?p=<%= parseInt(page) - 1 %>" class="px-4 py-2 bg-gray-800 rounded-l-lg hover:bg-gray-700 transition">
-                        <i class="fas fa-chevron-left"></i>
-                    </a>
-                <% } else { %>
-                    <span class="px-4 py-2 bg-gray-800 opacity-50 rounded-l-lg">
-                        <i class="fas fa-chevron-left"></i>
-                    </span>
-                <% } %>
-
-                <span class="px-4 py-2 bg-green-600 font-bold"><%= page %></span>
-
-                <a href="/top/tv?p=<%= parseInt(page) + 1 %>" class="px-4 py-2 bg-gray-800 rounded-r-lg hover:bg-gray-700 transition">
-                    <i class="fas fa-chevron-right"></i>
+    <div class="relative z-10">
+        <div class="flex justify-between items-center mb-8 bg-gray-800/50 backdrop-blur-md rounded-2xl p-6 border border-gray-700/50">
+            <h1 class="text-4xl font-bold bg-gradient-to-r from-yellow-400 via-orange-400 to-amber-400 bg-clip-text text-transparent flex items-center">
+                <i class="fas fa-star mr-3 text-yellow-400 animate-pulse"></i>Top Rated TV Shows
+            </h1>
+            <div class="flex items-center">
+                <a href="/top" class="px-4 py-2 bg-gradient-to-r from-green-500/80 to-green-600/80 backdrop-blur-sm hover:from-green-400/80 hover:to-green-500/80 rounded-xl transition-all border border-green-500/50 hover:border-green-400/50 group">
+                    <i class="fas fa-film mr-2 group-hover:scale-110 transition-transform"></i> Switch to Movies
                 </a>
             </div>
         </div>
-    <% } else { %>
-        <div class="text-center py-12">
-            <i class="fas fa-tv text-6xl text-gray-700 mb-4"></i>
-            <h2 class="text-2xl font-bold text-gray-400">No TV shows found</h2>
-            <p class="mt-2 text-gray-500">Try refreshing the page or check your connection.</p>
-        </div>
-    <% } %>
+        
+        <% if (shows && shows.length > 0) { %>
+            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
+                <% shows.forEach(show => { %>
+                    <div class="movie-card bg-gray-800/80 backdrop-blur-md rounded-2xl overflow-hidden shadow-2xl border border-gray-700/50 hover:border-yellow-500/50 transition-all duration-500 group">
+                        <a href="/view/tv/<%= show.id %>">
+                            <div class="relative pb-[150%] group">
+                                <% if (show.poster) { %>
+                                    <img src="<%= show.poster %>" alt="<%= show.title %>" class="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-700">
+                                <% } else { %>
+                                    <div class="absolute inset-0 w-full h-full bg-gradient-to-br from-gray-700/80 to-gray-800/80 flex items-center justify-center">
+                                        <i class="fas fa-tv text-5xl text-gray-500"></i>
+                                    </div>
+                                <% } %>
+                                <div class="absolute top-2 right-2 bg-gradient-to-r from-yellow-500 to-yellow-600 px-3 py-1 rounded-full text-xs font-bold shadow-lg backdrop-blur-sm">
+                                    <i class="fas fa-star mr-1 animate-pulse"></i> TOP
+                                </div>
+                                
+                                <!-- Enhanced Play Icon with Modern Animation -->
+                                <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 bg-black/40 backdrop-blur-sm">
+                                    <div class="play-icon bg-gradient-to-r from-yellow-500 to-yellow-600 rounded-full p-6 transform group-hover:scale-125 transition-all duration-300 shadow-2xl border border-yellow-400/50">
+                                        <i class="fas fa-play text-2xl ml-1"></i>
+                                    </div>
+                                </div>
+                                
+                                <!-- Enhanced Show Details on Hover -->
+                                <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 via-black/60 to-transparent py-4 px-4 transform translate-y-0 group-hover:translate-y-0 transition-transform backdrop-blur-sm">
+                                    <h3 class="text-sm md:text-base font-bold line-clamp-2 text-white group-hover:text-yellow-400 transition-colors"><%= show.title %></h3>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                <% }); %>
+            </div>
+
+            <!-- Modern Pagination -->
+            <div class="mt-12 flex justify-center">
+                <div class="flex space-x-2 bg-gray-800/50 backdrop-blur-md rounded-2xl p-2 border border-gray-700/50">
+                    <% if (parseInt(page) > 1) { %>
+                        <a href="/top/tv?p=<%= parseInt(page) - 1 %>" class="px-6 py-3 bg-gray-700/80 backdrop-blur-sm hover:bg-gray-600/80 rounded-xl transition-all border border-gray-600/50 hover:border-yellow-500/50 group">
+                            <i class="fas fa-chevron-left group-hover:text-yellow-400 transition-colors"></i>
+                        </a>
+                    <% } else { %>
+                        <span class="px-6 py-3 bg-gray-800/50 opacity-50 rounded-xl border border-gray-700/30">
+                            <i class="fas fa-chevron-left"></i>
+                        </span>
+                    <% } %>
+
+                    <span class="px-6 py-3 bg-gradient-to-r from-yellow-500 to-yellow-600 font-bold rounded-xl shadow-lg border border-yellow-400/50"><%= page %></span>
+
+                    <a href="/top/tv?p=<%= parseInt(page) + 1 %>" class="px-6 py-3 bg-gray-700/80 backdrop-blur-sm hover:bg-gray-600/80 rounded-xl transition-all border border-gray-600/50 hover:border-yellow-500/50 group">
+                        <i class="fas fa-chevron-right group-hover:text-yellow-400 transition-colors"></i>
+                    </a>
+                </div>
+            </div>
+        <% } else { %>
+            <div class="text-center py-16 bg-gray-800/50 backdrop-blur-md rounded-2xl border border-gray-700/50">
+                <i class="fas fa-tv text-8xl text-gray-600 mb-6 animate-pulse"></i>
+                <h2 class="text-3xl font-bold text-gray-300 mb-4">No TV shows found</h2>
+                <p class="text-gray-400 text-lg">Try refreshing the page or check your connection.</p>
+                <button onclick="location.reload()" class="mt-6 px-6 py-3 bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-400 hover:to-yellow-500 rounded-xl transition-all shadow-lg">
+                    <i class="fas fa-refresh mr-2"></i> Refresh Page
+                </button>
+            </div>
+        <% } %>
+    </div>
 </div>
 
-<!-- Quick Links -->
-<div class="flex flex-wrap justify-center gap-4 mb-8">
-    <a href="/browse/tv" class="px-5 py-2 bg-gray-800 hover:bg-gray-700 rounded-lg transition flex items-center">
-        <i class="fas fa-tv mr-2"></i> Popular Shows
-    </a>
-    <a href="/search/tv" class="px-5 py-2 bg-gray-800 hover:bg-gray-700 rounded-lg transition flex items-center">
-        <i class="fas fa-search mr-2"></i> Search Shows
-    </a>
-    <a href="/latest/tv" class="px-5 py-2 bg-gray-800 hover:bg-gray-700 rounded-lg transition flex items-center">
-        <i class="fas fa-clock mr-2"></i> Latest Shows
-    </a>
-    <a href="/latest/episodes" class="px-5 py-2 bg-gray-800 hover:bg-gray-700 rounded-lg transition flex items-center">
-        <i class="fas fa-play-circle mr-2"></i> Latest Episodes
-    </a>
+<!-- Modern Quick Links -->
+<div class="flex flex-wrap justify-center gap-4 mb-8 bg-gray-800/50 backdrop-blur-md rounded-2xl p-6 border border-gray-700/50 relative">
+    <!-- Animated background -->
+    <div class="absolute inset-0 bg-gradient-to-br from-blue-500/5 via-transparent to-purple-500/5"></div>
+    
+    <div class="relative z-10 flex flex-wrap justify-center gap-4">
+        <a href="/browse/tv" class="px-6 py-3 bg-gray-700/80 backdrop-blur-sm hover:bg-blue-500/20 rounded-xl transition-all flex items-center border border-gray-600/50 hover:border-blue-500/50 group shadow-lg hover:shadow-xl">
+            <i class="fas fa-tv mr-2 group-hover:text-blue-400 transition-colors"></i> 
+            <span class="group-hover:text-blue-400 transition-colors">Popular Shows</span>
+        </a>
+        <a href="/search/tv" class="px-6 py-3 bg-gray-700/80 backdrop-blur-sm hover:bg-green-500/20 rounded-xl transition-all flex items-center border border-gray-600/50 hover:border-green-500/50 group shadow-lg hover:shadow-xl">
+            <i class="fas fa-search mr-2 group-hover:text-green-400 transition-colors"></i> 
+            <span class="group-hover:text-green-400 transition-colors">Search Shows</span>
+        </a>
+        <a href="/latest/tv" class="px-6 py-3 bg-gray-700/80 backdrop-blur-sm hover:bg-purple-500/20 rounded-xl transition-all flex items-center border border-gray-600/50 hover:border-purple-500/50 group shadow-lg hover:shadow-xl">
+            <i class="fas fa-clock mr-2 group-hover:text-purple-400 transition-colors"></i> 
+            <span class="group-hover:text-purple-400 transition-colors">Latest Shows</span>
+        </a>
+        <a href="/latest/episodes" class="px-6 py-3 bg-gray-700/80 backdrop-blur-sm hover:bg-pink-500/20 rounded-xl transition-all flex items-center border border-gray-600/50 hover:border-pink-500/50 group shadow-lg hover:shadow-xl">
+            <i class="fas fa-play-circle mr-2 group-hover:text-pink-400 transition-colors"></i> 
+            <span class="group-hover:text-pink-400 transition-colors">Latest Episodes</span>
+        </a>
+    </div>
 </div> 

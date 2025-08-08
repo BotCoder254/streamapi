@@ -1,168 +1,280 @@
-<!-- Contact Page -->
-<div class="py-8 animate__animated animate__fadeIn">
-    <div class="max-w-3xl mx-auto">
-        <!-- Contact Header -->
-        <div class="text-center mb-10">
-            <h1 class="text-4xl font-bold mb-4">Get In Touch</h1>
-            <p class="text-xl text-gray-400">We'd love to hear from you!</p>
+<!-- Modern Contact Page -->
+<div class="min-h-screen py-16 relative overflow-hidden">
+    <!-- Animated background elements -->
+    <div class="absolute inset-0 opacity-10 pointer-events-none">
+        <div class="absolute top-20 left-20 w-40 h-40 bg-green-500 rounded-full blur-3xl animate-pulse"></div>
+        <div class="absolute bottom-20 right-20 w-48 h-48 bg-blue-500 rounded-full blur-3xl animate-pulse" style="animation-delay: 1s;"></div>
+        <div class="absolute top-1/2 left-1/2 w-32 h-32 bg-purple-500 rounded-full blur-3xl animate-pulse" style="animation-delay: 2s;"></div>
+    </div>
+
+    <div class="max-w-6xl mx-auto px-4 relative z-10">
+        <!-- Modern Contact Header -->
+        <div class="text-center mb-16">
+            <div class="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-green-400 to-blue-500 rounded-2xl mb-6 shadow-lg">
+                <i class="fas fa-envelope text-white text-2xl"></i>
+            </div>
+            <h1 class="text-5xl font-bold mb-6 bg-gradient-to-r from-green-400 via-blue-500 to-purple-500 bg-clip-text text-transparent">Get In Touch</h1>
+            <p class="text-xl text-gray-300 max-w-2xl mx-auto leading-relaxed">Have a question, suggestion, or just want to say hello? We'd love to hear from you and will get back to you as soon as possible.</p>
         </div>
-        
-        <!-- Contact Form -->
-        <div class="bg-gray-800 p-6 rounded-lg shadow-lg mb-12">
-            <% if (locals.success) { %>
-                <div class="bg-green-600 text-white p-4 rounded-lg mb-6 animate__animated animate__fadeIn">
-                    <div class="flex items-center">
-                        <i class="fas fa-check-circle text-2xl mr-2"></i>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 mb-16">
+            <!-- Contact Form -->
+            <div class="bg-gray-800/80 backdrop-blur-md rounded-3xl p-8 shadow-2xl border border-gray-700/50 relative overflow-hidden">
+                <!-- Animated background -->
+                <div class="absolute inset-0 bg-gradient-to-br from-green-500/5 via-transparent to-blue-500/5"></div>
+                <div class="absolute top-0 right-0 w-40 h-40 bg-gradient-to-br from-green-400/10 to-transparent rounded-full blur-2xl"></div>
+                
+                <div class="relative z-10">
+                    <div class="mb-8">
+                        <h2 class="text-2xl font-bold mb-6 bg-gradient-to-r from-green-400 to-blue-500 bg-clip-text text-transparent">Send us a Message</h2>
+                    </div>
+
+                    <% if (locals.success) { %>
+                        <div class="bg-green-500/10 border border-green-500/30 text-green-300 p-6 rounded-2xl mb-8 animate__animated animate__fadeIn backdrop-blur-sm">
+                            <div class="flex items-center">
+                                <div class="w-12 h-12 bg-green-500/20 rounded-full flex items-center justify-center mr-4">
+                                    <i class="fas fa-check-circle text-2xl text-green-400"></i>
+                                </div>
+                                <div>
+                                    <h3 class="font-bold text-lg">Message Sent Successfully!</h3>
+                                    <p class="text-green-200"><%= locals.message || "Thank you for contacting us. We'll get back to you as soon as possible." %></p>
+                                </div>
+                            </div>
+                        </div>
+                    <% } %>
+                    
+                    <% if (locals.error) { %>
+                        <div class="bg-red-500/10 border border-red-500/30 text-red-300 p-6 rounded-2xl mb-8 animate__animated animate__fadeIn backdrop-blur-sm">
+                            <div class="flex items-center">
+                                <div class="w-12 h-12 bg-red-500/20 rounded-full flex items-center justify-center mr-4">
+                                    <i class="fas fa-exclamation-circle text-2xl text-red-400"></i>
+                                </div>
+                                <div>
+                                    <h3 class="font-bold text-lg">Error Sending Message</h3>
+                                    <p class="text-red-200"><%= locals.error %></p>
+                                </div>
+                            </div>
+                        </div>
+                    <% } %>
+            
+                    <form action="/contact" method="POST" class="space-y-6" id="contact-form">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label for="name" class="block text-gray-200 mb-3 font-medium">Your Name</label>
+                                <div class="relative group">
+                                    <span class="absolute inset-y-0 left-0 flex items-center pl-4 text-gray-400 group-focus-within:text-green-400 transition-colors">
+                                        <i class="far fa-user"></i>
+                                    </span>
+                                    <input 
+                                        type="text" 
+                                        id="name" 
+                                        name="name" 
+                                        placeholder="John Doe" 
+                                        value="<%= locals.formData ? formData.name : '' %>"
+                                        class="w-full bg-gray-700/80 backdrop-blur-sm text-white rounded-xl pl-12 pr-4 py-4 focus:outline-none focus:ring-2 focus:ring-green-500 focus:bg-gray-600/80 border border-gray-600/50 focus:border-green-500/50 transition-all"
+                                        required
+                                    >
+                                </div>
+                            </div>
+                            <div>
+                                <label for="email" class="block text-gray-200 mb-3 font-medium">Your Email</label>
+                                <div class="relative group">
+                                    <span class="absolute inset-y-0 left-0 flex items-center pl-4 text-gray-400 group-focus-within:text-green-400 transition-colors">
+                                        <i class="far fa-envelope"></i>
+                                    </span>
+                                    <input 
+                                        type="email" 
+                                        id="email" 
+                                        name="email" 
+                                        placeholder="your@email.com" 
+                                        value="<%= locals.formData ? formData.email : '' %>"
+                                        class="w-full bg-gray-700/80 backdrop-blur-sm text-white rounded-xl pl-12 pr-4 py-4 focus:outline-none focus:ring-2 focus:ring-green-500 focus:bg-gray-600/80 border border-gray-600/50 focus:border-green-500/50 transition-all"
+                                        required
+                                    >
+                                </div>
+                            </div>
+                        </div>
+                        
                         <div>
-                            <h3 class="font-bold">Message Sent Successfully!</h3>
-                            <p><%= locals.message || "Thank you for contacting us. We'll get back to you as soon as possible." %></p>
+                            <label for="subject" class="block text-gray-200 mb-3 font-medium">Subject</label>
+                            <div class="relative group">
+                                <span class="absolute inset-y-0 left-0 flex items-center pl-4 text-gray-400 group-focus-within:text-green-400 transition-colors">
+                                    <i class="fas fa-tag"></i>
+                                </span>
+                                <input 
+                                    type="text" 
+                                    id="subject" 
+                                    name="subject" 
+                                    placeholder="How can we help you?" 
+                                    value="<%= locals.formData ? formData.subject : '' %>"
+                                    class="w-full bg-gray-700/80 backdrop-blur-sm text-white rounded-xl pl-12 pr-4 py-4 focus:outline-none focus:ring-2 focus:ring-green-500 focus:bg-gray-600/80 border border-gray-600/50 focus:border-green-500/50 transition-all"
+                                    required
+                                >
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <label for="message" class="block text-gray-200 mb-3 font-medium">Message</label>
+                            <div class="relative group">
+                                <span class="absolute top-4 left-4 text-gray-400 group-focus-within:text-green-400 transition-colors">
+                                    <i class="fas fa-comment-alt"></i>
+                                </span>
+                                <textarea 
+                                    id="message" 
+                                    name="message" 
+                                    rows="6" 
+                                    placeholder="Your message here..." 
+                                    class="w-full bg-gray-700/80 backdrop-blur-sm text-white rounded-xl pl-12 pr-4 py-4 focus:outline-none focus:ring-2 focus:ring-green-500 focus:bg-gray-600/80 border border-gray-600/50 focus:border-green-500/50 transition-all resize-none"
+                                    required
+                                ><%= locals.formData ? formData.message : '' %></textarea>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <button type="submit" class="w-full bg-gradient-to-r from-green-600 to-green-500 hover:from-green-500 hover:to-green-400 text-white rounded-xl px-4 py-4 transition-all flex items-center justify-center gap-3 shadow-lg hover:shadow-xl font-semibold text-lg border border-green-500/20 group">
+                                <i class="fas fa-paper-plane group-hover:scale-110 transition-transform"></i>
+                                Send Message
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Contact Information Cards -->
+            <div class="bg-gray-800/80 backdrop-blur-md rounded-3xl p-8 shadow-2xl border border-gray-700/50 relative overflow-hidden">
+                <!-- Animated background -->
+                <div class="absolute inset-0 bg-gradient-to-br from-blue-500/5 via-transparent to-purple-500/5"></div>
+                <div class="absolute bottom-0 left-0 w-40 h-40 bg-gradient-to-br from-blue-400/10 to-transparent rounded-full blur-2xl"></div>
+                
+                <div class="relative z-10">
+                    <div class="mb-8">
+                        <h2 class="text-2xl font-bold mb-6 bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">Get in Touch</h2>
+                    </div>
+
+                    <div class="space-y-6">
+                        <!-- Email Contact -->
+                        <div class="group p-6 bg-gray-700/50 backdrop-blur-sm rounded-2xl border border-gray-600/30 hover:border-green-500/50 transition-all duration-300 hover:bg-gray-700/70">
+                            <div class="flex items-center space-x-4">
+                                <div class="w-14 h-14 bg-gradient-to-br from-green-400 to-green-600 rounded-xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
+                                    <i class="fas fa-envelope text-white text-xl"></i>
+                                </div>
+                                <div>
+                                    <h3 class="text-xl font-bold text-white mb-1">Email Us</h3>
+                                    <p class="text-gray-300">support@streamapi.com</p>
+                                    <p class="text-sm text-gray-400">We'll respond within 24 hours</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Phone Contact -->
+                        <div class="group p-6 bg-gray-700/50 backdrop-blur-sm rounded-2xl border border-gray-600/30 hover:border-blue-500/50 transition-all duration-300 hover:bg-gray-700/70">
+                            <div class="flex items-center space-x-4">
+                                <div class="w-14 h-14 bg-gradient-to-br from-blue-400 to-blue-600 rounded-xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
+                                    <i class="fas fa-phone text-white text-xl"></i>
+                                </div>
+                                <div>
+                                    <h3 class="text-xl font-bold text-white mb-1">Call Us</h3>
+                                    <p class="text-gray-300">+1 (555) 123-4567</p>
+                                    <p class="text-sm text-gray-400">Mon-Fri, 9AM-6PM EST</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Location Contact -->
+                        <div class="group p-6 bg-gray-700/50 backdrop-blur-sm rounded-2xl border border-gray-600/30 hover:border-purple-500/50 transition-all duration-300 hover:bg-gray-700/70">
+                            <div class="flex items-center space-x-4">
+                                <div class="w-14 h-14 bg-gradient-to-br from-purple-400 to-purple-600 rounded-xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
+                                    <i class="fas fa-map-marker-alt text-white text-xl"></i>
+                                </div>
+                                <div>
+                                    <h3 class="text-xl font-bold text-white mb-1">Visit Us</h3>
+                                    <p class="text-gray-300">123 Streaming St, Web City</p>
+                                    <p class="text-sm text-gray-400">Open for meetings by appointment</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Social Media -->
+                        <div class="group p-6 bg-gray-700/50 backdrop-blur-sm rounded-2xl border border-gray-600/30 hover:border-pink-500/50 transition-all duration-300 hover:bg-gray-700/70">
+                            <div class="flex items-center space-x-4">
+                                <div class="w-14 h-14 bg-gradient-to-br from-pink-400 to-pink-600 rounded-xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
+                                    <i class="fas fa-share-alt text-white text-xl"></i>
+                                </div>
+                                <div>
+                                    <h3 class="text-xl font-bold text-white mb-1">Follow Us</h3>
+                                    <div class="flex space-x-3 mt-2">
+                                        <a href="#" class="w-8 h-8 bg-gray-600/50 hover:bg-blue-500/20 rounded-lg flex items-center justify-center transition-all hover:scale-110">
+                                            <i class="fab fa-twitter text-blue-400 text-sm"></i>
+                                        </a>
+                                        <a href="#" class="w-8 h-8 bg-gray-600/50 hover:bg-gray-800/20 rounded-lg flex items-center justify-center transition-all hover:scale-110">
+                                            <i class="fab fa-github text-gray-300 text-sm"></i>
+                                        </a>
+                                        <a href="#" class="w-8 h-8 bg-gray-600/50 hover:bg-purple-500/20 rounded-lg flex items-center justify-center transition-all hover:scale-110">
+                                            <i class="fab fa-discord text-purple-400 text-sm"></i>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
-            <% } %>
+            </div>
+        </div>
+
+        <!-- Modern FAQ Section -->
+        <div class="bg-gray-800/80 backdrop-blur-md rounded-3xl p-8 shadow-2xl border border-gray-700/50 relative overflow-hidden">
+            <!-- Animated background -->
+            <div class="absolute inset-0 bg-gradient-to-br from-purple-500/5 via-transparent to-pink-500/5"></div>
+            <div class="absolute top-0 left-0 w-40 h-40 bg-gradient-to-br from-purple-400/10 to-transparent rounded-full blur-2xl"></div>
             
-            <% if (locals.error) { %>
-                <div class="bg-red-600 text-white p-4 rounded-lg mb-6 animate__animated animate__fadeIn">
-                    <div class="flex items-center">
-                        <i class="fas fa-exclamation-circle text-2xl mr-2"></i>
-                        <div>
-                            <h3 class="font-bold">Error Sending Message</h3>
-                            <p><%= locals.error %></p>
+            <div class="relative z-10">
+                <div class="text-center mb-12">
+                    <div class="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-purple-400 to-pink-500 rounded-2xl mb-4 shadow-lg">
+                        <i class="fas fa-question-circle text-white text-xl"></i>
+                    </div>
+                    <h2 class="text-3xl font-bold mb-4 bg-gradient-to-r from-purple-400 to-pink-500 bg-clip-text text-transparent">Frequently Asked Questions</h2>
+                    <p class="text-gray-300">Find answers to common questions about StreamAPI</p>
+                </div>
+                
+                <div class="space-y-4">
+                    <div class="bg-gray-700/50 backdrop-blur-sm rounded-2xl overflow-hidden border border-gray-600/30 hover:border-purple-500/50 transition-all duration-300">
+                        <button class="w-full text-left p-6 focus:outline-none flex justify-between items-center faq-toggle group">
+                            <span class="font-bold text-lg text-white group-hover:text-purple-300 transition-colors">How do I create an account?</span>
+                            <i class="fas fa-chevron-down text-purple-400 transition-transform group-hover:scale-110"></i>
+                        </button>
+                        <div class="faq-content hidden px-6 pb-6 text-gray-300 leading-relaxed">
+                            <p>Creating an account is simple! Just click on the "Sign Up" button in the top right corner and follow the instructions. You'll need to provide a valid email address and create a secure password. Once registered, you'll have access to your personal watchlist and other premium features.</p>
                         </div>
                     </div>
-                </div>
-            <% } %>
-            
-            <form action="/contact" method="POST" class="space-y-6" id="contact-form">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                        <label for="name" class="block text-gray-300 mb-2">Your Name</label>
-                        <input 
-                            type="text" 
-                            id="name" 
-                            name="name" 
-                            placeholder="John Doe" 
-                            value="<%= locals.formData ? formData.name : '' %>"
-                            class="w-full bg-gray-700 border border-gray-600 rounded-lg py-3 px-4 text-white focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition"
-                            required
-                        >
+                    
+                    <div class="bg-gray-700/50 backdrop-blur-sm rounded-2xl overflow-hidden border border-gray-600/30 hover:border-green-500/50 transition-all duration-300">
+                        <button class="w-full text-left p-6 focus:outline-none flex justify-between items-center faq-toggle group">
+                            <span class="font-bold text-lg text-white group-hover:text-green-300 transition-colors">Is StreamAPI free to use?</span>
+                            <i class="fas fa-chevron-down text-green-400 transition-transform group-hover:scale-110"></i>
+                        </button>
+                        <div class="faq-content hidden px-6 pb-6 text-gray-300 leading-relaxed">
+                            <p>Yes, StreamAPI is completely free to use! We provide access to comprehensive information about movies and TV shows, including ratings, reviews, trailers, and streaming availability - all without any subscription fees or hidden costs.</p>
+                        </div>
                     </div>
-                    <div>
-                        <label for="email" class="block text-gray-300 mb-2">Your Email</label>
-                        <input 
-                            type="email" 
-                            id="email" 
-                            name="email" 
-                            placeholder="your@email.com" 
-                            value="<%= locals.formData ? formData.email : '' %>"
-                            class="w-full bg-gray-700 border border-gray-600 rounded-lg py-3 px-4 text-white focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition"
-                            required
-                        >
+                    
+                    <div class="bg-gray-700/50 backdrop-blur-sm rounded-2xl overflow-hidden border border-gray-600/30 hover:border-blue-500/50 transition-all duration-300">
+                        <button class="w-full text-left p-6 focus:outline-none flex justify-between items-center faq-toggle group">
+                            <span class="font-bold text-lg text-white group-hover:text-blue-300 transition-colors">How do I add items to my watchlist?</span>
+                            <i class="fas fa-chevron-down text-blue-400 transition-transform group-hover:scale-110"></i>
+                        </button>
+                        <div class="faq-content hidden px-6 pb-6 text-gray-300 leading-relaxed">
+                            <p>To add an item to your watchlist, simply navigate to any movie or TV show page and click on the "Add to Watchlist" button. You can view and manage your entire watchlist by clicking on the bookmark icon in the navigation bar. Your watchlist is saved to your account and accessible from any device.</p>
+                        </div>
                     </div>
-                </div>
-                
-                <div>
-                    <label for="subject" class="block text-gray-300 mb-2">Subject</label>
-                    <input 
-                        type="text" 
-                        id="subject" 
-                        name="subject" 
-                        placeholder="How can we help you?" 
-                        value="<%= locals.formData ? formData.subject : '' %>"
-                        class="w-full bg-gray-700 border border-gray-600 rounded-lg py-3 px-4 text-white focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition"
-                        required
-                    >
-                </div>
-                
-                <div>
-                    <label for="message" class="block text-gray-300 mb-2">Message</label>
-                    <textarea 
-                        id="message" 
-                        name="message" 
-                        rows="6" 
-                        placeholder="Your message here..." 
-                        class="w-full bg-gray-700 border border-gray-600 rounded-lg py-3 px-4 text-white focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition"
-                        required
-                    ><%= locals.formData ? formData.message : '' %></textarea>
-                </div>
-                
-                <div>
-                    <button type="submit" class="w-full bg-green-600 hover:bg-green-700 transition text-white font-bold py-3 px-4 rounded-lg flex items-center justify-center btn-hover-effect">
-                        <i class="fas fa-paper-plane mr-2"></i> Send Message
-                    </button>
-                </div>
-            </form>
-        </div>
-        
-        <!-- Contact Information -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
-            <div class="bg-gray-800 p-6 rounded-lg text-center hover:bg-gray-700 transition">
-                <div class="text-green-500 text-3xl mb-3">
-                    <i class="fas fa-envelope"></i>
-                </div>
-                <h3 class="text-xl font-bold mb-2">Email Us</h3>
-                <p class="text-gray-400">support@streamapi.com</p>
-            </div>
-            
-            <div class="bg-gray-800 p-6 rounded-lg text-center hover:bg-gray-700 transition">
-                <div class="text-green-500 text-3xl mb-3">
-                    <i class="fas fa-phone"></i>
-                </div>
-                <h3 class="text-xl font-bold mb-2">Call Us</h3>
-                <p class="text-gray-400">+1 (555) 123-4567</p>
-            </div>
-            
-            <div class="bg-gray-800 p-6 rounded-lg text-center hover:bg-gray-700 transition">
-                <div class="text-green-500 text-3xl mb-3">
-                    <i class="fas fa-map-marker-alt"></i>
-                </div>
-                <h3 class="text-xl font-bold mb-2">Visit Us</h3>
-                <p class="text-gray-400">123 Streaming St, Web City</p>
-            </div>
-        </div>
-        
-        <!-- FAQ Section -->
-        <div class="mb-12">
-            <h2 class="text-2xl font-bold mb-6 text-center">Frequently Asked Questions</h2>
-            
-            <div class="space-y-4">
-                <div class="bg-gray-800 rounded-lg overflow-hidden">
-                    <button class="w-full text-left p-4 focus:outline-none flex justify-between items-center faq-toggle">
-                        <span class="font-bold">How do I create an account?</span>
-                        <i class="fas fa-chevron-down text-green-500 transition-transform"></i>
-                    </button>
-                    <div class="faq-content hidden px-4 pb-4 text-gray-400">
-                        <p>Creating an account is simple. Just click on the "Sign Up" button in the top right corner and follow the instructions. You'll need to provide a valid email address and create a password.</p>
-                    </div>
-                </div>
-                
-                <div class="bg-gray-800 rounded-lg overflow-hidden">
-                    <button class="w-full text-left p-4 focus:outline-none flex justify-between items-center faq-toggle">
-                        <span class="font-bold">Is StreamAPI free to use?</span>
-                        <i class="fas fa-chevron-down text-green-500 transition-transform"></i>
-                    </button>
-                    <div class="faq-content hidden px-4 pb-4 text-gray-400">
-                        <p>Yes, StreamAPI is completely free to use. We provide access to information about movies and TV shows without any subscription fees.</p>
-                    </div>
-                </div>
-                
-                <div class="bg-gray-800 rounded-lg overflow-hidden">
-                    <button class="w-full text-left p-4 focus:outline-none flex justify-between items-center faq-toggle">
-                        <span class="font-bold">How do I add items to my watchlist?</span>
-                        <i class="fas fa-chevron-down text-green-500 transition-transform"></i>
-                    </button>
-                    <div class="faq-content hidden px-4 pb-4 text-gray-400">
-                        <p>To add an item to your watchlist, simply navigate to the movie or TV show page and click on the "Add to Watchlist" button. You can view and manage your watchlist by clicking on the bookmark icon in the navigation bar.</p>
-                    </div>
-                </div>
-                
-                <div class="bg-gray-800 rounded-lg overflow-hidden">
-                    <button class="w-full text-left p-4 focus:outline-none flex justify-between items-center faq-toggle">
-                        <span class="font-bold">How can I request a new feature?</span>
-                        <i class="fas fa-chevron-down text-green-500 transition-transform"></i>
-                    </button>
-                    <div class="faq-content hidden px-4 pb-4 text-gray-400">
-                        <p>We're always looking to improve StreamAPI! You can request new features by filling out the contact form above. We value your feedback and consider all suggestions for future updates.</p>
+                    
+                    <div class="bg-gray-700/50 backdrop-blur-sm rounded-2xl overflow-hidden border border-gray-600/30 hover:border-pink-500/50 transition-all duration-300">
+                        <button class="w-full text-left p-6 focus:outline-none flex justify-between items-center faq-toggle group">
+                            <span class="font-bold text-lg text-white group-hover:text-pink-300 transition-colors">How can I request a new feature?</span>
+                            <i class="fas fa-chevron-down text-pink-400 transition-transform group-hover:scale-110"></i>
+                        </button>
+                        <div class="faq-content hidden px-6 pb-6 text-gray-300 leading-relaxed">
+                            <p>We're always looking to improve StreamAPI! You can request new features by filling out the contact form above or reaching out to us directly. We value your feedback and carefully consider all suggestions for future updates. Many of our current features came from user suggestions!</p>
+                        </div>
                     </div>
                 </div>
             </div>

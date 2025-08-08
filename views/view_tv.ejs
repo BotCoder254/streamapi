@@ -1,16 +1,19 @@
 <!-- TV Episode View -->
-<div class="animate__animated animate__fadeIn">
+<div class="animate__animated animate__fadeIn relative">
+    <!-- Modern background with glass morphism -->
+    <div class="fixed inset-0 bg-gradient-to-br from-gray-900/95 via-slate-800/95 to-gray-900/95 backdrop-blur-sm -z-10"></div>
+    
     <% if (episode && episode.id) { %>
         <!-- Episode Player Section -->
-        <div class="mb-8 bg-black rounded-xl overflow-hidden shadow-2xl relative" style="padding-top: 56.25%;">
+        <div class="mb-8 bg-black/80 backdrop-blur-md rounded-2xl overflow-hidden shadow-2xl relative border border-gray-700/50" style="padding-top: 56.25%;">
             <div class="episode-player-container absolute inset-0 w-full h-full">
-                <div class="player-loading-overlay absolute inset-0 flex flex-col items-center justify-center z-10 bg-black/90 backdrop-filter backdrop-blur-sm">
+                <div class="player-loading-overlay absolute inset-0 flex flex-col items-center justify-center z-10 bg-gradient-to-br from-gray-900/95 via-slate-800/95 to-gray-900/95 backdrop-blur-md">
                     <div class="relative mb-6">
-                        <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-16 h-16 rounded-full bg-green-500/20 animate-pulse"></div>
-                        <div class="w-12 h-12 border-4 border-gray-600 border-t-green-500 rounded-full animate-spin"></div>
+                        <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-20 h-20 rounded-full bg-gradient-to-r from-green-400/20 to-blue-500/20 animate-pulse"></div>
+                        <div class="w-16 h-16 border-4 border-gray-600/50 border-t-green-500 rounded-full animate-spin shadow-lg"></div>
                     </div>
-                    <p class="text-white text-lg font-medium">Loading episode...</p>
-                    <p class="text-sm text-gray-400 mt-2">S<%= episode.season %>:E<%= episode.episode %> - <%= episode.title %></p>
+                    <p class="text-white text-xl font-semibold bg-gradient-to-r from-green-400 to-blue-500 bg-clip-text text-transparent">Loading episode...</p>
+                    <p class="text-sm text-gray-300 mt-3 bg-gray-800/50 px-4 py-2 rounded-full backdrop-blur-sm">S<%= episode.season %>:E<%= episode.episode %> - <%= episode.title %></p>
                 </div>
                 <iframe 
                     src="<%= episode.embedUrl %>" 
@@ -35,75 +38,90 @@
         </div>
 
         <!-- Episode Info Section -->
-        <div class="bg-gray-800/90 backdrop-blur-sm rounded-xl p-6 mb-8 shadow-lg hover:shadow-xl transition-shadow duration-300">
-            <div class="flex flex-col md:flex-row justify-between items-start mb-4">
-                <div>
-                    <div class="flex items-center mb-2">
-                        <h1 class="text-2xl font-bold mr-3"><%= episode.title %></h1>
-                        <span class="bg-green-700 text-white text-xs px-2 py-1 rounded-full shadow-sm">S<%= episode.season %>:E<%= episode.episode %></span>
+        <div class="bg-gray-800/80 backdrop-blur-md rounded-2xl p-8 mb-8 shadow-2xl hover:shadow-3xl transition-all duration-500 border border-gray-700/50 relative overflow-hidden">
+            <!-- Animated background gradient -->
+            <div class="absolute inset-0 bg-gradient-to-br from-green-500/5 via-transparent to-blue-500/5 opacity-50"></div>
+            <div class="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-green-400/10 to-transparent rounded-full blur-2xl"></div>
+            
+            <div class="relative z-10">
+                <div class="flex flex-col md:flex-row justify-between items-start mb-6">
+                    <div>
+                        <div class="flex items-center mb-4">
+                            <h1 class="text-3xl font-bold mr-4 bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent"><%= episode.title %></h1>
+                            <span class="bg-gradient-to-r from-green-500 to-green-600 text-white text-sm px-4 py-2 rounded-full shadow-lg font-semibold">S<%= episode.season %>:E<%= episode.episode %></span>
+                        </div>
+                        
+                        <div class="flex items-center space-x-4 text-sm">
+                            <% if (episode.year) { %>
+                                <span class="bg-gray-700/80 backdrop-blur-sm px-4 py-2 rounded-full border border-gray-600/50 text-gray-300 hover:bg-gray-600/80 transition-colors"><%= episode.year %></span>
+                            <% } %>
+                            
+                            <% if (episode.rating) { %>
+                                <div class="flex items-center bg-gray-700/80 backdrop-blur-sm px-4 py-2 rounded-full border border-gray-600/50 hover:bg-gray-600/80 transition-colors">
+                                    <i class="fas fa-star text-yellow-400 mr-2"></i>
+                                    <span class="text-gray-300"><%= episode.rating %>/10</span>
+                                </div>
+                            <% } %>
+                            
+                            <% if (episode.imdbId) { %>
+                                <a href="https://www.imdb.com/title/<%= episode.imdbId %>" target="_blank" class="flex items-center hover:text-yellow-400 transition-all bg-gray-700/80 backdrop-blur-sm px-4 py-2 rounded-full border border-gray-600/50 hover:bg-yellow-500/10 hover:border-yellow-400/50 group">
+                                    <i class="fab fa-imdb text-yellow-400 mr-2 group-hover:scale-110 transition-transform"></i>
+                                    <span class="text-gray-300 group-hover:text-yellow-400">IMDb</span>
+                                </a>
+                            <% } %>
+                        </div>
                     </div>
                     
-                    <div class="flex items-center space-x-4 text-sm text-gray-400">
-                        <% if (episode.year) { %>
-                            <span class="bg-gray-700/70 px-3 py-1 rounded-full"><%= episode.year %></span>
-                        <% } %>
-                        
-                        <% if (episode.rating) { %>
-                            <div class="flex items-center bg-gray-700/70 px-3 py-1 rounded-full">
-                                <i class="fas fa-star text-yellow-500 mr-1"></i>
-                                <span><%= episode.rating %>/10</span>
-                            </div>
-                        <% } %>
-                        
-                        <% if (episode.imdbId) { %>
-                            <a href="https://www.imdb.com/title/<%= episode.imdbId %>" target="_blank" class="flex items-center hover:text-yellow-400 transition bg-gray-700/70 px-3 py-1 rounded-full hover:bg-gray-600/70">
-                                <i class="fab fa-imdb text-yellow-400 mr-1"></i>
-                                <span>IMDb</span>
-                            </a>
-                        <% } %>
+                    <div class="mt-6 md:mt-0 flex space-x-3">
+                        <button class="favorite-btn px-4 py-3 bg-gray-700/80 backdrop-blur-sm hover:bg-red-500/20 rounded-xl transition-all flex items-center text-sm shadow-lg hover:shadow-xl border border-gray-600/50 hover:border-red-400/50 group">
+                            <i class="far fa-heart mr-2 group-hover:text-red-400 transition-colors"></i> 
+                            <span class="group-hover:text-red-400 transition-colors">Favorite</span>
+                        </button>
+                        <button class="share-btn px-4 py-3 bg-gray-700/80 backdrop-blur-sm hover:bg-blue-500/20 rounded-xl transition-all flex items-center text-sm shadow-lg hover:shadow-xl border border-gray-600/50 hover:border-blue-400/50 group">
+                            <i class="fas fa-share-alt mr-2 group-hover:text-blue-400 transition-colors"></i> 
+                            <span class="group-hover:text-blue-400 transition-colors">Share</span>
+                        </button>
                     </div>
                 </div>
                 
-                <div class="mt-4 md:mt-0 flex space-x-2">
-                    <button class="favorite-btn px-3 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg transition flex items-center text-sm shadow-md hover:shadow-lg">
-                        <i class="far fa-heart mr-2"></i> <span>Favorite</span>
-                    </button>
-                    <button class="share-btn px-3 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg transition flex items-center text-sm shadow-md hover:shadow-lg">
-                        <i class="fas fa-share-alt mr-2"></i> <span>Share</span>
-                    </button>
-                </div>
+                <% if (episode.overview) { %>
+                    <div class="bg-gray-900/50 backdrop-blur-sm rounded-xl p-6 border border-gray-700/30">
+                        <p class="text-gray-200 leading-relaxed text-lg"><%= episode.overview %></p>
+                    </div>
+                <% } %>
             </div>
-            
-            <% if (episode.overview) { %>
-                <p class="text-gray-300 mb-4 leading-relaxed"><%= episode.overview %></p>
-            <% } %>
         </div>
         
         <!-- Episode Navigation -->
-        <div class="flex justify-between items-center mb-8">
+        <div class="flex justify-between items-center mb-8 bg-gray-800/50 backdrop-blur-md rounded-2xl p-6 border border-gray-700/50">
             <% if (parseInt(episode.episode) > 1) { %>
-                <a href="/view/tv/<%= episode.id %>/<%= episode.season %>/<%= parseInt(episode.episode) - 1 %>" class="px-4 py-2 bg-gray-800 hover:bg-gray-700 rounded-lg transition flex items-center shadow-md hover:shadow-lg group">
-                    <i class="fas fa-chevron-left mr-2 group-hover:-translate-x-1 transition-transform"></i> Previous Episode
+                <a href="/view/tv/<%= episode.id %>/<%= episode.season %>/<%= parseInt(episode.episode) - 1 %>" class="px-6 py-3 bg-gradient-to-r from-gray-700/80 to-gray-600/80 backdrop-blur-sm hover:from-gray-600/80 hover:to-gray-500/80 rounded-xl transition-all flex items-center shadow-lg hover:shadow-xl border border-gray-600/50 group">
+                    <i class="fas fa-chevron-left mr-3 group-hover:-translate-x-1 transition-transform text-green-400"></i> 
+                    <span class="font-medium">Previous Episode</span>
                 </a>
             <% } else if (parseInt(episode.season) > 1) { %>
-                <a href="/view/tv/<%= episode.id %>/<%= parseInt(episode.season) - 1 %>/<%= epCount - 1 %>" class="px-4 py-2 bg-gray-800 hover:bg-gray-700 rounded-lg transition flex items-center shadow-md hover:shadow-lg group">
-                    <i class="fas fa-chevron-left mr-2 group-hover:-translate-x-1 transition-transform"></i> Previous Season
+                <a href="/view/tv/<%= episode.id %>/<%= parseInt(episode.season) - 1 %>/<%= epCount - 1 %>" class="px-6 py-3 bg-gradient-to-r from-gray-700/80 to-gray-600/80 backdrop-blur-sm hover:from-gray-600/80 hover:to-gray-500/80 rounded-xl transition-all flex items-center shadow-lg hover:shadow-xl border border-gray-600/50 group">
+                    <i class="fas fa-chevron-left mr-3 group-hover:-translate-x-1 transition-transform text-green-400"></i> 
+                    <span class="font-medium">Previous Season</span>
                 </a>
             <% } else { %>
                 <div></div>
             <% } %>
             
-            <a href="/view/tv/<%= episode.id %>" class="px-4 py-2 bg-gray-800 hover:bg-gray-700 rounded-lg transition flex items-center shadow-md hover:shadow-lg hover:scale-105 transition-transform">
-                <i class="fas fa-th-list mr-2"></i> All Episodes
+            <a href="/view/tv/<%= episode.id %>" class="px-6 py-3 bg-gradient-to-r from-green-600/80 to-green-500/80 backdrop-blur-sm hover:from-green-500/80 hover:to-green-400/80 rounded-xl transition-all flex items-center shadow-lg hover:shadow-xl border border-green-500/50 hover:scale-105 group">
+                <i class="fas fa-th-list mr-3 group-hover:scale-110 transition-transform"></i> 
+                <span class="font-medium">All Episodes</span>
             </a>
             
             <% if (parseInt(episode.episode) < epCount - 1) { %>
-                <a href="/view/tv/<%= episode.id %>/<%= episode.season %>/<%= parseInt(episode.episode) + 1 %>" class="px-4 py-2 bg-gray-800 hover:bg-gray-700 rounded-lg transition flex items-center shadow-md hover:shadow-lg group">
-                    Next Episode <i class="fas fa-chevron-right ml-2 group-hover:translate-x-1 transition-transform"></i>
+                <a href="/view/tv/<%= episode.id %>/<%= episode.season %>/<%= parseInt(episode.episode) + 1 %>" class="px-6 py-3 bg-gradient-to-r from-gray-700/80 to-gray-600/80 backdrop-blur-sm hover:from-gray-600/80 hover:to-gray-500/80 rounded-xl transition-all flex items-center shadow-lg hover:shadow-xl border border-gray-600/50 group">
+                    <span class="font-medium">Next Episode</span>
+                    <i class="fas fa-chevron-right ml-3 group-hover:translate-x-1 transition-transform text-green-400"></i>
                 </a>
             <% } else if (nextSeason <= seasons.length) { %>
-                <a href="/view/tv/<%= episode.id %>/<%= nextSeason %>/1" class="px-4 py-2 bg-gray-800 hover:bg-gray-700 rounded-lg transition flex items-center shadow-md hover:shadow-lg group">
-                    Next Season <i class="fas fa-chevron-right ml-2 group-hover:translate-x-1 transition-transform"></i>
+                <a href="/view/tv/<%= episode.id %>/<%= nextSeason %>/1" class="px-6 py-3 bg-gradient-to-r from-gray-700/80 to-gray-600/80 backdrop-blur-sm hover:from-gray-600/80 hover:to-gray-500/80 rounded-xl transition-all flex items-center shadow-lg hover:shadow-xl border border-gray-600/50 group">
+                    <span class="font-medium">Next Season</span>
+                    <i class="fas fa-chevron-right ml-3 group-hover:translate-x-1 transition-transform text-green-400"></i>
                 </a>
             <% } else { %>
                 <div></div>
@@ -111,35 +129,46 @@
         </div>
         
         <!-- Season Episode Selector -->
-        <div class="mb-8">
-            <h2 class="text-xl font-bold mb-4"><i class="fas fa-list-ol mr-2 text-green-400"></i> Episodes</h2>
+        <div class="mb-8 bg-gray-800/50 backdrop-blur-md rounded-2xl p-8 border border-gray-700/50 relative overflow-hidden">
+            <!-- Animated background -->
+            <div class="absolute inset-0 bg-gradient-to-br from-blue-500/5 via-transparent to-purple-500/5"></div>
+            <div class="absolute top-0 left-0 w-32 h-32 bg-gradient-to-br from-blue-400/10 to-transparent rounded-full blur-2xl"></div>
             
-            <div class="mb-4">
-                <label for="season-select" class="block text-sm font-medium text-gray-400 mb-2">Season</label>
-                <select id="season-select" class="bg-gray-800 border border-gray-700 text-white rounded-lg block w-full p-2.5 focus:outline-none focus:ring-2 focus:ring-green-500 shadow-md">
-                    <% seasons.forEach((season, index) => { %>
-                        <% if (season.season_number > 0) { %>
-                            <option value="<%= season.season_number %>" <%= parseInt(episode.season) === season.season_number ? 'selected' : '' %>>
-                                Season <%= season.season_number %> (<%= season.episode_count %> Episodes)
-                            </option>
-                        <% } %>
-                    <% }); %>
-                </select>
-            </div>
-            
-            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4" id="episode-grid">
-                <% for (let i = 1; i < epCount; i++) { %>
-                    <a href="/view/tv/<%= episode.id %>/<%= episode.season %>/<%= i %>" 
-                       class="episode-card bg-gray-800 p-4 rounded-lg text-center hover:bg-gray-700 transition-all duration-300 shadow-md hover:shadow-lg transform hover:-translate-y-1 <%= parseInt(episode.episode) === i ? 'border-2 border-green-500 bg-gray-700' : '' %>">
-                        <div class="w-full aspect-video bg-gray-900 mb-2 flex items-center justify-center rounded overflow-hidden group">
-                            <i class="fas fa-play-circle text-gray-600 text-2xl group-hover:text-green-500 group-hover:scale-125 transition-all duration-300"></i>
-                            <% if (parseInt(episode.episode) === i) { %>
-                                <div class="absolute inset-0 bg-green-500/10"></div>
+            <div class="relative z-10">
+                <h2 class="text-2xl font-bold mb-6 bg-gradient-to-r from-green-400 to-blue-500 bg-clip-text text-transparent flex items-center">
+                    <i class="fas fa-list-ol mr-3 text-green-400"></i> Episodes
+                </h2>
+                
+                <div class="mb-6">
+                    <label for="season-select" class="block text-sm font-medium text-gray-300 mb-3">Select Season</label>
+                    <select id="season-select" class="bg-gray-700/80 backdrop-blur-sm border border-gray-600/50 text-white rounded-xl block w-full p-4 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 shadow-lg transition-all hover:bg-gray-600/80">
+                        <% seasons.forEach((season, index) => { %>
+                            <% if (season.season_number > 0) { %>
+                                <option value="<%= season.season_number %>" <%= parseInt(episode.season) === season.season_number ? 'selected' : '' %>>
+                                    Season <%= season.season_number %> (<%= season.episode_count %> Episodes)
+                                </option>
                             <% } %>
-                        </div>
-                        <h3 class="text-sm font-bold truncate"><%= parseInt(episode.episode) === i ? 'Now Playing:' : 'Episode' %> <%= i %></h3>
-                    </a>
-                <% } %>
+                        <% }); %>
+                    </select>
+                </div>
+                
+                <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4" id="episode-grid">
+                    <% for (let i = 1; i < epCount; i++) { %>
+                        <a href="/view/tv/<%= episode.id %>/<%= episode.season %>/<%= i %>" 
+                           class="episode-card bg-gray-700/80 backdrop-blur-sm p-4 rounded-xl text-center hover:bg-gray-600/80 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-2 border border-gray-600/50 hover:border-green-500/50 group <%= parseInt(episode.episode) === i ? 'border-2 border-green-500 bg-green-500/10' : '' %>">
+                            <div class="w-full aspect-video bg-gray-800/80 mb-3 flex items-center justify-center rounded-lg overflow-hidden relative">
+                                <i class="fas fa-play-circle text-gray-500 text-2xl group-hover:text-green-400 group-hover:scale-125 transition-all duration-300"></i>
+                                <% if (parseInt(episode.episode) === i) { %>
+                                    <div class="absolute inset-0 bg-gradient-to-br from-green-500/20 to-blue-500/20"></div>
+                                    <div class="absolute top-1 right-1 w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                                <% } %>
+                            </div>
+                            <h3 class="text-sm font-bold truncate group-hover:text-green-400 transition-colors">
+                                <%= parseInt(episode.episode) === i ? 'Now Playing:' : 'Episode' %> <%= i %>
+                            </h3>
+                        </a>
+                    <% } %>
+                </div>
             </div>
         </div>
     <% } else { %>
