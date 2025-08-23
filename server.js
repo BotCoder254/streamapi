@@ -349,8 +349,8 @@ const transporter = nodemailer.createTransport({
   port: process.env.EMAIL_PORT || 587,
   secure: false, // true for 465, false for other ports
   auth: {
-    user: process.env.EMAIL_USER || 'teumteum776@gmail.com',
-    pass: process.env.EMAIL_PASSWORD || 'pihl zudv xrwi racy'
+    user: process.env.EMAIL_USER || '',
+    pass: process.env.EMAIL_PASSWORD || ''
   },
   tls: {
     rejectUnauthorized: false // Allow self-signed certificates in development
