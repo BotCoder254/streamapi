@@ -2,6 +2,42 @@
 require('dotenv').config();
 const express = require('express');
 const axios = require('axios');
+const crypto = require('crypto');
+
+// Secure axios wrapper to prevent data: URI DoS attacks
+const secureAxios = {
+  async get(url, config = {}) {
+    // Validate URL to prevent data: URI attacks
+    if (typeof url === 'string' && url.toLowerCase().startsWith('data:')) {
+      throw new Error('Data URIs are not allowed for security reasons');
+    }
+    
+    // Set security limits
+    const secureConfig = {
+      ...config,
+      maxContentLength: 50 * 1024 * 1024, // 50MB limit
+      maxBodyLength: 50 * 1024 * 1024,    // 50MB limit
+      timeout: 30000, // 30 second timeout
+    };
+    
+    return axios.get(url, secureConfig);
+  },
+  
+  async post(url, data, config = {}) {
+    if (typeof url === 'string' && url.toLowerCase().startsWith('data:')) {
+      throw new Error('Data URIs are not allowed for security reasons');
+    }
+    
+    const secureConfig = {
+      ...config,
+      maxContentLength: 50 * 1024 * 1024,
+      maxBodyLength: 50 * 1024 * 1024,
+      timeout: 30000,
+    };
+    
+    return axios.post(url, data, secureConfig);
+  }
+};
 const path = require('path');
 const cors = require('cors');
 const expressLayouts = require('express-ejs-layouts');
@@ -28,7 +64,8 @@ const WatchHistory = require('./models/WatchHistory');
 const app = express();
 const PORT = process.env.PORT || 5001;
 
-const uri = "";
+// MongoDB connection URI from environment variable
+const uri = process.env.MONGODB_URI || "mongodb+srv://telvin:<db_password>@streamapi.usi6f7z.mongodb.net/?appName=streamapi";
 
 // Create a MongoClient with a MongoClientOptions object
 const client = new MongoClient(uri, {
@@ -38,6 +75,20 @@ const client = new MongoClient(uri, {
         deprecationErrors: true,
     }
 });
+
+// MongoDB connection function
+async function connectToMongoDB() {
+    try {
+        // Connect the client to the server
+        await client.connect();
+        // Send a ping to confirm a successful connection
+        await client.db("admin").command({ ping: 1 });
+        console.log("Pinged your deployment. You successfully connected to MongoDB!");
+    } catch (err) {
+        console.error("Error connecting to MongoDB:", err);
+        throw err;
+    }
+}
 
 // DB Config with Mongoose
 mongoose.connect(uri, {
@@ -49,25 +100,21 @@ mongoose.connect(uri, {
         deprecationErrors: true
     }
 })
-.then(async () => {
-    try {
-        // Connect the client to the server
-        await client.connect();
-        // Send a ping to confirm a successful connection
-        await client.db("admin").command({ ping: 1 });
-        console.log("MongoDB Connected Successfully!");
-    } catch (err) {
-        console.error("Error connecting to MongoDB:", err);
-    }
+.then(() => {
+    console.log("Mongoose connected to MongoDB!");
+    return connectToMongoDB();
 })
-.catch(err => console.error('MongoDB connection error:', err));
+.catch(err => {
+    console.error('MongoDB connection error:', err);
+    process.exit(1);
+});
 
 // Passport Config
 require('./config/passport')(passport);
 
 // Express Session with MongoDB store
 app.use(session({
-    secret: process.env.SESSION_SECRET || 'secret',
+    secret: process.env.SESSION_SECRET || 'default-secret-change-in-production',
     resave: true,
     saveUninitialized: true,
     store: MongoStore.create({ 
@@ -538,7 +585,7 @@ setInterval(() => {
 // Helper functions
 const fetchFromTMDB = async (endpoint, params = {}) => {
   try {
-    const response = await axios.get(`https://api.themoviedb.org/3${endpoint}`, {
+    const response = await secureAxios.get(`https://api.themoviedb.org/3${endpoint}`, {
       params: {
         api_key: TMDB_API_KEY,
         ...params
@@ -654,7 +701,7 @@ const fetchLatestTVShows = async (page = 1) => {
 const fetchLatestEpisodes = async (page = 1) => {
   try {
     // Fetch the latest episodes from VidSrc API
-    const response = await axios.get(`https://vidsrc.xyz/episodes/latest/page-${page}.json`);
+    const response = await secureAxios.get(`https://vidsrc.xyz/episodes/latest/page-${page}.json`);
     return response.data;
   } catch (error) {
     console.error(`Error fetching latest episodes: ${error.message}`);
@@ -1832,7 +1879,7 @@ const watchPartyStorage = {
   activeParties: new Map(), // Track active parties per media
   
   createParty(hostId, mediaId, mediaType, title, config = {}) {
-    const partyId = `party_${Math.random().toString(36).substr(2, 9)}`;
+    const partyId = `party_${crypto.randomBytes(6).toString('hex')}`;
     const party = {
       id: partyId,
       hostId,
@@ -2042,7 +2089,10 @@ const interval = setInterval(function ping() {
 }, 30000);
 
 // Watch Party API endpoints
-app.post('/api/watch-party/create', async (req, res) => {
+app.post('/api/watch-party/create', (req, res) => {
+    // Set proper headers for JSON response
+    res.setHeader('Content-Type', 'application/json');
+    
     try {
         const { hostId, mediaId, mediaType, title, config } = req.body;
         
@@ -2083,26 +2133,38 @@ app.post('/api/watch-party/create', async (req, res) => {
     }
 });
 
-app.get('/api/watch-party/:partyId', async (req, res) => {
+app.get('/api/watch-party/:partyId', (req, res) => {
+  // Set proper headers for JSON response
+  res.setHeader('Content-Type', 'application/json');
+  
   try {
     const { partyId } = req.params;
     const party = watchPartyStorage.getParty(partyId);
     
     if (!party) {
-      return res.status(404).json({ error: 'Party not found' });
+      return res.status(404).json({ success: false, error: 'Party not found' });
     }
     
     res.json({ success: true, party: { ...party, members: Array.from(party.members) } });
   } catch (error) {
-    handleError(res, 'Error fetching watch party');
+    console.error('Error fetching watch party:', error);
+    res.status(500).json({ success: false, error: 'Error fetching watch party' });
   }
 });
 
 // Add this with the other watch party endpoints
 app.get('/api/watch-party/active/:mediaId', (req, res) => {
-    const { mediaId } = req.params;
-    const count = watchPartyStorage.getActivePartiesCount(mediaId);
-    res.json({ count });
+    // Set proper headers for JSON response
+    res.setHeader('Content-Type', 'application/json');
+    
+    try {
+        const { mediaId } = req.params;
+        const count = watchPartyStorage.getActivePartiesCount(mediaId);
+        res.json({ success: true, count });
+    } catch (error) {
+        console.error('Error getting active parties count:', error);
+        res.status(500).json({ success: false, error: 'Error getting active parties count' });
+    }
 });
 
 // Clear watch history
@@ -2116,7 +2178,32 @@ app.delete('/api/watch-history/clear', ensureAuthenticated, async (req, res) => 
   }
 });
 
-// Remove the Netlify condition and just start the server
+// Graceful shutdown handling
+process.on('SIGINT', async () => {
+  console.log('Shutting down gracefully...');
+  try {
+    await client.close();
+    await mongoose.connection.close();
+    console.log('Database connections closed.');
+  } catch (err) {
+    console.error('Error during shutdown:', err);
+  }
+  process.exit(0);
+});
+
+process.on('SIGTERM', async () => {
+  console.log('Shutting down gracefully...');
+  try {
+    await client.close();
+    await mongoose.connection.close();
+    console.log('Database connections closed.');
+  } catch (err) {
+    console.error('Error during shutdown:', err);
+  }
+  process.exit(0);
+});
+
+// Start the server
 server.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });

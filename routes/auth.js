@@ -25,7 +25,7 @@ const storage = multer.diskStorage({
         cb(null, uploadDir);
     },
     filename: function (req, file, cb) {
-        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+        const uniqueSuffix = Date.now() + '-' + crypto.randomBytes(4).toString('hex');
         cb(null, 'profile-' + uniqueSuffix + path.extname(file.originalname));
     }
 });
@@ -91,10 +91,45 @@ const sendEmail = async (options) => {
     }
 };
 
+// Secure axios wrapper to prevent data: URI DoS attacks
+const secureAxios = {
+  async get(url, config = {}) {
+    // Validate URL to prevent data: URI attacks
+    if (typeof url === 'string' && url.toLowerCase().startsWith('data:')) {
+      throw new Error('Data URIs are not allowed for security reasons');
+    }
+    
+    // Set security limits
+    const secureConfig = {
+      ...config,
+      maxContentLength: 50 * 1024 * 1024, // 50MB limit
+      maxBodyLength: 50 * 1024 * 1024,    // 50MB limit
+      timeout: 30000, // 30 second timeout
+    };
+    
+    return axios.get(url, secureConfig);
+  },
+  
+  async post(url, data, config = {}) {
+    if (typeof url === 'string' && url.toLowerCase().startsWith('data:')) {
+      throw new Error('Data URIs are not allowed for security reasons');
+    }
+    
+    const secureConfig = {
+      ...config,
+      maxContentLength: 50 * 1024 * 1024,
+      maxBodyLength: 50 * 1024 * 1024,
+      timeout: 30000,
+    };
+    
+    return axios.post(url, data, secureConfig);
+  }
+};
+
 // Function to fetch latest movies
 async function fetchLatestMovies() {
     try {
-        const response = await axios.get('https://api.themoviedb.org/3/movie/now_playing', {
+        const response = await secureAxios.get('https://api.themoviedb.org/3/movie/now_playing', {
             params: {
                 api_key: process.env.TMDB_API_KEY || 'fdbc5d0ea9e499aaeba73d29c21726be',
                 language: 'en-US',

@@ -44,6 +44,8 @@ This application can be deployed using multiple services. Here are instructions 
 2. Create an account on [Vercel](https://vercel.com)
 3. Create a new project and import your repository
 4. Add the following environment variables:
+   - `MONGODB_URI` - Your MongoDB connection string
+   - `SESSION_SECRET` - Secret key for session encryption
    - `TMDB_API_KEY` - Your TMDB API key
    - `EMAIL_HOST` - SMTP server host
    - `EMAIL_PORT` - SMTP server port
@@ -76,7 +78,9 @@ docker build -t streamapi .
 2. Run the container:
 
 ```bash
-docker run -p 3000:3000 \
+docker run -p 5001:5001 \
+  -e MONGODB_URI=your_mongodb_uri \
+  -e SESSION_SECRET=your_session_secret \
   -e TMDB_API_KEY=your_tmdb_api_key \
   -e EMAIL_HOST=your_email_host \
   -e EMAIL_PORT=your_email_port \
@@ -114,14 +118,16 @@ npm install
 3. Create a `.env` file with the following variables:
 
 ```
-PORT=3000
+PORT=5001
+MONGODB_URI=mongodb+srv://telvin:<db_password>@streamapi.usi6f7z.mongodb.net/?appName=streamapi
+SESSION_SECRET=your_session_secret_here
 TMDB_API_KEY=your_tmdb_api_key
 EMAIL_HOST=smtp.gmail.com
 EMAIL_PORT=587
 EMAIL_USER=your_email@gmail.com
 EMAIL_PASSWORD=your_app_password
 EMAIL_FROM=StreamAPI <your_email@gmail.com>
-SITE_URL=http://localhost:3000
+SITE_URL=http://localhost:5001
 ```
 
 4. Start the development server:

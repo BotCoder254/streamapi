@@ -1,6 +1,41 @@
 const express = require('express');
 const router = express.Router();
 const axios = require('axios');
+
+// Secure axios wrapper to prevent data: URI DoS attacks
+const secureAxios = {
+  async get(url, config = {}) {
+    // Validate URL to prevent data: URI attacks
+    if (typeof url === 'string' && url.toLowerCase().startsWith('data:')) {
+      throw new Error('Data URIs are not allowed for security reasons');
+    }
+    
+    // Set security limits
+    const secureConfig = {
+      ...config,
+      maxContentLength: 50 * 1024 * 1024, // 50MB limit
+      maxBodyLength: 50 * 1024 * 1024,    // 50MB limit
+      timeout: 30000, // 30 second timeout
+    };
+    
+    return axios.get(url, secureConfig);
+  },
+  
+  async post(url, data, config = {}) {
+    if (typeof url === 'string' && url.toLowerCase().startsWith('data:')) {
+      throw new Error('Data URIs are not allowed for security reasons');
+    }
+    
+    const secureConfig = {
+      ...config,
+      maxContentLength: 50 * 1024 * 1024,
+      maxBodyLength: 50 * 1024 * 1024,
+      timeout: 30000,
+    };
+    
+    return axios.post(url, data, secureConfig);
+  }
+};
 const WebTorrent = require('webtorrent');
 const path = require('path');
 const fs = require('fs');
@@ -61,7 +96,7 @@ router.get('/results', async (req, res) => {
             ...(sort && { sort_by: sort })
         });
         
-        const response = await axios.get(`${YTS_API_BASE}/list_movies.json?${params}`);
+        const response = await secureAxios.get(`${YTS_API_BASE}/list_movies.json?${params}`);
         const { data } = response.data;
         
         // Add magnet URIs to movies
@@ -105,7 +140,7 @@ router.get('/results', async (req, res) => {
 router.get('/movie/:id', async (req, res) => {
     try {
         const { id } = req.params;
-        const response = await axios.get(`${YTS_API_BASE}/movie_details.json`, {
+        const response = await secureAxios.get(`${YTS_API_BASE}/movie_details.json`, {
             params: {
                 movie_id: id,
                 with_images: true,
