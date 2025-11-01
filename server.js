@@ -65,7 +65,7 @@ const app = express();
 const PORT = process.env.PORT || 5001;
 
 // MongoDB connection URI from environment variable
-const uri = process.env.MONGODB_URI || "mongodb+srv://telvin:<db_password>@streamapi.usi6f7z.mongodb.net/?appName=streamapi";
+const uri = process.env.MONGODB_URI || "mongodb+srv://telvin:soulmind@streamapi.usi6f7z.mongodb.net/?appName=streamapi";
 
 // Create a MongoClient with a MongoClientOptions object
 const client = new MongoClient(uri, {
