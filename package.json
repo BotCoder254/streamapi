@@ -40,7 +40,7 @@
     "ws": "^8.18.1"
   },
   "devDependencies": {
-    "nodemon": "^2.0.22"
+    "nodemon": "^3.1.10"
   },
   "engines": {
     "node": ">=14.0.0"
