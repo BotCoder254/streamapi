@@ -17,7 +17,7 @@
   "license": "ISC",
   "description": "A streaming API service that fetches movie and TV show data from TMDB and VidSrc",
   "dependencies": {
-    "axios": "^0.27.2",
+    "axios": "^0.30.2",
     "bcryptjs": "^3.0.2",
     "connect-flash": "^0.1.1",
     "connect-mongo": "^5.1.0",
